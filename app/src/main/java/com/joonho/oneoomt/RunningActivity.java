@@ -92,6 +92,7 @@ import com.joonho.oneoomt.file.myPicture;
 import com.joonho.oneoomt.util.CalDistance;
 import com.joonho.oneoomt.util.PhotoUtil;
 
+import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 import static com.joonho.oneoomt.R.id.alertTitle;
 import static com.joonho.oneoomt.R.id.map;
@@ -468,9 +469,9 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
         LinearLayout llo = (LinearLayout) findViewById(R.id.llo_left_center);
 
         if(!pIsStarted) {
-            tv_time.setVisibility(View.INVISIBLE);
-            tv_dist.setVisibility(View.INVISIBLE);
-            llo.setVisibility(View.INVISIBLE);
+            tv_time.setVisibility(INVISIBLE);
+            tv_dist.setVisibility(INVISIBLE);
+            llo.setVisibility(INVISIBLE);
             return;
         } else {
             tv_time.setTextColor(Color.BLUE);
@@ -789,7 +790,7 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
                     loc_dist = 0;
                     loc_points = 0;
 
-                    bt_start.setVisibility(View.INVISIBLE);
+                    bt_start.setVisibility(INVISIBLE);
                     bt_stop.setVisibility(View.VISIBLE);
 
                 }
@@ -827,9 +828,9 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
                             dbgateway.serailizeActivitywithName(getApplicationContext(), et.getText().toString() + ".ser");
                             Toast.makeText(getApplicationContext(),"Activity Saved & Quit !!!" + et.getText().toString(),Toast.LENGTH_LONG).show();
                             dashboard_time_dist_speed();
-                            bt_stop.setVisibility(View.INVISIBLE);
+                            bt_stop.setVisibility(INVISIBLE);
                             bt_start.setVisibility(View.VISIBLE);
-                            llo_left_center.setVisibility(View.INVISIBLE);
+                            llo_left_center.setVisibility(INVISIBLE);
                         }
                     }
                 });
@@ -932,7 +933,10 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
         final ImageView bt_stop = (ImageView)findViewById(R.id.imgview_stop);
         if(pIsStarted) {
             bt_stop.setVisibility(VISIBLE);
-            bt_start.setVisibility(View.INVISIBLE);
+            bt_start.setVisibility(INVISIBLE);
+        } else {
+            bt_stop.setVisibility(INVISIBLE);
+            bt_start.setVisibility(View.VISIBLE);
         }
         show_cur_loc();
     }

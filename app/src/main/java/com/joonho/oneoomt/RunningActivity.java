@@ -89,6 +89,7 @@ import com.joonho.oneoomt.db.DBGateway;
 import com.joonho.oneoomt.db.PropsDB;
 import com.joonho.oneoomt.file.myActivity;
 import com.joonho.oneoomt.file.myPicture;
+import com.joonho.oneoomt.util.CalBearing;
 import com.joonho.oneoomt.util.CalDistance;
 import com.joonho.oneoomt.util.PhotoUtil;
 
@@ -97,6 +98,7 @@ import static android.view.View.VISIBLE;
 import static com.joonho.oneoomt.R.id.alertTitle;
 import static com.joonho.oneoomt.R.id.map;
 import static com.joonho.oneoomt.R.id.src_in;
+import static com.joonho.oneoomt.R.id.tv_bearingmode;
 
 public class RunningActivity extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -437,6 +439,18 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
         tv_speed.setText(speed);
     }
 
+    public void dashboard_bearing(LatLng ll1, LatLng ll2) {
+        if(ll1 == null || ll2 == null) return;
+        CalBearing cb = new CalBearing(ll1.latitude, ll1.longitude, ll2.latitude, ll2.longitude);
+        cb.getBearing();
+
+        TextView tv_bearing = (TextView) findViewById(R.id.tv_bearing);
+        tv_bearing.setText("Ang:" + cb.getBearing() + "");
+
+        TextView tv_bearingmode = (TextView) findViewById(R.id.tv_bearingmode);
+        tv_bearing.setText("Mode:Driving");
+    }
+
     public void dashboard_distances(LatLng ll1, LatLng ll2, Location mLastLoc,  Location mCurLoc) {
         //if(ll1==null || ll2 == null || mLastLoc == null || mCurLoc == null) return;
 
@@ -465,21 +479,28 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
         TextView tv_dist = (TextView) findViewById(R.id.tv_dist);
         TextView tv_avgspeed = (TextView) findViewById(R.id.tv_avgspd);
         TextView tv_alt = (TextView) findViewById(R.id.tv_alt);
+        final ImageButton bt_start  = (ImageButton)findViewById(R.id.imgbt_start);
+        final ImageButton bt_stop = (ImageButton)findViewById(R.id.imgbt_stop);
+        final LinearLayout llo_left_center = (LinearLayout)findViewById(R.id.llo_left_center);
 
-        LinearLayout llo = (LinearLayout) findViewById(R.id.llo_left_center);
+
 
         if(!pIsStarted) {
             tv_time.setVisibility(INVISIBLE);
             tv_dist.setVisibility(INVISIBLE);
-            llo.setVisibility(INVISIBLE);
+            bt_stop.setVisibility(INVISIBLE);
+            bt_start.setVisibility(View.VISIBLE);
+            llo_left_center.setVisibility(View.INVISIBLE);
             return;
         } else {
             tv_time.setTextColor(Color.BLUE);
             tv_dist.setTextColor(Color.RED);
 
-            tv_time.setVisibility(View.VISIBLE);
-            tv_dist.setVisibility(View.VISIBLE);
-            llo.setVisibility(View.VISIBLE);
+            tv_time.setVisibility(VISIBLE);
+            tv_dist.setVisibility(VISIBLE);
+            bt_stop.setVisibility(VISIBLE);
+            bt_start.setVisibility(View.INVISIBLE);
+            llo_left_center.setVisibility(View.VISIBLE);
         }
 
         tv_time.setTextSize(25);
@@ -631,8 +652,6 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
                             String dstr = String.format("%3.1f", speed_km_per_hour);
                             if (mMaxAlt < mCurLoc.getAltitude()) mMaxAlt = mCurLoc.getAltitude();
 
-                            dashboard_distances(ll1,ll2, mLastLoc, mCurLoc);
-
                             Log.e(TAG,"ll1=" + ll1);
                             Log.e(TAG,"ll2=" + ll2);
                             Log.e(TAG,"mLastLoc=" + mLastLoc);
@@ -640,6 +659,9 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
 
                             dashboard_speed(dstr);
                             dashboard_time_dist_speed();
+                            dashboard_distances(ll1,ll2, mLastLoc, mCurLoc);
+                            dashboard_bearing(ll1,ll2);
+
                             show_cur_loc();
                         }
                     } else{ // loc_change = false;
@@ -741,8 +763,8 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
         });
 
         // 005. Start/Stop Buttons
-        final ImageView bt_start  = (ImageView)findViewById(R.id.imgview_start);
-        final ImageView bt_stop = (ImageView)findViewById(R.id.imgview_stop);
+        final ImageButton bt_start  = (ImageButton)findViewById(R.id.imgbt_start);
+        final ImageButton bt_stop = (ImageButton)findViewById(R.id.imgbt_stop);
         final LinearLayout llo_left_center = (LinearLayout)findViewById(R.id.llo_left_center);
 
         // 출발버튼
@@ -929,14 +951,18 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
     }
 
     public void resumewithSavedValue() {
-        final ImageView bt_start  = (ImageView)findViewById(R.id.imgview_start);
-        final ImageView bt_stop = (ImageView)findViewById(R.id.imgview_stop);
+        final ImageButton bt_start  = (ImageButton)findViewById(R.id.imgbt_start);
+        final ImageButton bt_stop = (ImageButton)findViewById(R.id.imgbt_stop);
+        final LinearLayout llo_left_center = (LinearLayout)findViewById(R.id.llo_left_center);
+
         if(pIsStarted) {
             bt_stop.setVisibility(VISIBLE);
             bt_start.setVisibility(INVISIBLE);
+            llo_left_center.setVisibility(VISIBLE);
         } else {
             bt_stop.setVisibility(INVISIBLE);
             bt_start.setVisibility(View.VISIBLE);
+            llo_left_center.setVisibility(INVISIBLE);
         }
         show_cur_loc();
     }

@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">마이웨이1001</string>
+    <string name="title_activity_maps">마이웨이1001</string>
+    <string name="title_activity_props">마이웨이1001</string>
+    <string name="title_activity_scrolling_hist">마이웨이1001</string>
+    <string name="action_settings">마이웨이1001</string>
+    <string name="title_activity_history_google_maps">마이웨이1001</string>
+    <string name="title_activity_image_view">마이웨이1001</string>
+    <string name="title_activity_image">마이웨이1001</string>
+    <string name="title_activity_running">마이웨이1001</string>
+</resources>

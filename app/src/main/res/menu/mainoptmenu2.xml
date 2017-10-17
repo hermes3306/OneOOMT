@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/main_opt_menu_item_save"
+        android:title="SAVE" />
+    <item
+        android:id="@+id/main_opt_menu_item_hist"
+        android:title="HISTORY" />
+    <item android:id="@+id/map_ui" android:title="Map UI" >
+        <menu>
+
+            <item
+                android:id="@+id/main_opt_menu_item_marker"
+                android:title="Marker" />
+
+            <item
+                android:id="@+id/main_opt_menu_item_track"
+                android:title="Track" />
+            <item
+                android:id="@+id/main_opt_menu_item_top_button_menu"
+                android:title="Top Button Menu" />
+            <item
+                android:id="@+id/main_opt_menu_item_bottom_button_menu"
+                android:title="Bottom Button Menu" />
+        </menu>
+    </item>
+    <item
+        android:id="@+id/main_opt_menu_item_zoomin"
+        android:title="Zoom In" />
+
+    <item
+        android:id="@+id/main_opt_menu_item_zoomout"
+        android:title="Zoom Out" />
+
+    <item
+        android:id="@+id/main_opt_menu_item_map"
+        android:title="Map Types..." />
+
+    <item
+        android:id="@+id/main_opt_menu_item_cam"
+        android:title="CAMERA" />
+    <item
+        android:id="@+id/main_opt_menu_item_conf"
+        android:title="Settings..." />
+</menu>

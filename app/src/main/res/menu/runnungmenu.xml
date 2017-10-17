@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/item_dup_remove"
+        android:title="Remove Duplicates" />
+
+    <item
+        android:id="@+id/item_serialize"
+        android:title="Serialize a File" />
+
+    <item
+        android:id="@+id/sync_from_file"
+        android:title="Sync from File" />
+
+    <item
+        android:id="@+id/item_rep_db_with_scr"
+        android:title="Sync to DB" />
+
+
+    <item
+        android:id="@+id/item_list_files"
+        android:title="List Files" />
+
+    <item
+        android:id="@+id/item_list_pics"
+        android:title="List Pictures" />
+
+    <item
+        android:id="@+id/item_list_pics_folder"
+        android:title="Pictures on Folder" />
+
+    <item
+        android:id="@+id/item_show_pics_on_the_map"
+        android:title="Show Pictures on map" />
+
+    <item
+        android:id="@+id/item_gallery"
+        android:title="Gallery" />
+
+    <item
+        android:id="@+id/item_info"
+        android:title="Status" />
+
+    <item
+        android:id="@+id/item_setting"
+        android:title="Setting" />
+
+    <item
+        android:id="@+id/item_admin"
+        android:title="Admin" />
+
+
+
+</menu>

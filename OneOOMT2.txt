@@ -1,0 +1,6 @@
+git config --global user.name hermes3306
+git config --globle user.email joonho.park@hotmail.com
+git init
+git add .
+git commit -m
+

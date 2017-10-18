@@ -25,6 +25,6 @@ public class CalBearing {
             }
         }
         double bearing = (Math.toDegrees(Math.atan2(dLong, dPhi)) + 360.0) % 360.0;
-        return bearing;
+        return bearing + 180.0;
     }
 }

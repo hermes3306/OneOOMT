@@ -111,6 +111,7 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
     private static double mMaxAlt = 0;
     private static Location mLastLoc=null;
     private static Location mCurLoc=null;
+    private static double mBearing=0;
     private static PolylineOptions mPlops = null;
     private static Polyline myLine = null;
 
@@ -442,13 +443,14 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
     public void dashboard_bearing(LatLng ll1, LatLng ll2) {
         if(ll1 == null || ll2 == null) return;
         CalBearing cb = new CalBearing(ll1.latitude, ll1.longitude, ll2.latitude, ll2.longitude);
-        cb.getBearing();
+
+        mBearing = cb.getBearing();
 
         TextView tv_bearing = (TextView) findViewById(R.id.tv_bearing);
         tv_bearing.setText("Ang:" + cb.getBearing() + "");
 
         TextView tv_bearingmode = (TextView) findViewById(R.id.tv_bearingmode);
-        tv_bearing.setText("Mode:Driving");
+        tv_bearingmode.setText("Mode:Driving");
     }
 
     public void dashboard_distances(LatLng ll1, LatLng ll2, Location mLastLoc,  Location mCurLoc) {
@@ -927,8 +929,19 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
             return;
         }
         LatLng curloc = new LatLng(mCurLoc.getLatitude(), mCurLoc.getLongitude());
-        CameraPosition cameraPosition = new CameraPosition.Builder().target(curloc).zoom(myzoom).build();
-        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+
+
+        if(pIsStarted) {
+            CameraPosition currentPlace = new CameraPosition.Builder()
+                    .target(curloc)
+                    .bearing((float)mBearing).zoom(myzoom).build();
+            //        .bearing((float)mBearing).tilt(65.5f).zoom(18f).build();
+
+            mMap.moveCamera(CameraUpdateFactory.newCameraPosition(currentPlace));
+        } else {
+            CameraPosition cameraPosition = new CameraPosition.Builder().target(curloc).zoom(myzoom).build();
+            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+        }
     }
 
     public void addMarker() {

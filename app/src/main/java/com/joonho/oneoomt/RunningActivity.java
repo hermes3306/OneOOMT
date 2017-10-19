@@ -110,6 +110,7 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
     private static boolean isOnStartCalled=false;
     private static double mMaxAlt = 0;
     private static Location mLastLoc=null;
+    private static boolean mDrivingMode=true;
     private static Location mCurLoc=null;
     private static double mBearing=0;
     private static PolylineOptions mPlops = null;
@@ -449,8 +450,23 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
         TextView tv_bearing = (TextView) findViewById(R.id.tv_bearing);
         tv_bearing.setText("Ang:" + cb.getBearing() + "");
 
-        TextView tv_bearingmode = (TextView) findViewById(R.id.tv_bearingmode);
-        tv_bearingmode.setText("Mode:Driving");
+        final TextView tv_bearingmode = (TextView) findViewById(R.id.tv_bearingmode);
+        tv_bearingmode.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mDrivingMode = !mDrivingMode;
+                if(mDrivingMode) {
+                    tv_bearingmode.setText("Mode:Driving");
+                }else {
+                    tv_bearingmode.setText("Mode:Fixed");
+                }
+            }
+        });
+        if(mDrivingMode) {
+            tv_bearingmode.setText("Mode:Driving");
+        }else {
+            tv_bearingmode.setText("Mode:Fixed");
+        }
     }
 
     public void dashboard_distances(LatLng ll1, LatLng ll2, Location mLastLoc,  Location mCurLoc) {
@@ -930,14 +946,13 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
         }
         LatLng curloc = new LatLng(mCurLoc.getLatitude(), mCurLoc.getLongitude());
 
-
-        if(pIsStarted) {
+        if(mDrivingMode) {
             CameraPosition currentPlace = new CameraPosition.Builder()
                     .target(curloc)
                     .bearing((float)mBearing).zoom(myzoom).build();
             //        .bearing((float)mBearing).tilt(65.5f).zoom(18f).build();
-
-            mMap.moveCamera(CameraUpdateFactory.newCameraPosition(currentPlace));
+            //mMap.moveCamera(CameraUpdateFactory.newCameraPosition(currentPlace));
+            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(currentPlace));
         } else {
             CameraPosition cameraPosition = new CameraPosition.Builder().target(curloc).zoom(myzoom).build();
             mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));

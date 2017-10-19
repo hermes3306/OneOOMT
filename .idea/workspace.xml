@@ -15,12 +15,12 @@
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gradle/3.3/taskArtifacts/fileSnapshots.bin" afterPath="$PROJECT_DIR$/.gradle/3.3/taskArtifacts/fileSnapshots.bin" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gradle/3.3/taskArtifacts/taskArtifacts.bin" afterPath="$PROJECT_DIR$/.gradle/3.3/taskArtifacts/taskArtifacts.bin" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gradle/3.3/taskArtifacts/taskArtifacts.lock" afterPath="$PROJECT_DIR$/.gradle/3.3/taskArtifacts/taskArtifacts.lock" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gradle/3.3/tasks/_app_compileDebugJavaWithJavac/localClassSetAnalysis/localClassSetAnalysis.bin" afterPath="$PROJECT_DIR$/.gradle/3.3/tasks/_app_compileDebugJavaWithJavac/localClassSetAnalysis/localClassSetAnalysis.bin" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gradle/3.3/tasks/_app_compileDebugJavaWithJavac/localClassSetAnalysis/localClassSetAnalysis.lock" afterPath="$PROJECT_DIR$/.gradle/3.3/tasks/_app_compileDebugJavaWithJavac/localClassSetAnalysis/localClassSetAnalysis.lock" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gradle/3.3/tasks/_app_compileDebugJavaWithJavac/localJarClasspathSnapshot/localJarClasspathSnapshot.lock" afterPath="$PROJECT_DIR$/.gradle/3.3/tasks/_app_compileDebugJavaWithJavac/localJarClasspathSnapshot/localJarClasspathSnapshot.lock" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/app.iml" afterPath="$PROJECT_DIR$/app/app.iml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/com/joonho/oneoomt/RunningActivity.java" afterPath="$PROJECT_DIR$/app/src/main/java/com/joonho/oneoomt/RunningActivity.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/com/joonho/oneoomt/util/CalBearing.java" afterPath="$PROJECT_DIR$/app/src/main/java/com/joonho/oneoomt/util/CalBearing.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/res/layout/activity_running.xml" afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_running.xml" />
     </list>
     <ignored path="OneOOMT.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -52,12 +52,15 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="RunningActivity.java" pinned="false" current-in-tab="false">
+      <file leaf-file-name="RunningActivity.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/app/src/main/java/com/joonho/oneoomt/RunningActivity.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="248">
-              <caret line="933" column="24" selection-start-line="933" selection-start-column="24" selection-end-line="933" selection-end-column="24" />
-              <folding />
+            <state relative-caret-position="211">
+              <caret line="954" column="84" selection-start-line="954" selection-start-column="84" selection-end-line="954" selection-end-column="84" />
+              <folding>
+                <element signature="e#19752#20112#0" expanded="true" />
+                <element signature="e#20111#20112#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -72,7 +75,7 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="CalBearing.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="CalBearing.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/src/main/java/com/joonho/oneoomt/util/CalBearing.java">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="301">
@@ -2066,8 +2069,8 @@
         <option value="$PROJECT_DIR$/app/src/main/java/com/joonho/oneoomt/HistoryGoogleMapsActivity.java" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/joonho/oneoomt/util/PhotoUtil.java" />
         <option value="$PROJECT_DIR$/app/src/main/res/layout/activity_running.xml" />
-        <option value="$PROJECT_DIR$/app/src/main/java/com/joonho/oneoomt/RunningActivity.java" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/joonho/oneoomt/util/CalBearing.java" />
+        <option value="$PROJECT_DIR$/app/src/main/java/com/joonho/oneoomt/RunningActivity.java" />
       </list>
     </option>
   </component>
@@ -2222,7 +2225,7 @@
     <property name="settings.editor.selected.configurable" value="configurable.group.build" />
     <property name="settings.editor.splitter.proportion" value="0.2" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/.." />
-    <property name="device.picker.selection" value="ce021712b9add0e10c" />
+    <property name="device.picker.selection" value="6dad4e78" />
   </component>
   <component name="RecentsManager">
     <key name="android.template.packageName">
@@ -2570,7 +2573,14 @@
       <option name="project" value="LOCAL" />
       <updated>1508283818385</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Bearing View 180도 추가 하여 반대로 나오는 버그 수정 - 테스트전">
+      <created>1508370069116</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1508370069116</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -2586,7 +2596,7 @@
       <window_info id="Android Monitor" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.22333333" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.5883333" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.42333335" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Captures" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -2640,7 +2650,8 @@
     <MESSAGE value="AndroidStudio 20171017 1753" />
     <MESSAGE value="Running Activity - pIsStarted 오류 수정 중간 결과" />
     <MESSAGE value="Bearing View 추가" />
-    <option name="LAST_COMMIT_MESSAGE" value="Bearing View 추가" />
+    <MESSAGE value="Bearing View 180도 추가 하여 반대로 나오는 버그 수정 - 테스트전" />
+    <option name="LAST_COMMIT_MESSAGE" value="Bearing View 180도 추가 하여 반대로 나오는 버그 수정 - 테스트전" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager />
@@ -3058,19 +3069,22 @@
         <state />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/joonho/oneoomt/RunningActivity.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="248">
-          <caret line="933" column="24" selection-start-line="933" selection-start-column="24" selection-end-line="933" selection-end-column="24" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/com/joonho/oneoomt/util/CalBearing.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="301">
           <caret line="27" column="31" selection-start-line="27" selection-start-column="31" selection-end-line="27" selection-end-column="31" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/joonho/oneoomt/RunningActivity.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="211">
+          <caret line="954" column="84" selection-start-line="954" selection-start-column="84" selection-end-line="954" selection-end-column="84" />
+          <folding>
+            <element signature="e#19752#20112#0" expanded="true" />
+            <element signature="e#20111#20112#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>

@@ -1,5 +1,7 @@
 package com.joonho.oneoomt.util;
 
+import android.util.Log;
+
 /**
  * Created by joonhopark on 2017. 9. 18..
  */
@@ -7,6 +9,7 @@ package com.joonho.oneoomt.util;
 public class CalDistance {
     public double theta, dist;
     public double bef_lat, bef_long, cur_lat, cur_long;
+    public static String TAG = "CalDistance";
 
     public CalDistance(double bef_lat, double bef_long, double cur_lat, double cur_long) {
         this.theta = 0;
@@ -27,6 +30,8 @@ public class CalDistance {
         dist = dist * 60 * 1.1515;
         dist = dist * 1.609344;
         dist = dist * 1000.0;  // 단위 Km 에서 m로 변환
+
+        //Log.e(TAG, "Distance:" + dist);
         return dist; // 단위 m
     }
 

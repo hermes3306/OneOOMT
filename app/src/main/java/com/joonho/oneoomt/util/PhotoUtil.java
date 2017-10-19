@@ -73,11 +73,31 @@ public class PhotoUtil {
 
     static {
         myPictureList = loadMyPictueList();
+
         // 초기화
         //myPictureList = new ArrayList<myPicture>();
     }
 
     public static int picsize = 100;
+    public static void validatePictures() {
+        if(myPictureList.size()==0) return;
+        Boolean dl[] = new Boolean[myPictureList.size()];
+        for(int i=0;i<myPictureList.size();i++) {
+            myPicture mp = myPictureList.get(i);
+            Bitmap bmp = BitmapFactory.decodeFile(mp.filepath);
+            if(bmp == null){
+                dl[i] = true;
+            }else {
+                dl[i] = false;
+            }
+        }
+
+        for(int i=myPictureList.size()-1; i>=0; i--) {
+            if(dl[i]) myPictureList.remove(i);
+        }
+
+    }
+
     public static void showPictureAlertDialog(Context ctx, myPicture mp, int index) {
         final int inx = index;
         final Context cur_context = ctx;

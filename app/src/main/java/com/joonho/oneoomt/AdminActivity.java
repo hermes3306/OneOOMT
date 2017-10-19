@@ -18,6 +18,7 @@ import com.joonho.oneoomt.db.DBGateway;
 import com.joonho.oneoomt.file.myActivity;
 import com.joonho.oneoomt.file.myPicture;
 import com.joonho.oneoomt.util.FileUtils;
+import com.joonho.oneoomt.util.PhotoUtil;
 import com.joonho.oneoomt.util.modifiedDate;
 
 import java.io.BufferedInputStream;
@@ -62,12 +63,21 @@ public class AdminActivity extends AppCompatActivity implements View.OnClickList
             case R.id.imageButton_manage_external_activities:
                 manage_external_activities();
                 break;
+            case R.id.imageButton_validationcheck4pics:
+                validation_check4pics();
+                break;
             case R.id.bt_admin_back:
                 finish();
                 break;
             default:
                 break;
         }
+    }
+
+    private void validation_check4pics() {
+        PhotoUtil.validatePictures();
+        PhotoUtil pu = new PhotoUtil();
+        pu.saveMyPictueList();
     }
 
     public void copyPICstoGallery() {

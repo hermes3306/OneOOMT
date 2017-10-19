@@ -74,6 +74,7 @@ import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Hashtable;
@@ -92,6 +93,7 @@ import com.joonho.oneoomt.file.myPicture;
 import com.joonho.oneoomt.util.CalBearing;
 import com.joonho.oneoomt.util.CalDistance;
 import com.joonho.oneoomt.util.PhotoUtil;
+import com.joonho.oneoomt.util.modifiedDate;
 
 import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
@@ -104,7 +106,7 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
 
     private String TAG = "RunningActivity";
     private GoogleMap mMap;
-    private static int myzoom=16;
+    private static float myzoom=16.0f;
     private static LocalLocationService mService;
     private static boolean mBound=false;
     private static boolean isOnStartCalled=false;
@@ -145,17 +147,17 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
     final int track_color[] = {Color.RED, Color.BLUE, Color.WHITE, Color.YELLOW, Color.BLACK, Color.GREEN, Color.MAGENTA, Color.YELLOW, Color.GRAY, Color.DKGRAY, Color.CYAN};
 
     private void getSharedPreferences() {
-        pMarkerInterval = mPref.getInt      ("pMarkerInterval", 500);
-        pdrawMarker     = mPref.getBoolean  ("pdrawMarker", true);
+        pMarkerInterval = mPref.getInt      ("pMarkerInterval",1000);
+        pdrawMarker     = mPref.getBoolean  ("pdrawMarker", false);
         pdrawTrack      = mPref.getBoolean  ("pdrawTrack",  true);
         pTrackColor     = mPref.getInt      ("pTrackColor", 0);
-        pTrackWidth     = mPref.getInt      ("pTrackWidth", 15);
-        pdrawGroudNum   = mPref.getBoolean  ("pdrawGroudNum", true);
+        pTrackWidth     = mPref.getInt      ("pTrackWidth", 25);
+        pdrawGroudNum   = mPref.getBoolean  ("pdrawGroudNum", false);
         pdirectDBUpdate = mPref.getBoolean  ("pdirectDBUpdate", true);
         ponStartDBLoad  = mPref.getBoolean  ("ponStartDBLoad", true);
-        pshowPictures   = mPref.getBoolean  ("pshowPictures", true);
-        pTimerPeriod    = mPref.getInt      ("pTimerPeriod", 10000);
-        pLatestFilename = mPref.getString   ("pLatestFilename","");
+        pshowPictures   = mPref.getBoolean  ("pshowPictures", false);
+        pTimerPeriod    = mPref.getInt      ("pTimerPeriod", 1000);
+        pLatestFilename = mPref.getString   ("pLatestFilename","Last_Activity");
 
         // Readonly Property
         pIsStarted      = mPref.getBoolean  ("pIsStarted", false);
@@ -460,6 +462,7 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
                 }else {
                     tv_bearingmode.setText("Mode:Fixed");
                 }
+                show_cur_loc();
             }
         });
         if(mDrivingMode) {
@@ -492,6 +495,77 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
         }
     }
 
+    public static int last_pic_loc01=-1;
+    public static int last_pic_loc02=-1;
+    public static int last_pic_loc03=-1;
+
+    public void dashboard_3pics() {
+        if(mCurLoc==null) {
+            return;
+        }
+
+        ImageView imv_pic1 = (ImageView) findViewById(R.id.imv_pic1);
+        ImageView imv_pic2 = (ImageView) findViewById(R.id.imv_pic2);
+        ImageView imv_pic3 = (ImageView) findViewById(R.id.imv_pic3);
+
+        double minDist=Double.MAX_VALUE;
+        int mPos=0;
+        int msize = PhotoUtil.myPictureList.size();
+
+        for(int i=0;i<msize;i++) {
+            myPicture mp = PhotoUtil.myPictureList.get(i);
+            CalDistance cd = new CalDistance(mp.myactivity.latitude, mp.myactivity.longitude, mCurLoc.getLatitude(), mCurLoc.getLatitude());
+            if(minDist > cd.getDistance()) {
+                minDist = cd.getDistance();
+                mPos = i;
+            }
+        }
+
+        Toast.makeText(RunningActivity.this, "" + minDist + "meters", Toast.LENGTH_LONG ).show();
+
+
+        if(last_pic_loc01 != -1) {
+            last_pic_loc03 = last_pic_loc02;
+            last_pic_loc02 = last_pic_loc01;
+            last_pic_loc01 = mPos;
+        } else last_pic_loc01 = mPos;
+
+        if(last_pic_loc01 != -1) {
+            Bitmap capturebmp01 = getPreview(mMyPicture.get(last_pic_loc01).filepath);
+            imv_pic1.setImageBitmap(capturebmp01);
+            imv_pic1.setRotation(90);
+        }
+        if(last_pic_loc02 != -1) {
+            Bitmap capturebmp02 = getPreview(mMyPicture.get(last_pic_loc02).filepath);
+            imv_pic2.setImageBitmap(capturebmp02);
+            imv_pic2.setRotation(90);
+        }
+        if(last_pic_loc03 != -1) {
+            Bitmap capturebmp03 = getPreview(mMyPicture.get(last_pic_loc03).filepath);
+            imv_pic3.setImageBitmap(capturebmp03);
+            imv_pic3.setRotation(90);
+        }
+    }
+
+    Bitmap getPreview(String filepath) {
+        File image = new File(filepath);
+
+        BitmapFactory.Options bounds = new BitmapFactory.Options();
+        bounds.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(image.getPath(), bounds);
+        if ((bounds.outWidth == -1) || (bounds.outHeight == -1))
+            return null;
+
+        int originalSize = (bounds.outHeight > bounds.outWidth) ? bounds.outHeight
+                : bounds.outWidth;
+
+        BitmapFactory.Options opts = new BitmapFactory.Options();
+        opts.inSampleSize = originalSize / 120; //120 = Thumnail Size
+        return BitmapFactory.decodeFile(image.getPath(), opts);
+    }
+
+
+
     public void dashboard_time_dist_speed() {
         TextView tv_time = (TextView) findViewById(R.id.tv_time);
         TextView tv_dist = (TextView) findViewById(R.id.tv_dist);
@@ -499,16 +573,14 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
         TextView tv_alt = (TextView) findViewById(R.id.tv_alt);
         final ImageButton bt_start  = (ImageButton)findViewById(R.id.imgbt_start);
         final ImageButton bt_stop = (ImageButton)findViewById(R.id.imgbt_stop);
-        final LinearLayout llo_left_center = (LinearLayout)findViewById(R.id.llo_left_center);
-
-
+        final LinearLayout llo_left_top = (LinearLayout)findViewById(R.id.llo_left_top);
 
         if(!pIsStarted) {
             tv_time.setVisibility(INVISIBLE);
             tv_dist.setVisibility(INVISIBLE);
             bt_stop.setVisibility(INVISIBLE);
             bt_start.setVisibility(View.VISIBLE);
-            llo_left_center.setVisibility(View.INVISIBLE);
+            llo_left_top.setVisibility(View.INVISIBLE);
             return;
         } else {
             tv_time.setTextColor(Color.BLUE);
@@ -518,7 +590,7 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
             tv_dist.setVisibility(VISIBLE);
             bt_stop.setVisibility(VISIBLE);
             bt_start.setVisibility(View.INVISIBLE);
-            llo_left_center.setVisibility(View.VISIBLE);
+            llo_left_top.setVisibility(View.VISIBLE);
         }
 
         tv_time.setTextSize(25);
@@ -748,7 +820,7 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
         zoomin.setBackgroundColor(Color.TRANSPARENT);
         zoomin.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                myzoom++;
+                myzoom = myzoom+1.0f;
                 show_cur_loc();
             }}
         );
@@ -758,7 +830,7 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
         zoomout.setBackgroundColor(Color.TRANSPARENT);
         zoomout.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                myzoom--;
+                myzoom = myzoom-1.0f;
                 show_cur_loc();
             }}
         );
@@ -783,7 +855,7 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
         // 005. Start/Stop Buttons
         final ImageButton bt_start  = (ImageButton)findViewById(R.id.imgbt_start);
         final ImageButton bt_stop = (ImageButton)findViewById(R.id.imgbt_stop);
-        final LinearLayout llo_left_center = (LinearLayout)findViewById(R.id.llo_left_center);
+        final LinearLayout llo_left_top = (LinearLayout)findViewById(R.id.llo_left_top);
 
         // 출발버튼
         bt_start.setOnClickListener(new View.OnClickListener() {
@@ -817,7 +889,7 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
                             mEditor.commit();
 
                             mMaxAlt = 0;
-                            llo_left_center.setVisibility(View.VISIBLE);
+                            llo_left_top.setVisibility(View.VISIBLE);
                             Toast.makeText(getApplicationContext(), "All data on Screen is reset, if you want to confirm sync to DB else reboot to sync from DB",Toast.LENGTH_LONG );
                         }
                     });
@@ -870,7 +942,7 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
                             dashboard_time_dist_speed();
                             bt_stop.setVisibility(INVISIBLE);
                             bt_start.setVisibility(View.VISIBLE);
-                            llo_left_center.setVisibility(INVISIBLE);
+                            llo_left_top.setVisibility(INVISIBLE);
                         }
                     }
                 });
@@ -888,19 +960,15 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
             }}
         );
 
-        // 006. Take Picture / Magic
-        final ImageView bt_pic = (ImageView)findViewById(R.id.imb_pic);
+        // 006. Take Picture / Magic / 3PIC
+        final ImageButton bt_pic = (ImageButton)findViewById(R.id.imb_pic);
         bt_pic.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-
-
                 dispatchTakePictureIntent();
-
-
             }}
         );
 
-        final ImageView bt_magic = (ImageView)findViewById(R.id.imb_magic);
+        final ImageButton bt_magic = (ImageButton)findViewById(R.id.imb_magic);
         bt_magic.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 PhotoUtil pu = new PhotoUtil();
@@ -908,6 +976,12 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
             }
         });
 
+        final ImageButton bt_3pic = (ImageButton)findViewById(R.id.imb_3Pics);
+        bt_3pic.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                dashboard_3pics();
+            }
+        });
     }
 
     // **  ----------------------------------------------------------------------------------------
@@ -917,27 +991,28 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
     public void doMyTimeTask() {
         TimerTask mTask =new MyTimerTask();
         Timer mTimer = new Timer();
-
         mTimer.schedule(mTask, 1000, pTimerPeriod); //delaytime(10sec), period(1sec)
-
     }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+
         if(mLatLngList.size() >0 ) {
             resumewithSavedValue();
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mLatLngList.get(mLatLngList.size()-1), myzoom));
+        } else {
+            LatLng ll = new LatLng(29.51, 127.7);
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(ll, myzoom));
         }
-
         Log.e(TAG,">>>>>>>>>>>>>> onMapReady called !!!");
-//        LatLng curloc = new LatLng(37.499157,127.131574);
-//        mMap.addMarker(new MarkerOptions().position(curloc).title("Home"));
-//        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(curloc, myzoom));
     }
 
     // **  ----------------------------------------------------------------------------------------
     //        Google Map Functions, 9/27/17, jhpark
     // **  -------------------------------------------------------------------------------------- **
+
+    public static boolean moveCamerafirstcall=true;
 
     public void moveCamera() {
         if(mCurLoc==null) {
@@ -945,6 +1020,9 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
             return;
         }
         LatLng curloc = new LatLng(mCurLoc.getLatitude(), mCurLoc.getLongitude());
+
+        myzoom = mMap.getCameraPosition().zoom;
+        Log.e(TAG,"myzoom:" + myzoom);
 
         if(mDrivingMode) {
             CameraPosition currentPlace = new CameraPosition.Builder()
@@ -981,16 +1059,16 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
     public void resumewithSavedValue() {
         final ImageButton bt_start  = (ImageButton)findViewById(R.id.imgbt_start);
         final ImageButton bt_stop = (ImageButton)findViewById(R.id.imgbt_stop);
-        final LinearLayout llo_left_center = (LinearLayout)findViewById(R.id.llo_left_center);
+        final LinearLayout llo_left_top = (LinearLayout)findViewById(R.id.llo_left_top);
 
         if(pIsStarted) {
             bt_stop.setVisibility(VISIBLE);
             bt_start.setVisibility(INVISIBLE);
-            llo_left_center.setVisibility(VISIBLE);
+            llo_left_top.setVisibility(VISIBLE);
         } else {
             bt_stop.setVisibility(INVISIBLE);
             bt_start.setVisibility(View.VISIBLE);
-            llo_left_center.setVisibility(INVISIBLE);
+            llo_left_top.setVisibility(INVISIBLE);
         }
         show_cur_loc();
     }

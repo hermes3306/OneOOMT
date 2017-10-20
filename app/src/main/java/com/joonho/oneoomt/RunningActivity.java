@@ -615,7 +615,7 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
         imv_pic1.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view) {
-                myPicture mp = PhotoUtil.myPictureList.get(last_pic_loc[1]);
+                myPicture mp = PhotoUtil.myPictureList.get(last_pic_loc[0]);
                 MarkerOptions opt = new MarkerOptions()
                         .position(new LatLng(mp.myactivity.latitude, mp.myactivity.longitude))
                         .title(mp.picname)
@@ -625,17 +625,31 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
                 Marker marker = mMap.addMarker(opt);
             }
         });
+
         imv_pic2.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view) {
-
+                myPicture mp = PhotoUtil.myPictureList.get(last_pic_loc[1]);
+                MarkerOptions opt = new MarkerOptions()
+                        .position(new LatLng(mp.myactivity.latitude, mp.myactivity.longitude))
+                        .title(mp.picname)
+                        .draggable(true).visible(true).snippet(mp.myactivity.added_on);
+                Bitmap bmp = getPreview(PhotoUtil.myPictureList.get(last_pic_loc[1]).filepath);
+                opt.icon(BitmapDescriptorFactory.fromBitmap(bmp));
+                Marker marker = mMap.addMarker(opt);
             }
         });
         imv_pic3.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view) {
-
-
+                myPicture mp = PhotoUtil.myPictureList.get(last_pic_loc[2]);
+                MarkerOptions opt = new MarkerOptions()
+                        .position(new LatLng(mp.myactivity.latitude, mp.myactivity.longitude))
+                        .title(mp.picname)
+                        .draggable(true).visible(true).snippet(mp.myactivity.added_on);
+                Bitmap bmp = getPreview(PhotoUtil.myPictureList.get(last_pic_loc[2]).filepath);
+                opt.icon(BitmapDescriptorFactory.fromBitmap(bmp));
+                Marker marker = mMap.addMarker(opt);
             }
         });
     }

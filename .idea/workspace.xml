@@ -7,18 +7,11 @@
   </component>
   <component name="AndroidLogFilters">
     <option name="TOOL_WINDOW_LOG_LEVEL" value="error" />
-    <option name="TOOL_WINDOW_CONFIGURED_FILTER" value="Show only selected application" />
+    <option name="TOOL_WINDOW_CONFIGURED_FILTER" value="Firebase" />
     <option name="TOOL_WINDOW_REGEXP_FILTER" value="false" />
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d481c67e-d66f-4346-bce1-884e7e09ffaa" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gradle/3.3/taskArtifacts/fileHashes.bin" afterPath="$PROJECT_DIR$/.gradle/3.3/taskArtifacts/fileHashes.bin" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gradle/3.3/taskArtifacts/fileSnapshots.bin" afterPath="$PROJECT_DIR$/.gradle/3.3/taskArtifacts/fileSnapshots.bin" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gradle/3.3/taskArtifacts/taskArtifacts.bin" afterPath="$PROJECT_DIR$/.gradle/3.3/taskArtifacts/taskArtifacts.bin" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gradle/3.3/taskArtifacts/taskArtifacts.lock" afterPath="$PROJECT_DIR$/.gradle/3.3/taskArtifacts/taskArtifacts.lock" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gradle/3.3/tasks/_app_compileDebugJavaWithJavac/localClassSetAnalysis/localClassSetAnalysis.bin" afterPath="$PROJECT_DIR$/.gradle/3.3/tasks/_app_compileDebugJavaWithJavac/localClassSetAnalysis/localClassSetAnalysis.bin" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gradle/3.3/tasks/_app_compileDebugJavaWithJavac/localClassSetAnalysis/localClassSetAnalysis.lock" afterPath="$PROJECT_DIR$/.gradle/3.3/tasks/_app_compileDebugJavaWithJavac/localClassSetAnalysis/localClassSetAnalysis.lock" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gradle/3.3/tasks/_app_compileDebugJavaWithJavac/localJarClasspathSnapshot/localJarClasspathSnapshot.lock" afterPath="$PROJECT_DIR$/.gradle/3.3/tasks/_app_compileDebugJavaWithJavac/localJarClasspathSnapshot/localJarClasspathSnapshot.lock" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/com/joonho/oneoomt/RunningActivity.java" afterPath="$PROJECT_DIR$/app/src/main/java/com/joonho/oneoomt/RunningActivity.java" />
     </list>
@@ -55,17 +48,17 @@
       <file leaf-file-name="RunningActivity.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/app/src/main/java/com/joonho/oneoomt/RunningActivity.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="343">
-              <caret line="162" column="65" selection-start-line="162" selection-start-column="48" selection-end-line="162" selection-end-column="65" />
+            <state relative-caret-position="223">
+              <caret line="613" column="27" selection-start-line="613" selection-start-column="27" selection-end-line="613" selection-end-column="27" />
               <folding>
-                <element signature="e#25011#25289#0" expanded="true" />
-                <element signature="e#25288#25289#0" expanded="true" />
-                <element signature="e#25328#25497#0" expanded="true" />
-                <element signature="e#25496#25497#0" expanded="true" />
-                <element signature="e#25536#25705#0" expanded="true" />
-                <element signature="e#25704#25705#0" expanded="true" />
-                <element signature="e#25744#25913#0" expanded="true" />
-                <element signature="e#25912#25913#0" expanded="true" />
+                <element signature="e#25013#25224#0" expanded="true" />
+                <element signature="e#25223#25224#0" expanded="true" />
+                <element signature="e#25268#25479#0" expanded="true" />
+                <element signature="e#25478#25479#0" expanded="true" />
+                <element signature="e#25523#25734#0" expanded="true" />
+                <element signature="e#25733#25734#0" expanded="true" />
+                <element signature="e#25803#26496#0" expanded="true" />
+                <element signature="e#26495#26496#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -2109,8 +2102,8 @@
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="15" />
-    <option name="width" value="1299" />
+    <option name="x" value="-4" />
+    <option name="width" value="1311" />
     <option name="height" value="1020" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="false">
@@ -2641,11 +2634,18 @@
       <option name="project" value="LOCAL" />
       <updated>1508484014358</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="Show Adjacent Pictures - Admin Setting">
+      <created>1508489405491</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1508489405491</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="15" y="0" width="1299" height="1020" extended-state="0" />
+    <frame x="-4" y="0" width="1311" height="1020" extended-state="0" />
     <editor active="false" />
     <layout>
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
@@ -2657,12 +2657,12 @@
       <window_info id="Android Monitor" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.23228803" sideWeight="0.49758455" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.44367015" sideWeight="0.2815735" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.21370499" sideWeight="0.2815735" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Captures" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Gradle Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.2881356" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.2853717" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Gradle" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Android Model" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="true" content_ui="tabs" />
@@ -2714,7 +2714,8 @@
     <MESSAGE value="Bearing View 180도 추가 하여 반대로 나오는 버그 수정 - 테스트전" />
     <MESSAGE value="Bearing View 180도 완료됨.&#10;드라이빙 모드 픽스 모드 텍스트 onClick event 처리 기능 추가" />
     <MESSAGE value="에러수정(3PICs)" />
-    <option name="LAST_COMMIT_MESSAGE" value="에러수정(3PICs)" />
+    <MESSAGE value="Show Adjacent Pictures - Admin Setting" />
+    <option name="LAST_COMMIT_MESSAGE" value="Show Adjacent Pictures - Admin Setting" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -2755,14 +2756,14 @@
         <state relative-caret-position="27330">
           <caret line="1826" column="46" selection-start-line="1826" selection-start-column="46" selection-end-line="1826" selection-end-column="46" />
           <folding>
-            <element signature="e#25011#25289#0" expanded="true" />
-            <element signature="e#25288#25289#0" expanded="true" />
-            <element signature="e#25328#25497#0" expanded="true" />
-            <element signature="e#25496#25497#0" expanded="true" />
-            <element signature="e#25536#25705#0" expanded="true" />
-            <element signature="e#25704#25705#0" expanded="true" />
-            <element signature="e#25744#25913#0" expanded="true" />
-            <element signature="e#25912#25913#0" expanded="true" />
+            <element signature="e#25013#25224#0" expanded="true" />
+            <element signature="e#25223#25224#0" expanded="true" />
+            <element signature="e#25268#25479#0" expanded="true" />
+            <element signature="e#25478#25479#0" expanded="true" />
+            <element signature="e#25523#25734#0" expanded="true" />
+            <element signature="e#25733#25734#0" expanded="true" />
+            <element signature="e#25803#26496#0" expanded="true" />
+            <element signature="e#26495#26496#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -2833,14 +2834,14 @@
         <state relative-caret-position="27330">
           <caret line="1826" column="46" selection-start-line="1826" selection-start-column="46" selection-end-line="1826" selection-end-column="46" />
           <folding>
-            <element signature="e#25011#25289#0" expanded="true" />
-            <element signature="e#25288#25289#0" expanded="true" />
-            <element signature="e#25328#25497#0" expanded="true" />
-            <element signature="e#25496#25497#0" expanded="true" />
-            <element signature="e#25536#25705#0" expanded="true" />
-            <element signature="e#25704#25705#0" expanded="true" />
-            <element signature="e#25744#25913#0" expanded="true" />
-            <element signature="e#25912#25913#0" expanded="true" />
+            <element signature="e#25013#25224#0" expanded="true" />
+            <element signature="e#25223#25224#0" expanded="true" />
+            <element signature="e#25268#25479#0" expanded="true" />
+            <element signature="e#25478#25479#0" expanded="true" />
+            <element signature="e#25523#25734#0" expanded="true" />
+            <element signature="e#25733#25734#0" expanded="true" />
+            <element signature="e#25803#26496#0" expanded="true" />
+            <element signature="e#26495#26496#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -2908,14 +2909,14 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="e#25011#25289#0" expanded="true" />
-            <element signature="e#25288#25289#0" expanded="true" />
-            <element signature="e#25328#25497#0" expanded="true" />
-            <element signature="e#25496#25497#0" expanded="true" />
-            <element signature="e#25536#25705#0" expanded="true" />
-            <element signature="e#25704#25705#0" expanded="true" />
-            <element signature="e#25744#25913#0" expanded="true" />
-            <element signature="e#25912#25913#0" expanded="true" />
+            <element signature="e#25013#25224#0" expanded="true" />
+            <element signature="e#25223#25224#0" expanded="true" />
+            <element signature="e#25268#25479#0" expanded="true" />
+            <element signature="e#25478#25479#0" expanded="true" />
+            <element signature="e#25523#25734#0" expanded="true" />
+            <element signature="e#25733#25734#0" expanded="true" />
+            <element signature="e#25803#26496#0" expanded="true" />
+            <element signature="e#26495#26496#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -2925,14 +2926,14 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="e#25011#25289#0" expanded="true" />
-            <element signature="e#25288#25289#0" expanded="true" />
-            <element signature="e#25328#25497#0" expanded="true" />
-            <element signature="e#25496#25497#0" expanded="true" />
-            <element signature="e#25536#25705#0" expanded="true" />
-            <element signature="e#25704#25705#0" expanded="true" />
-            <element signature="e#25744#25913#0" expanded="true" />
-            <element signature="e#25912#25913#0" expanded="true" />
+            <element signature="e#25013#25224#0" expanded="true" />
+            <element signature="e#25223#25224#0" expanded="true" />
+            <element signature="e#25268#25479#0" expanded="true" />
+            <element signature="e#25478#25479#0" expanded="true" />
+            <element signature="e#25523#25734#0" expanded="true" />
+            <element signature="e#25733#25734#0" expanded="true" />
+            <element signature="e#25803#26496#0" expanded="true" />
+            <element signature="e#26495#26496#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -3210,17 +3211,17 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/com/joonho/oneoomt/RunningActivity.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="343">
-          <caret line="162" column="65" selection-start-line="162" selection-start-column="48" selection-end-line="162" selection-end-column="65" />
+        <state relative-caret-position="223">
+          <caret line="613" column="27" selection-start-line="613" selection-start-column="27" selection-end-line="613" selection-end-column="27" />
           <folding>
-            <element signature="e#25011#25289#0" expanded="true" />
-            <element signature="e#25288#25289#0" expanded="true" />
-            <element signature="e#25328#25497#0" expanded="true" />
-            <element signature="e#25496#25497#0" expanded="true" />
-            <element signature="e#25536#25705#0" expanded="true" />
-            <element signature="e#25704#25705#0" expanded="true" />
-            <element signature="e#25744#25913#0" expanded="true" />
-            <element signature="e#25912#25913#0" expanded="true" />
+            <element signature="e#25013#25224#0" expanded="true" />
+            <element signature="e#25223#25224#0" expanded="true" />
+            <element signature="e#25268#25479#0" expanded="true" />
+            <element signature="e#25478#25479#0" expanded="true" />
+            <element signature="e#25523#25734#0" expanded="true" />
+            <element signature="e#25733#25734#0" expanded="true" />
+            <element signature="e#25803#26496#0" expanded="true" />
+            <element signature="e#26495#26496#0" expanded="true" />
           </folding>
         </state>
       </provider>

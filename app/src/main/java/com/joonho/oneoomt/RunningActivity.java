@@ -315,7 +315,7 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
                 mEditor.putBoolean("ponStartDBLoad",  tg_ponStartDBLoad.isChecked());
                 mEditor.putBoolean("pshowPictures",  tg_pshowPictures.isChecked());
                 mEditor.putInt("pTimerPeriod", Integer.parseInt(et_pTimerPeriod.getText().toString()));
-                mEditor.putBoolean("tg_pshowAdjacentPics",  tg_pshowAdjacentPics.isChecked());
+                mEditor.putBoolean("pshowAdjacentPics",  tg_pshowAdjacentPics.isChecked());
                 mEditor.putString("pLatestFilename", et_pLatestFilename.getText().toString());
                 mEditor.commit();
                 getSharedPreferences();
@@ -586,29 +586,56 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
             imv_pic3.setRotation(90);
             imv_pic3.setVisibility(VISIBLE);
         }
-        imv_pic1.setOnDragListener(new View.OnDragListener() {
+        imv_pic1.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
-            public boolean onDrag(View view, DragEvent dragEvent) {
-                Toast.makeText(RunningActivity.this, "" + dragEvent.toString(), Toast.LENGTH_LONG).show();
+            public boolean onLongClick(View view) {
+                imv_pic1.setVisibility(INVISIBLE);
                 return false;
             }
         });
+
+        imv_pic2.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                imv_pic2.setVisibility(INVISIBLE);
+                return false;
+            }
+        });
+
+        imv_pic3.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                imv_pic3.setVisibility(INVISIBLE);
+                return false;
+            }
+        });
+
+
+        // 클릭시 포지션에 그림 올리기.
         imv_pic1.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view) {
-                imv_pic1.setVisibility(INVISIBLE);
+                myPicture mp = PhotoUtil.myPictureList.get(last_pic_loc[1]);
+                MarkerOptions opt = new MarkerOptions()
+                        .position(new LatLng(mp.myactivity.latitude, mp.myactivity.longitude))
+                        .title(mp.picname)
+                        .draggable(true).visible(true).snippet(mp.myactivity.added_on);
+                Bitmap bmp = getPreview(PhotoUtil.myPictureList.get(last_pic_loc[0]).filepath);
+                opt.icon(BitmapDescriptorFactory.fromBitmap(bmp));
+                Marker marker = mMap.addMarker(opt);
             }
         });
         imv_pic2.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view) {
-                imv_pic2.setVisibility(INVISIBLE);
+
             }
         });
         imv_pic3.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view) {
-                imv_pic3.setVisibility(INVISIBLE);
+
+
             }
         });
     }
@@ -1973,6 +2000,13 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
                     Log.e(TAG, e.toString());
                 }
             }
+
+
+
+
+
+
+
 
             Marker marker = mMap.addMarker(opt);
             marker.setTag(mp); //setTag, getTag with myPicture

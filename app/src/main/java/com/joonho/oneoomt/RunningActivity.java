@@ -38,6 +38,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.PopupMenu;
 import android.util.Log;
+import android.view.DragEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -130,17 +131,18 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
     public static SharedPreferences.Editor mEditor = null;
 
     public static int       pMarkerInterval;
-    public static boolean   pdrawMarker;
-    public static boolean   pdrawTrack;
+    public static boolean  pdrawMarker;
+    public static boolean  pdrawTrack;
     public static int       pTrackColor;
     public static int       pTrackWidth;
-    public static boolean   pdrawGroudNum;
-    public static boolean   pdirectDBUpdate;
-    public static boolean   ponStartDBLoad;
-    public static boolean   pshowPictures;
+    public static boolean  pdrawGroudNum;
+    public static boolean  pdirectDBUpdate;
+    public static boolean  ponStartDBLoad;
+    public static boolean  pshowPictures;
     public static int       pTimerPeriod;
+    public static boolean  pshowAdjacentPics;
     public static String    pLatestFilename;
-    public static boolean   pIsStarted;
+    public static boolean  pIsStarted;
     public static long      pTime_start;
     public static int       pStartPos;
 
@@ -158,6 +160,7 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
         ponStartDBLoad  = mPref.getBoolean  ("ponStartDBLoad", true);
         pshowPictures   = mPref.getBoolean  ("pshowPictures", false);
         pTimerPeriod    = mPref.getInt      ("pTimerPeriod", 1000);
+        pshowAdjacentPics = mPref.getBoolean  ("pshowAdjacentPics", true);
         pLatestFilename = mPref.getString   ("pLatestFilename","Last_Activity");
 
         // Readonly Property
@@ -181,6 +184,7 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
         final ToggleButton  tg_ponStartDBLoad = new ToggleButton(RunningActivity.this);
         final ToggleButton  tg_pshowPictures = new ToggleButton(RunningActivity.this);
         final EditText      et_pTimerPeriod = new EditText(RunningActivity.this);
+        final ToggleButton  tg_pshowAdjacentPics = new ToggleButton(RunningActivity.this);
         final EditText      et_pLatestFilename = new EditText(RunningActivity.this);
 
         getSharedPreferences();
@@ -192,6 +196,7 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
         tg_pdirectDBUpdate.setChecked(pdirectDBUpdate);
         tg_ponStartDBLoad.setChecked(ponStartDBLoad);
         tg_pshowPictures.setChecked(pshowPictures);
+        tg_pshowAdjacentPics.setChecked(pshowAdjacentPics);
         et_pTimerPeriod.setText(""+pTimerPeriod);
         et_pLatestFilename.setText(""+pLatestFilename);
 
@@ -280,6 +285,12 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
         ll_hor9.addView(et_pTimerPeriod);
         ll_ver.addView(ll_hor9);
 
+        final LinearLayout ll_hor811 = new LinearLayout(RunningActivity.this);
+        ll_hor811.setOrientation(LinearLayout.HORIZONTAL);
+        final TextView tv811 = new TextView(RunningActivity.this); tv811.setText("show Adjacent Pics");
+        ll_hor811.addView(tv811);
+        ll_hor811.addView(tg_pshowAdjacentPics);
+        ll_ver.addView(ll_hor811);
 
         final LinearLayout ll_hor10 = new LinearLayout(RunningActivity.this);
         ll_hor10.setOrientation(LinearLayout.HORIZONTAL);
@@ -304,6 +315,7 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
                 mEditor.putBoolean("ponStartDBLoad",  tg_ponStartDBLoad.isChecked());
                 mEditor.putBoolean("pshowPictures",  tg_pshowPictures.isChecked());
                 mEditor.putInt("pTimerPeriod", Integer.parseInt(et_pTimerPeriod.getText().toString()));
+                mEditor.putBoolean("tg_pshowAdjacentPics",  tg_pshowAdjacentPics.isChecked());
                 mEditor.putString("pLatestFilename", et_pLatestFilename.getText().toString());
                 mEditor.commit();
                 getSharedPreferences();
@@ -508,15 +520,16 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
     }
 
     public void dashboard_3pics() {
-        // 현재 위치 서비스로 다시 가져 온후 진행함.
+        if(!pshowAdjacentPics) return;
+
         mCurLoc = mService.getLastLocation();
         if(mCurLoc==null) {
             return;
         }
 
-        ImageView imv_pic1 = (ImageView) findViewById(R.id.imv_pic1);
-        ImageView imv_pic2 = (ImageView) findViewById(R.id.imv_pic2);
-        ImageView imv_pic3 = (ImageView) findViewById(R.id.imv_pic3);
+        final ImageView imv_pic1 = (ImageView) findViewById(R.id.imv_pic1);
+        final ImageView imv_pic2 = (ImageView) findViewById(R.id.imv_pic2);
+        final ImageView imv_pic3 = (ImageView) findViewById(R.id.imv_pic3);
 
         double minDist=Double.MAX_VALUE;
         int mPos=0;
@@ -559,17 +572,45 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
             Bitmap capturebmp01 = getPreview(PhotoUtil.myPictureList.get(last_pic_loc[0] ).filepath);
             imv_pic1.setImageBitmap(capturebmp01);
             imv_pic1.setRotation(90);
+            imv_pic1.setVisibility(VISIBLE);
         }
         if(last_pic_loc[1] != -1) {
             Bitmap capturebmp02 = getPreview(PhotoUtil.myPictureList.get(last_pic_loc[1]).filepath);
             imv_pic2.setImageBitmap(capturebmp02);
             imv_pic2.setRotation(90);
+            imv_pic2.setVisibility(VISIBLE);
         }
         if(last_pic_loc[2] != -1) {
             Bitmap capturebmp03 = getPreview(PhotoUtil.myPictureList.get(last_pic_loc[2]).filepath);
             imv_pic3.setImageBitmap(capturebmp03);
             imv_pic3.setRotation(90);
+            imv_pic3.setVisibility(VISIBLE);
         }
+        imv_pic1.setOnDragListener(new View.OnDragListener() {
+            @Override
+            public boolean onDrag(View view, DragEvent dragEvent) {
+                Toast.makeText(RunningActivity.this, "" + dragEvent.toString(), Toast.LENGTH_LONG).show();
+                return false;
+            }
+        });
+        imv_pic1.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view) {
+                imv_pic1.setVisibility(INVISIBLE);
+            }
+        });
+        imv_pic2.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view) {
+                imv_pic2.setVisibility(INVISIBLE);
+            }
+        });
+        imv_pic3.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view) {
+                imv_pic3.setVisibility(INVISIBLE);
+            }
+        });
     }
 
     Bitmap getPreview(String filepath) {
@@ -776,6 +817,7 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
                             dashboard_time_dist_speed();
                             dashboard_distances(ll1,ll2, mLastLoc, mCurLoc);
                             dashboard_bearing(ll1,ll2);
+                            dashboard_3pics();
 
                             show_cur_loc();
                         }

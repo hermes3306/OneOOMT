@@ -549,7 +549,7 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
             for(int i=0;i<last_pic_loc.length;i++) last_pic_loc[i]=-1;
         }
 
-        Toast.makeText(RunningActivity.this, "" + mPos + "]" + minDist + "meters", Toast.LENGTH_LONG ).show();
+        //Toast.makeText(RunningActivity.this, "" + mPos + "]" + minDist + "meters", Toast.LENGTH_LONG ).show();
         for(int i=last_pic_loc.length-1; i>0;i--) {
             last_pic_loc[i] = last_pic_loc[i-1];
         }

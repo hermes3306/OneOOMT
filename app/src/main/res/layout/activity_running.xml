@@ -264,7 +264,7 @@ android:gravity="center">
                         android:layout_height="48dp"
                         android:layout_weight="1"
                         android:background="@android:color/transparent"
-                        app:srcCompat="@drawable/pic3_48" />
+                        app:srcCompat="@drawable/custommarker2_48" />
 
                     <TextView
                         android:id="@+id/textView16"

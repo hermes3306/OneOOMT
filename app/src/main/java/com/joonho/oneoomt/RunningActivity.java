@@ -84,6 +84,7 @@ import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
+import java.util.stream.IntStream;
 
 import com.joonho.oneoomt.LocalLocationService.LocalBinder;
 import com.joonho.oneoomt.db.DBGateway;
@@ -499,7 +500,16 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
     public static int last_pic_loc02=-1;
     public static int last_pic_loc03=-1;
 
+    public static int last_pic_loc[] = new int[100];
+    static {
+        for(int i=0;i<last_pic_loc.length;i++) {
+            last_pic_loc[i] = -1;
+        }
+    }
+
     public void dashboard_3pics() {
+        // 현재 위치 서비스로 다시 가져 온후 진행함.
+        mCurLoc = mService.getLastLocation();
         if(mCurLoc==null) {
             return;
         }
@@ -512,36 +522,51 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
         int mPos=0;
         int msize = PhotoUtil.myPictureList.size();
 
+        for(int i=0;i<last_pic_loc.length;i++) {
+            Log.e(TAG, "" + i + ":" + last_pic_loc[i]);
+            if(last_pic_loc[i] == -1) break;
+        }
+
         for(int i=0;i<msize;i++) {
+            boolean contains = false;
+            for(int j=0;j<last_pic_loc.length;j++) {
+                if(last_pic_loc[j] == -1 )  break;
+                if(last_pic_loc[j] ==  i )  {
+                    contains = true;
+                }
+            }
+            if(contains) continue;
+
             myPicture mp = PhotoUtil.myPictureList.get(i);
-            CalDistance cd = new CalDistance(mp.myactivity.latitude, mp.myactivity.longitude, mCurLoc.getLatitude(), mCurLoc.getLatitude());
+            CalDistance cd = new CalDistance(mp.myactivity.latitude, mp.myactivity.longitude, mCurLoc.getLatitude(), mCurLoc.getLongitude());
             if(minDist > cd.getDistance()) {
                 minDist = cd.getDistance();
                 mPos = i;
             }
         }
 
-        Toast.makeText(RunningActivity.this, "" + minDist + "meters", Toast.LENGTH_LONG ).show();
+        if(last_pic_loc[0] == mPos) {
+            for(int i=0;i<last_pic_loc.length;i++) last_pic_loc[i]=-1;
+        }
 
+        Toast.makeText(RunningActivity.this, "" + mPos + "]" + minDist + "meters", Toast.LENGTH_LONG ).show();
+        for(int i=last_pic_loc.length-1; i>0;i--) {
+            last_pic_loc[i] = last_pic_loc[i-1];
+        }
+        last_pic_loc[0] = mPos;
 
-        if(last_pic_loc01 != -1) {
-            last_pic_loc03 = last_pic_loc02;
-            last_pic_loc02 = last_pic_loc01;
-            last_pic_loc01 = mPos;
-        } else last_pic_loc01 = mPos;
-
-        if(last_pic_loc01 != -1) {
-            Bitmap capturebmp01 = getPreview(mMyPicture.get(last_pic_loc01).filepath);
+        if(last_pic_loc[0]  != -1) {
+            Bitmap capturebmp01 = getPreview(PhotoUtil.myPictureList.get(last_pic_loc[0] ).filepath);
             imv_pic1.setImageBitmap(capturebmp01);
             imv_pic1.setRotation(90);
         }
-        if(last_pic_loc02 != -1) {
-            Bitmap capturebmp02 = getPreview(mMyPicture.get(last_pic_loc02).filepath);
+        if(last_pic_loc[1] != -1) {
+            Bitmap capturebmp02 = getPreview(PhotoUtil.myPictureList.get(last_pic_loc[1]).filepath);
             imv_pic2.setImageBitmap(capturebmp02);
             imv_pic2.setRotation(90);
         }
-        if(last_pic_loc03 != -1) {
-            Bitmap capturebmp03 = getPreview(mMyPicture.get(last_pic_loc03).filepath);
+        if(last_pic_loc[2] != -1) {
+            Bitmap capturebmp03 = getPreview(PhotoUtil.myPictureList.get(last_pic_loc[2]).filepath);
             imv_pic3.setImageBitmap(capturebmp03);
             imv_pic3.setRotation(90);
         }

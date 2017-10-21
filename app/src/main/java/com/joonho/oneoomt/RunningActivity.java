@@ -17,6 +17,7 @@ import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.VectorDrawable;
@@ -337,7 +338,7 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_running);
+        setContentView(R.layout.activity_running2);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(map);
@@ -519,7 +520,7 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
         }
     }
 
-    public void dashboard_3pics() {
+    public void dashboard_3pics_orig() {
         if(!pshowAdjacentPics) return;
 
         mCurLoc = mService.getLastLocation();
@@ -528,8 +529,8 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
         }
 
         final ImageView imv_pic1 = (ImageView) findViewById(R.id.imv_pic1);
-        final ImageView imv_pic2 = (ImageView) findViewById(R.id.imv_pic2);
-        final ImageView imv_pic3 = (ImageView) findViewById(R.id.imv_pic3);
+//        final ImageView imv_pic2 = (ImageView) findViewById(R.id.imv_pic2);
+//        final ImageView imv_pic3 = (ImageView) findViewById(R.id.imv_pic3);
 
         double minDist=Double.MAX_VALUE;
         int mPos=0;
@@ -558,10 +559,6 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
             }
         }
 
-        if(last_pic_loc[0] == mPos) {
-            for(int i=0;i<last_pic_loc.length;i++) last_pic_loc[i]=-1;
-        }
-
         //Toast.makeText(RunningActivity.this, "" + mPos + "]" + minDist + "meters", Toast.LENGTH_LONG ).show();
         for(int i=last_pic_loc.length-1; i>0;i--) {
             last_pic_loc[i] = last_pic_loc[i-1];
@@ -574,18 +571,22 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
             imv_pic1.setRotation(90);
             imv_pic1.setVisibility(VISIBLE);
         }
-        if(last_pic_loc[1] != -1) {
-            Bitmap capturebmp02 = getPreview(PhotoUtil.myPictureList.get(last_pic_loc[1]).filepath);
-            imv_pic2.setImageBitmap(capturebmp02);
-            imv_pic2.setRotation(90);
-            imv_pic2.setVisibility(VISIBLE);
-        }
-        if(last_pic_loc[2] != -1) {
-            Bitmap capturebmp03 = getPreview(PhotoUtil.myPictureList.get(last_pic_loc[2]).filepath);
-            imv_pic3.setImageBitmap(capturebmp03);
-            imv_pic3.setRotation(90);
-            imv_pic3.setVisibility(VISIBLE);
-        }
+//        if(last_pic_loc[1] != -1) {
+//            Bitmap capturebmp02 = getPreview(PhotoUtil.myPictureList.get(last_pic_loc[1]).filepath);
+//            imv_pic2.setImageBitmap(capturebmp02);
+//            imv_pic2.setRotation(90);
+//            imv_pic2.setVisibility(VISIBLE);
+//        }
+//        if(last_pic_loc[2] != -1) {
+//            Bitmap capturebmp03 = getPreview(PhotoUtil.myPictureList.get(last_pic_loc[2]).filepath);
+//            imv_pic3.setImageBitmap(capturebmp03);
+//            imv_pic3.setRotation(90);
+//            imv_pic3.setVisibility(VISIBLE);
+//        }
+
+        // reset
+        if(last_pic_loc[2] != -1) for(int i=0;i<last_pic_loc.length;i++) last_pic_loc[i] = -1;
+
         imv_pic1.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
@@ -594,21 +595,21 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
             }
         });
 
-        imv_pic2.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view) {
-                imv_pic2.setVisibility(INVISIBLE);
-                return false;
-            }
-        });
-
-        imv_pic3.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view) {
-                imv_pic3.setVisibility(INVISIBLE);
-                return false;
-            }
-        });
+//        imv_pic2.setOnLongClickListener(new View.OnLongClickListener() {
+//            @Override
+//            public boolean onLongClick(View view) {
+//                imv_pic2.setVisibility(INVISIBLE);
+//                return false;
+//            }
+//        });
+//
+//        imv_pic3.setOnLongClickListener(new View.OnLongClickListener() {
+//            @Override
+//            public boolean onLongClick(View view) {
+//                imv_pic3.setVisibility(INVISIBLE);
+//                return false;
+//            }
+//        });
 
 
         // 클릭시 포지션에 그림 올리기.
@@ -626,30 +627,93 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
             }
         });
 
-        imv_pic2.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View view) {
-                myPicture mp = PhotoUtil.myPictureList.get(last_pic_loc[1]);
-                MarkerOptions opt = new MarkerOptions()
-                        .position(new LatLng(mp.myactivity.latitude, mp.myactivity.longitude))
-                        .title(mp.picname)
-                        .draggable(true).visible(true).snippet(mp.myactivity.added_on);
-                Bitmap bmp = getPreview(PhotoUtil.myPictureList.get(last_pic_loc[1]).filepath);
-                opt.icon(BitmapDescriptorFactory.fromBitmap(bmp));
-                Marker marker = mMap.addMarker(opt);
+//        imv_pic2.setOnClickListener(new View.OnClickListener(){
+//            @Override
+//            public void onClick(View view) {
+//                myPicture mp = PhotoUtil.myPictureList.get(last_pic_loc[1]);
+//                MarkerOptions opt = new MarkerOptions()
+//                        .position(new LatLng(mp.myactivity.latitude, mp.myactivity.longitude))
+//                        .title(mp.picname)
+//                        .draggable(true).visible(true).snippet(mp.myactivity.added_on);
+//                Bitmap bmp = getPreview(PhotoUtil.myPictureList.get(last_pic_loc[1]).filepath);
+//                opt.icon(BitmapDescriptorFactory.fromBitmap(bmp));
+//                Marker marker = mMap.addMarker(opt);
+//            }
+//        });
+//        imv_pic3.setOnClickListener(new View.OnClickListener(){
+//            @Override
+//            public void onClick(View view) {
+//                myPicture mp = PhotoUtil.myPictureList.get(last_pic_loc[2]);
+//                MarkerOptions opt = new MarkerOptions()
+//                        .position(new LatLng(mp.myactivity.latitude, mp.myactivity.longitude))
+//                        .title(mp.picname)
+//                        .draggable(true).visible(true).snippet(mp.myactivity.added_on);
+//                Bitmap bmp = getPreview(PhotoUtil.myPictureList.get(last_pic_loc[2]).filepath);
+//                opt.icon(BitmapDescriptorFactory.fromBitmap(bmp));
+//                Marker marker = mMap.addMarker(opt);
+//            }
+//        });
+    }
+
+    public void dashboard_3pics() {
+        if(!pshowAdjacentPics) return;
+
+        mCurLoc = mService.getLastLocation();
+        if(mCurLoc==null) {
+            return;
+        }
+
+        final ImageView imv_pic1 = (ImageView) findViewById(R.id.imv_pic1);
+//        final ImageView imv_pic2 = (ImageView) findViewById(R.id.imv_pic2);
+//        final ImageView imv_pic3 = (ImageView) findViewById(R.id.imv_pic3);
+        final TextView tv_onPic1 = (TextView) findViewById(R.id.tv_onPic1);
+
+        double minDist=Double.MAX_VALUE;
+        int mPos=-1;
+        int msize = PhotoUtil.myPictureList.size();
+
+        for(int i=0;i<last_pic_loc.length;i++) {
+            Log.e(TAG, "" + i + ":" + last_pic_loc[i]);
+            if(last_pic_loc[i] == -1) break;
+        }
+
+        for(int i=0;i<msize;i++) {
+            myPicture mp = PhotoUtil.myPictureList.get(i);
+            CalDistance cd = new CalDistance(mp.myactivity.latitude, mp.myactivity.longitude, mCurLoc.getLatitude(), mCurLoc.getLongitude());
+            if(minDist > cd.getDistance()) {
+                minDist = cd.getDistance();
+                mPos = i;
             }
-        });
-        imv_pic3.setOnClickListener(new View.OnClickListener(){
+        }
+
+        final int _mPos = mPos;
+        final String _minDist = (minDist>1000)?  "" + (int)(minDist/1000) + " km" : "" + (int)minDist + " m";
+
+        if(mPos != -1) {
+            Bitmap bmp = getPreview(PhotoUtil.myPictureList.get(mPos).filepath);
+            imv_pic1.setImageBitmap(bmp);
+            myPicture mp1= PhotoUtil.myPictureList.get(_mPos);
+            String sinfo = mp1.picname + "\n" + mp1.myactivity.added_on + "\n" + _minDist;
+            tv_onPic1.setText(sinfo );
+            tv_onPic1.setVisibility(VISIBLE);
+            imv_pic1.setVisibility(VISIBLE);
+//
+//            imv_pic2.setImageBitmap(bmp);
+//            imv_pic2.setVisibility(VISIBLE);
+        }
+
+
+        imv_pic1.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view) {
-                myPicture mp = PhotoUtil.myPictureList.get(last_pic_loc[2]);
+                myPicture mp = PhotoUtil.myPictureList.get(_mPos);
                 MarkerOptions opt = new MarkerOptions()
                         .position(new LatLng(mp.myactivity.latitude, mp.myactivity.longitude))
-                        .title(mp.picname)
-                        .draggable(true).visible(true).snippet(mp.myactivity.added_on);
-                Bitmap bmp = getPreview(PhotoUtil.myPictureList.get(last_pic_loc[2]).filepath);
-                opt.icon(BitmapDescriptorFactory.fromBitmap(bmp));
-                Marker marker = mMap.addMarker(opt);
+                        .title(mp.myactivity.added_on)
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
+                        .draggable(true).visible(true).snippet(_minDist);
+                mMap.addMarker(opt).showInfoWindow();
+                //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mp.myactivity.latitude, mp.myactivity.longitude), myzoom));
             }
         });
     }
@@ -660,6 +724,7 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
         BitmapFactory.Options bounds = new BitmapFactory.Options();
         bounds.inJustDecodeBounds = true;
         BitmapFactory.decodeFile(image.getPath(), bounds);
+
         if ((bounds.outWidth == -1) || (bounds.outHeight == -1))
             return null;
 
@@ -667,11 +732,15 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
                 : bounds.outWidth;
 
         BitmapFactory.Options opts = new BitmapFactory.Options();
-        opts.inSampleSize = originalSize / 120; //120 = Thumnail Size
-        return BitmapFactory.decodeFile(image.getPath(), opts);
+        opts.inSampleSize = originalSize / 700 ;//Thumb size
+        Bitmap bitmap =  BitmapFactory.decodeFile(image.getPath(), opts);
+
+        Matrix matrix = new Matrix();
+        matrix.postRotate(90);
+        Bitmap rotated = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(),
+                matrix, true);
+        return rotated;
     }
-
-
 
     public void dashboard_time_dist_speed() {
         TextView tv_time = (TextView) findViewById(R.id.tv_time);
@@ -1149,6 +1218,11 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
         if(mCurLoc==null) return;
         LatLng curloc = new LatLng(mCurLoc.getLatitude(), mCurLoc.getLongitude());
         mMap.addMarker(new MarkerOptions().position(curloc).title("Current Location..."));
+    }
+
+    public void addMarker(LatLng ll, String str) {
+        if(ll==null) return;
+        mMap.addMarker(new MarkerOptions().position(ll).title(str));
     }
 
     public boolean isCurLocCatched() {

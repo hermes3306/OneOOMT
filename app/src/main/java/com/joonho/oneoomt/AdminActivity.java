@@ -51,6 +51,9 @@ public class AdminActivity extends AppCompatActivity implements View.OnClickList
             case R.id.imageButton_copy:
                 copyPICstoPIC_DIR();
                 break;
+            case R.id.imageButton_copy2:
+                copyPIC_DIRtoPICS();
+                break;
             case R.id.imageButton_rebuild_master:
                 rebuildMaster(false); //do not copy all files
                 break;
@@ -269,6 +272,31 @@ public class AdminActivity extends AppCompatActivity implements View.OnClickList
 
         }
         Toast.makeText(getApplicationContext(),"copyPICstoPIC_DIR end", Toast.LENGTH_LONG).show();
+    }
+
+    public void copyPIC_DIRtoPICS() {
+        Toast.makeText(getApplicationContext(),"copyPIC_DIRtoPICs begin", Toast.LENGTH_LONG).show();
+
+        File mediaStorageDir = new File(Environment.getExternalStorageDirectory(), "MyCameraApp");
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File flist[] = storageDir.listFiles();
+
+        for(int i=0;i<flist.length;i++) {
+            File targetFile = new File(mediaStorageDir, flist[i].getName());
+            try {
+
+                FileUtils.copyFileUsingFileStreams(flist[i], targetFile);
+                String sinfo = "" + targetFile.toString() + "Copy done!";
+
+                Toast.makeText(getApplicationContext(), sinfo, Toast.LENGTH_SHORT).show();
+                Log.e(TAG, sinfo);
+            }catch(Exception e) {
+                e.printStackTrace();
+                Log.e(TAG, e.toString());
+            }
+
+        }
+        Toast.makeText(getApplicationContext(),"copyPIC_DIRtoPICs end", Toast.LENGTH_LONG).show();
     }
 
     public ArrayList<myActivity> deserializeActivities(String filepath) {

@@ -82,6 +82,7 @@ public class HistoryActivity extends AppCompatActivity implements OnMapReadyCall
         final File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
 //        Log.e(TAG,"Environment.DIRECTORY_PICTURES " + Environment.DIRECTORY_PICTURES);
         //final File storageDir = new File(Environment.getExternalStorageDirectory(), "MyCameraApp");
+
         final File f[] = storageDir.listFiles();
 
         int cnt = f.length;

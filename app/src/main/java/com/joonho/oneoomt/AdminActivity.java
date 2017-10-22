@@ -213,8 +213,12 @@ public class AdminActivity extends AppCompatActivity implements View.OnClickList
     private void rebuildMaster(boolean copy_files) {
         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         String fileName = "myPicture.master";
+
+
         File file = new File(storageDir, fileName);
         File bakFile = new File(storageDir, fileName +".Bak");
+
+
         try {
             FileUtils.copyFileUsingFileStreams(file, bakFile);
         }catch (Exception e) {
@@ -298,6 +302,11 @@ public class AdminActivity extends AppCompatActivity implements View.OnClickList
         }
         Toast.makeText(getApplicationContext(),"copyPIC_DIRtoPICs end", Toast.LENGTH_LONG).show();
     }
+
+
+
+
+
 
     public ArrayList<myActivity> deserializeActivities(String filepath) {
         File file = new File(filepath);

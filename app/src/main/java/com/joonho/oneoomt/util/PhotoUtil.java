@@ -52,6 +52,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -65,13 +66,16 @@ import static android.support.v4.content.ContextCompat.startActivity;
  */
 
 public class PhotoUtil {
+    public static File mediaStorageDir =  null;
+
     public static String TAG = "PhotoUtil";
     public String myPictureMetaFilename = "";
     public static ArrayList<myPicture> myPictureList = new ArrayList<myPicture> ();
     public static int position=0;
 
-
     static {
+//        mediaStorageDir = new File(Environment.getExternalStorageDirectory(), "MyCameraApp");
+        mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "OneOOMT");
         myPictureList = loadMyPictueList();
 
         // 초기화
@@ -95,7 +99,6 @@ public class PhotoUtil {
         for(int i=myPictureList.size()-1; i>=0; i--) {
             if(dl[i]) myPictureList.remove(i);
         }
-
     }
 
     public static void showPictureAlertDialog(Context ctx, myPicture mp, int index) {
@@ -139,7 +142,7 @@ public class PhotoUtil {
         final ImageView mImageView =  new ImageView(ctx);
         Bitmap bmp2 = bmp.createScaledBitmap(bmp, bmp.getWidth()/2, bmp.getHeight()/2, true);
         mImageView.setImageBitmap(bmp2);
-        mImageView.setRotation(90);
+        //mImageView.setRotation(90);
 
         final LinearLayout llh = new LinearLayout(ctx);
         llh.setOrientation(LinearLayout.HORIZONTAL);
@@ -266,10 +269,11 @@ public class PhotoUtil {
     }
 
     public static ArrayList<myPicture> loadMyPictueList() {
-        File mediaStorageDir = new File(Environment.getExternalStorageDirectory(), "MyCameraApp");
         String fileName = "myPicture.master";
         File file = new File(mediaStorageDir, fileName);
         Log.e(TAG, "My Picture Master File:" + file.toString());
+
+
 
         FileInputStream fis = null;
         BufferedInputStream bis = null;
@@ -307,8 +311,8 @@ public class PhotoUtil {
 
                 if(list.size()==0) {
                     Log.e(TAG, "File ("+ fileName +") corrupted !!!!");
-                    file.delete();
-                    Log.e(TAG, "File ("+ fileName +") deleted  !!!!");
+//                    file.delete();
+//                    Log.e(TAG, "File ("+ fileName +") deleted  !!!!");
                 }
             }catch(Exception e) {}
         }
@@ -325,7 +329,6 @@ public class PhotoUtil {
     }
 
     public void saveMyPictueList() {
-        File mediaStorageDir = new File(Environment.getExternalStorageDirectory(), "MyCameraApp");
         String fileName = "myPicture.master";
         File file = new File(mediaStorageDir, fileName);
         Log.e(TAG, "My Picture Master File:" + file.toString());
@@ -443,8 +446,6 @@ public class PhotoUtil {
     public static String mLastPictureFilename = null;
 
     private static File getOutputMediaFile(int type){
-        File mediaStorageDir = new File(Environment.getExternalStorageDirectory(), "MyCameraApp");
-
         if (! mediaStorageDir.exists()){
             if (! mediaStorageDir.mkdirs()){
                 Log.d("MyCameraApp", "failed to create directory");
@@ -529,9 +530,15 @@ public class PhotoUtil {
 
     public  void TakeAPicture(Camera mCamera, Location loc, EditText et) {
         mCamera.takePicture(null,null,mPicture);
-        myActivity myactivity = new myActivity(loc.getLatitude(), loc.getLongitude(),"");
+        myActivity myactivity = null;
 
-        File mediaStorageDir = new File(Environment.getExternalStorageDirectory(), "MyCameraApp");
+        if(loc != null) {
+            myactivity = new myActivity(loc.getLatitude(), loc.getLongitude(), StringUtil.DateToString1(new Date(), "yyyy년MM월dd일HH시mm분ss초"));
+        } else {
+            myactivity = new myActivity(37.4992434, 127.1316329, StringUtil.DateToString1(new Date(), "yyyy년MM월dd일HH시mm분ss초"));
+        }
+
+
         if (! mediaStorageDir.exists()){
             if (! mediaStorageDir.mkdirs()){
                 Log.d("MyCameraApp", "failed to create directory");
@@ -546,7 +553,7 @@ public class PhotoUtil {
         myPicture mpic = new myPicture(myactivity, et.getText().toString(), mLastPictureFilename);
         addAndSaveMyPicture(mpic);
 
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy_MM_dd_hh_mm_ss", Locale.KOREA);
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss", Locale.KOREA);
         Date now = new Date();
         final String fileName = "PIC_" + formatter.format(now);
         et.setText(fileName);
@@ -572,7 +579,7 @@ public class PhotoUtil {
 //        bt.setWidth(15); bt.setGravity(Gravity.CENTER);
 
         final EditText et = new EditText(ctx);
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy_MM_dd_hh_mm_ss", Locale.KOREA);
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss", Locale.KOREA);
         Date now = new Date();
         final String fileName = "PIC_" + formatter.format(now);
         et.setText(fileName);
@@ -605,7 +612,7 @@ public class PhotoUtil {
                 TakeAPicture(mCamera, loc, et);
                 Toast.makeText(_ctx, mLastPictureFilename + " created successfully", Toast.LENGTH_LONG).show();
 
-                SimpleDateFormat formatter = new SimpleDateFormat("yyyy_MM_dd_hh_mm_ss", Locale.KOREA);
+                SimpleDateFormat formatter = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss", Locale.KOREA);
                 Date now = new Date();
                 final String fileName = "PIC_" + formatter.format(now);
                 et.setText(fileName);

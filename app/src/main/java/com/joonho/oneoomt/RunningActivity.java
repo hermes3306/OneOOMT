@@ -96,6 +96,7 @@ import com.joonho.oneoomt.file.myPicture;
 import com.joonho.oneoomt.util.CalBearing;
 import com.joonho.oneoomt.util.CalDistance;
 import com.joonho.oneoomt.util.PhotoUtil;
+import com.joonho.oneoomt.util.StringUtil;
 import com.joonho.oneoomt.util.modifiedDate;
 
 import static android.view.View.INVISIBLE;
@@ -520,147 +521,21 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
         }
     }
 
-    public void dashboard_3pics_orig() {
+    public static int mPos=-1;
+    public void dashboard_3pics(boolean next) {
         if(!pshowAdjacentPics) return;
-
         mCurLoc = mService.getLastLocation();
         if(mCurLoc==null) {
             return;
         }
 
-        final ImageView imv_pic1 = (ImageView) findViewById(R.id.imv_pic1);
-//        final ImageView imv_pic2 = (ImageView) findViewById(R.id.imv_pic2);
-//        final ImageView imv_pic3 = (ImageView) findViewById(R.id.imv_pic3);
-
-        double minDist=Double.MAX_VALUE;
-        int mPos=0;
-        int msize = PhotoUtil.myPictureList.size();
-
-        for(int i=0;i<last_pic_loc.length;i++) {
-            Log.e(TAG, "" + i + ":" + last_pic_loc[i]);
-            if(last_pic_loc[i] == -1) break;
-        }
-
-        for(int i=0;i<msize;i++) {
-            boolean contains = false;
-            for(int j=0;j<last_pic_loc.length;j++) {
-                if(last_pic_loc[j] == -1 )  break;
-                if(last_pic_loc[j] ==  i )  {
-                    contains = true;
-                }
+        LatLng startpos = new LatLng(mCurLoc.getLatitude(), mCurLoc.getLongitude());
+        if(next == true) {
+            myPicture mp = null;
+            if(mPos!= -1)  {
+                mp = PhotoUtil.myPictureList.get(mPos);
+                startpos = new LatLng(mp.myactivity.latitude, mp.myactivity.longitude);
             }
-            if(contains) continue;
-
-            myPicture mp = PhotoUtil.myPictureList.get(i);
-            CalDistance cd = new CalDistance(mp.myactivity.latitude, mp.myactivity.longitude, mCurLoc.getLatitude(), mCurLoc.getLongitude());
-            if(minDist > cd.getDistance()) {
-                minDist = cd.getDistance();
-                mPos = i;
-            }
-        }
-
-        //Toast.makeText(RunningActivity.this, "" + mPos + "]" + minDist + "meters", Toast.LENGTH_LONG ).show();
-        for(int i=last_pic_loc.length-1; i>0;i--) {
-            last_pic_loc[i] = last_pic_loc[i-1];
-        }
-        last_pic_loc[0] = mPos;
-
-        if(last_pic_loc[0]  != -1) {
-            Bitmap capturebmp01 = getPreview(PhotoUtil.myPictureList.get(last_pic_loc[0] ).filepath);
-            imv_pic1.setImageBitmap(capturebmp01);
-            imv_pic1.setRotation(90);
-            imv_pic1.setVisibility(VISIBLE);
-        }
-//        if(last_pic_loc[1] != -1) {
-//            Bitmap capturebmp02 = getPreview(PhotoUtil.myPictureList.get(last_pic_loc[1]).filepath);
-//            imv_pic2.setImageBitmap(capturebmp02);
-//            imv_pic2.setRotation(90);
-//            imv_pic2.setVisibility(VISIBLE);
-//        }
-//        if(last_pic_loc[2] != -1) {
-//            Bitmap capturebmp03 = getPreview(PhotoUtil.myPictureList.get(last_pic_loc[2]).filepath);
-//            imv_pic3.setImageBitmap(capturebmp03);
-//            imv_pic3.setRotation(90);
-//            imv_pic3.setVisibility(VISIBLE);
-//        }
-
-        // reset
-        if(last_pic_loc[2] != -1) for(int i=0;i<last_pic_loc.length;i++) last_pic_loc[i] = -1;
-
-        imv_pic1.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view) {
-                imv_pic1.setVisibility(INVISIBLE);
-                return false;
-            }
-        });
-
-//        imv_pic2.setOnLongClickListener(new View.OnLongClickListener() {
-//            @Override
-//            public boolean onLongClick(View view) {
-//                imv_pic2.setVisibility(INVISIBLE);
-//                return false;
-//            }
-//        });
-//
-//        imv_pic3.setOnLongClickListener(new View.OnLongClickListener() {
-//            @Override
-//            public boolean onLongClick(View view) {
-//                imv_pic3.setVisibility(INVISIBLE);
-//                return false;
-//            }
-//        });
-
-
-        // 클릭시 포지션에 그림 올리기.
-        imv_pic1.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View view) {
-                myPicture mp = PhotoUtil.myPictureList.get(last_pic_loc[0]);
-                MarkerOptions opt = new MarkerOptions()
-                        .position(new LatLng(mp.myactivity.latitude, mp.myactivity.longitude))
-                        .title(mp.picname)
-                        .draggable(true).visible(true).snippet(mp.myactivity.added_on);
-                Bitmap bmp = getPreview(PhotoUtil.myPictureList.get(last_pic_loc[0]).filepath);
-                opt.icon(BitmapDescriptorFactory.fromBitmap(bmp));
-                Marker marker = mMap.addMarker(opt);
-            }
-        });
-
-//        imv_pic2.setOnClickListener(new View.OnClickListener(){
-//            @Override
-//            public void onClick(View view) {
-//                myPicture mp = PhotoUtil.myPictureList.get(last_pic_loc[1]);
-//                MarkerOptions opt = new MarkerOptions()
-//                        .position(new LatLng(mp.myactivity.latitude, mp.myactivity.longitude))
-//                        .title(mp.picname)
-//                        .draggable(true).visible(true).snippet(mp.myactivity.added_on);
-//                Bitmap bmp = getPreview(PhotoUtil.myPictureList.get(last_pic_loc[1]).filepath);
-//                opt.icon(BitmapDescriptorFactory.fromBitmap(bmp));
-//                Marker marker = mMap.addMarker(opt);
-//            }
-//        });
-//        imv_pic3.setOnClickListener(new View.OnClickListener(){
-//            @Override
-//            public void onClick(View view) {
-//                myPicture mp = PhotoUtil.myPictureList.get(last_pic_loc[2]);
-//                MarkerOptions opt = new MarkerOptions()
-//                        .position(new LatLng(mp.myactivity.latitude, mp.myactivity.longitude))
-//                        .title(mp.picname)
-//                        .draggable(true).visible(true).snippet(mp.myactivity.added_on);
-//                Bitmap bmp = getPreview(PhotoUtil.myPictureList.get(last_pic_loc[2]).filepath);
-//                opt.icon(BitmapDescriptorFactory.fromBitmap(bmp));
-//                Marker marker = mMap.addMarker(opt);
-//            }
-//        });
-    }
-
-    public void dashboard_3pics() {
-        if(!pshowAdjacentPics) return;
-
-        mCurLoc = mService.getLastLocation();
-        if(mCurLoc==null) {
-            return;
         }
 
         final ImageView imv_pic1 = (ImageView) findViewById(R.id.imv_pic1);
@@ -669,37 +544,36 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
         final TextView tv_onPic1 = (TextView) findViewById(R.id.tv_onPic1);
 
         double minDist=Double.MAX_VALUE;
-        int mPos=-1;
         int msize = PhotoUtil.myPictureList.size();
 
-        for(int i=0;i<last_pic_loc.length;i++) {
-            Log.e(TAG, "" + i + ":" + last_pic_loc[i]);
-            if(last_pic_loc[i] == -1) break;
-        }
-
+        int _t_pos=-1;
         for(int i=0;i<msize;i++) {
-            myPicture mp = PhotoUtil.myPictureList.get(i);
-            CalDistance cd = new CalDistance(mp.myactivity.latitude, mp.myactivity.longitude, mCurLoc.getLatitude(), mCurLoc.getLongitude());
-            if(minDist > cd.getDistance()) {
-                minDist = cd.getDistance();
-                mPos = i;
+            if(i != mPos) {
+                myPicture mp = PhotoUtil.myPictureList.get(i);
+                CalDistance cd = new CalDistance(mp.myactivity.latitude, mp.myactivity.longitude, startpos.latitude, startpos.longitude);
+                if(minDist > cd.getDistance()) {
+                    minDist = cd.getDistance();
+                    _t_pos  = i;
+                }
             }
         }
 
-        final int _mPos = mPos;
-        final String _minDist = (minDist>1000)?  "" + (int)(minDist/1000) + " km" : "" + (int)minDist + " m";
+        final int _mPos = mPos = _t_pos;
+        final String _minDist = (minDist>1000)?  "" + (int)(minDist/1000) + " 킬로" : "" + (int)minDist + " 미터";
 
         if(mPos != -1) {
             Bitmap bmp = getPreview(PhotoUtil.myPictureList.get(mPos).filepath);
             imv_pic1.setImageBitmap(bmp);
             myPicture mp1= PhotoUtil.myPictureList.get(_mPos);
-            String sinfo = mp1.picname + "\n" + mp1.myactivity.added_on + "\n" + _minDist;
+
+            Date date = StringUtil.StringToDate1(mp1.picname);
+            //String date_str = StringUtil.DateToString1(date, "yyyy/MM/dd hh:mm:ss");
+            String date_str = StringUtil.DateToString1(date, "MM월dd일 HH시");
+            String sinfo = " " + date_str + "\n (" + _minDist + " 거리)";
+
             tv_onPic1.setText(sinfo );
             tv_onPic1.setVisibility(VISIBLE);
             imv_pic1.setVisibility(VISIBLE);
-//
-//            imv_pic2.setImageBitmap(bmp);
-//            imv_pic2.setVisibility(VISIBLE);
         }
 
 
@@ -734,11 +608,26 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
         BitmapFactory.Options opts = new BitmapFactory.Options();
         opts.inSampleSize = originalSize / 700 ;//Thumb size
         Bitmap bitmap =  BitmapFactory.decodeFile(image.getPath(), opts);
+        if(bitmap == null) return null;
+
+
 
         Matrix matrix = new Matrix();
         matrix.postRotate(90);
-        Bitmap rotated = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(),
-                matrix, true);
+        Bitmap rotated = bitmap;
+
+        boolean  go_rotate=false;
+        if(bounds.outHeight < bounds.outWidth) go_rotate = true;
+
+        if(go_rotate) {
+            try {
+                rotated = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(),
+                        matrix, true);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
         return rotated;
     }
 
@@ -888,7 +777,6 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
 
                                     loc_changed = true;
                                     isOnStartCalled = false;
-
                                     Log.e(TAG,"**** loc_changed Event Captured [0] .............");
                                 }
                             }
@@ -927,8 +815,7 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
                             dashboard_time_dist_speed();
                             dashboard_distances(ll1,ll2, mLastLoc, mCurLoc);
                             dashboard_bearing(ll1,ll2);
-                            dashboard_3pics();
-
+                            dashboard_3pics(false);
                             show_cur_loc();
                         }
                     } else{ // loc_change = false;
@@ -1156,7 +1043,10 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
         final ImageButton bt_3pic = (ImageButton)findViewById(R.id.imb_3Pics);
         bt_3pic.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                dashboard_3pics();
+
+                boolean next = true;
+                dashboard_3pics(next);
+
             }
         });
     }
@@ -1566,7 +1456,7 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
             LatLng l = new LatLng((double)ht.get("latitude"), (double)ht.get("longitude"));
 
             long added_on = (long)ht.get("added_on");
-            SimpleDateFormat dayTime = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+            SimpleDateFormat dayTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             String added_on_str  = dayTime.format(new Date(added_on));
 
 
@@ -1583,7 +1473,7 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
 
                 if(pdrawMarker) {
                     long t = added_on;
-                    SimpleDateFormat dT = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+                    SimpleDateFormat dT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                     String title = dT.format(new Date(t));
 
                     MarkerOptions opt = new MarkerOptions()
@@ -1657,7 +1547,7 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
                                 if( k==llv.size()-1) {
                                 } else {
                                     long t = added_on;
-                                    SimpleDateFormat dT = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+                                    SimpleDateFormat dT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                                     String title = dT.format(new Date(t));
 
                                     MarkerOptions opt = new MarkerOptions()
@@ -1732,7 +1622,7 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
 
         LatLng ll = mLatLngList.get(pStartPos);
 
-        SimpleDateFormat dayTime = new SimpleDateFormat("yyyy-mm-dd hh:mm:ss");
+        SimpleDateFormat dayTime = new SimpleDateFormat("yyyy-mm-dd HH:mm:ss");
         String str = dayTime.format(pTime_start);
 
         mMap.addMarker(new MarkerOptions()
@@ -1770,7 +1660,7 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
         if(mCurLoc==null) return;
         if(ll==null) return;
 
-        SimpleDateFormat dayTime = new SimpleDateFormat("yyyy-mm-dd hh:mm:ss");
+        SimpleDateFormat dayTime = new SimpleDateFormat("yyyy-mm-dd HH:mm:ss");
         String str = dayTime.format(System.currentTimeMillis());
 
         mMap.addMarker(new MarkerOptions()
@@ -1785,7 +1675,7 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
         if(true) {
             if(mCurLoc != null) {
                 long t = mCurLoc.getTime();
-                SimpleDateFormat dayTime = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+                SimpleDateFormat dayTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 String title = dayTime.format(new Date(t));
 
                 long d = distance_of_curtrack();

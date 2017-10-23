@@ -10,6 +10,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.hardware.Camera;
@@ -69,7 +70,7 @@ public class PhotoUtil {
     public static File mediaStorageDir =  null;
 
     public static String TAG = "PhotoUtil";
-    public String myPictureMetaFilename = "";
+    public static String myPictureMetaFilename = "myPicture3.master";
     public static ArrayList<myPicture> myPictureList = new ArrayList<myPicture> ();
     public static int position=0;
 
@@ -119,12 +120,6 @@ public class PhotoUtil {
 
         final AlertDialog.Builder _alertDialog = alertDialog;
         alertDialog.setTitle(mp.picname);
-//        String msg = " file   :" + mp.picname;
-//        msg+= "\n size  :" + bmp.getByteCount();
-//        msg+= "\n width :" + bmp.getWidth();
-//        msg+= "\n height:" + bmp.getHeight();
-//
-//        alertDialog.setMessage(msg);
 
         Log.e(TAG,"file size:" + bmp.getByteCount());
         Log.e(TAG,"width    :" + bmp.getWidth());
@@ -133,35 +128,56 @@ public class PhotoUtil {
         final LinearLayout ll = new LinearLayout(ctx);
         ll.setOrientation(LinearLayout.VERTICAL);
 
-
-        Button bt_prev = new Button(ctx);
-        bt_prev.setText("Prev");
-        Button bt_next = new Button(ctx);
-        bt_next.setText("Next");
+        FrameLayout flo = new FrameLayout(ctx);
+        FrameLayout.LayoutParams floparams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        flo.setLayoutParams(floparams);
 
         final ImageView mImageView =  new ImageView(ctx);
         Bitmap bmp2 = bmp.createScaledBitmap(bmp, bmp.getWidth()/2, bmp.getHeight()/2, true);
         mImageView.setImageBitmap(bmp2);
-        //mImageView.setRotation(90);
+        //mImageView.setScaleType(ImageView.ScaleType.FIT_START);
+
+        if(bmp.getWidth() > bmp.getHeight()) mImageView.setRotation(90);
 
         final LinearLayout llh = new LinearLayout(ctx);
         llh.setOrientation(LinearLayout.HORIZONTAL);
+        Button bt_prev = new Button(ctx);
+        bt_prev.setText("Prev");
+        Button bt_next = new Button(ctx);
+        bt_next.setText("Next");
         llh.addView(bt_prev);
         llh.addView(bt_next);
-        llh.setGravity(Gravity.CENTER);
+        llh.setHorizontalGravity(Gravity.CENTER_HORIZONTAL);
+        llh.setVerticalGravity(Gravity.BOTTOM);
 
-        ll.addView(mImageView);
         String inx_str = "" + (index+1) + "/" + myPictureList.size();
-        final TextView tv  = new TextView(ctx); tv.setText(inx_str); tv.setGravity(Gravity.CENTER);
-        final TextView tv2 = new TextView(ctx); tv2.setText(mp.picname);
-        ll.addView(tv2); tv2.setGravity(Gravity.CENTER);
-        final TextView tv3 = new TextView(ctx); tv3.setText("");  // space
-        ll.addView(tv3);
+        final TextView tv_t = new TextView(ctx);
+        tv_t.setTextColor(Color.WHITE);
+        tv_t.setTextSize(18);
+        tv_t.setAlpha(0.7f);
+        String tv_t_str = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n" + mp.picname + "\n                 (" + inx_str + ")";
+        tv_t.setText(tv_t_str);
 
-        ll.addView(tv);
-        ll.addView(llh);
+        final LinearLayout llh2 = new LinearLayout(ctx);
+        llh2.setOrientation(LinearLayout.HORIZONTAL);
+        llh2.setHorizontalGravity(Gravity.CENTER_HORIZONTAL);
+        llh2.setVerticalGravity(Gravity.CENTER);
+        llh2.addView(tv_t);
+
+        flo.addView(mImageView);
+        flo.addView(llh2);
+        flo.addView(llh);
+        ll.addView(flo);
+
+
+
+
+//        final TextView tv  = new TextView(ctx); tv.setText(inx_str); tv.setGravity(Gravity.CENTER_HORIZONTAL);
+//        ll.addView(tv);
+//        final TextView tv2 = new TextView(ctx); tv2.setText(mp.picname);
+//        ll.addView(tv2); tv2.setGravity(Gravity.CENTER_HORIZONTAL);
+
         alertDialog.setView(ll);
-
         mImageView.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
 //                if(position>=0 && (position+1) < myPictureList.size() ) {
@@ -205,12 +221,12 @@ public class PhotoUtil {
                     try {
                         Bitmap bmp = BitmapFactory.decodeFile(mp2.filepath);
                         Bitmap bmp2 = bmp.createScaledBitmap(bmp, bmp.getWidth()/2, bmp.getHeight()/2, true);
-                        mImageView.setImageBitmap(bmp2);
-                        mImageView.setRotation(90);
+                        if(bmp.getWidth() > bmp.getHeight()) mImageView.setRotation(90);
+                        //mImageView.setImageBitmap(bmp2);
 
                         String inx_str = "" + (position+1)  + "/" + myPictureList.size();
-                        tv.setText(inx_str);
-                        tv2.setText(mp2.picname);
+                        String tv_t_str = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n" + mp2.picname + "\n                 (" + inx_str + ")";
+                        tv_t.setText(tv_t_str);
 
                         String msg = " file   :" + mp2.picname;
                         msg+= "\n size  :" + bmp.getByteCount();
@@ -235,11 +251,12 @@ public class PhotoUtil {
                         Bitmap bmp = BitmapFactory.decodeFile(mp2.filepath);
                         Bitmap bmp2 = bmp.createScaledBitmap(bmp, bmp.getWidth()/2, bmp.getHeight()/2, true);
                         mImageView.setImageBitmap(bmp2);
-                        mImageView.setRotation(90);
+                        if(bmp.getWidth() > bmp.getHeight()) mImageView.setRotation(90);
+                        //mImageView.setRotation(90);
 
                         String inx_str = "" + (position+1)  + "/" + myPictureList.size();
-                        tv.setText(inx_str);
-                        tv2.setText(mp2.picname);
+                        String tv_t_str = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n" + mp2.picname + "\n                 (" + inx_str + ")";
+                        tv_t.setText(tv_t_str);
 
                         String msg = " file   :" + mp2.picname;
                         msg+= "\n size  :" + bmp.getByteCount();
@@ -269,10 +286,12 @@ public class PhotoUtil {
     }
 
     public static ArrayList<myPicture> loadMyPictueList() {
-        String fileName = "myPicture.master";
+        String fileName = myPictureMetaFilename;
         File file = new File(mediaStorageDir, fileName);
-        Log.e(TAG, "My Picture Master File:" + file.toString());
 
+        Log.e(TAG, "My Picture Master File:" + file.toString());
+        Log.e(TAG, "My Picture Master File length:" + file.length());
+        Log.e(TAG, "My Picture Master File exists:" + file.exists());
 
 
         FileInputStream fis = null;
@@ -329,7 +348,7 @@ public class PhotoUtil {
     }
 
     public void saveMyPictueList() {
-        String fileName = "myPicture.master";
+        String fileName = myPictureMetaFilename;
         File file = new File(mediaStorageDir, fileName);
         Log.e(TAG, "My Picture Master File:" + file.toString());
 

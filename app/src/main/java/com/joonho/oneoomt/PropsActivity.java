@@ -61,11 +61,11 @@ public class PropsActivity extends AppCompatActivity {
         String debug_switch_val = pdb.getProperty(getApplicationContext(), "DEBUG_ENABLED");
         String et_marker_cnt_val = pdb.getProperty(getApplicationContext(), "MARKER INTERVAL");
 
-        if(tg_gps_val==null) tg_gps.setChecked(false);
+        if(tg_gps_val==null) tg_gps.setChecked(true);
         else if(tg_gps_val.equalsIgnoreCase("true")) tg_gps.setChecked(true);
         else tg_gps.setChecked(false);
 
-        if(tg_net_val==null) tg_net.setChecked(false);
+        if(tg_net_val==null) tg_net.setChecked(true);
         else if(tg_net_val.equalsIgnoreCase("true")) tg_net.setChecked(true);
         else tg_net.setChecked(false);
 

@@ -192,6 +192,18 @@ android:gravity="center">
                                 android:layout_width="match_parent"
                                 android:layout_height="190dp">
 
+                                <TextView
+                                    android:id="@+id/tv_onPic1"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="bottom"
+                                    android:layout_marginBottom="5dp"
+                                    android:paddingLeft="5dp"
+                                    android:textColor="@android:color/background_light"
+                                    android:textSize="18sp"
+                                    android:textStyle="bold"
+                                    android:text=""/>
+
                                 <ImageView
                                     android:id="@+id/imv_pic1"
                                     android:layout_width="140dp"
@@ -207,17 +219,6 @@ android:gravity="center">
                                     android:paddingTop="5dp"
                                     android:scaleType="fitStart"
                                     android:visibility="invisible" />
-                                <TextView
-                                    android:id="@+id/tv_onPic1"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_gravity="bottom"
-                                    android:layout_marginBottom="5dp"
-                                    android:paddingLeft="5dp"
-                                    android:textColor="@android:color/background_light"
-                                    android:textSize="18sp"
-                                    android:textStyle="bold"
-                                    android:text=""/>
                             </FrameLayout>
 
 

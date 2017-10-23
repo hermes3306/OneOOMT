@@ -1893,6 +1893,28 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
                 filepath[i] = list.get(i).filepath;
 
                 Log.e(TAG, ""+ i + "picname: " + items[i] + " filenmame:" +filepath[i]);
+
+
+                boolean ADMIN_MODE = false;  // 저장소 강제 변경에 따른 일시 조치
+                if(ADMIN_MODE) {
+
+                    if(filepath[i].length() > 70) {
+                        String t_fname = filepath[i].substring(67);
+                        String t_cr_date = filepath[i].substring(71, 86);
+                        String t_pname = "";
+                        String f_name = "/storage/emulated/0/Pictures/OneOOMT/" + t_fname;  // 저장될 대상
+                        Date t_date = StringUtil.StringToDate(t_cr_date, "yyyyMMdd_HHmmss");
+                        String p_name = "PIC_" + StringUtil.DateToString1(t_date, "yyyy_MM_dd_HH_mm_ss");  // 저장될 대상
+
+//                        Log.e(TAG, "BEFOR >> " + filepath[i]);
+//                        Log.e(TAG, "AFTER >> " + f_name);
+                        Log.e(TAG, "PNAME:" + p_name);
+                        Log.e(TAG, "FNAME:" + f_name);
+
+                        list.get(i).picname = p_name;
+                        list.get(i).filepath = f_name;
+                    }
+                }
             }
 
             AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);

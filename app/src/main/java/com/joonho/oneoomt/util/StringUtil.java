@@ -15,7 +15,7 @@ public class StringUtil {
         Date date ;
 
         try {
-            formatter = new SimpleDateFormat("yyyy_MM_dd_hh_mm_ss");
+            formatter = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
             date = (Date)formatter.parse(str_date.substring(4));
         } catch (ParseException e) {
             return null;
@@ -23,9 +23,23 @@ public class StringUtil {
         return date;
     }
 
-    public static String DateToString1(Date date, String format) { // eg) format = "yyyyMMDDhhmmss"
+    public static Date StringToDate (String str_date, String fmt)  {
+        DateFormat formatter ;
+        Date date ;
+
+        try {
+            formatter = new SimpleDateFormat(fmt);
+            date = (Date)formatter.parse(str_date);
+        } catch (ParseException e) {
+            return null;
+        }
+        return date;
+    }
+
+
+    public static String DateToString1(Date date, String format) { // eg) format = "yyyy/MM/dd HH:mm:ss"
         String dformat = format;
-        if (format == null) dformat = "yyyy/MM/dd dd:mm:ss";
+        if (format == null) dformat = "yyyy/MM/dd HH:mm:ss";
 
         SimpleDateFormat dateformatyyyyMMdd = new SimpleDateFormat(dformat);
         String date_to_string = dateformatyyyyMMdd.format(date);

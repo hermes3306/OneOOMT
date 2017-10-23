@@ -33,12 +33,14 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.joonho.oneoomt.R;
 import com.joonho.oneoomt.RunningActivity;
 import com.joonho.oneoomt.ViewCameraPicActivity;
 import com.joonho.oneoomt.file.myActivity;
@@ -101,7 +103,7 @@ public class PhotoUtil {
             if(dl[i]) myPictureList.remove(i);
         }
     }
-
+    public static ImageView.ScaleType scaleType = ImageView.ScaleType.CENTER;
     public static void showPictureAlertDialog(Context ctx, myPicture mp, int index) {
         final int inx = index;
         final Context cur_context = ctx;
@@ -119,7 +121,7 @@ public class PhotoUtil {
         }
 
         final AlertDialog.Builder _alertDialog = alertDialog;
-        alertDialog.setTitle(mp.picname);
+        //alertDialog.setTitle(mp.picname);
 
         Log.e(TAG,"file size:" + bmp.getByteCount());
         Log.e(TAG,"width    :" + bmp.getWidth());
@@ -135,20 +137,24 @@ public class PhotoUtil {
         final ImageView mImageView =  new ImageView(ctx);
         Bitmap bmp2 = bmp.createScaledBitmap(bmp, bmp.getWidth()/2, bmp.getHeight()/2, true);
         mImageView.setImageBitmap(bmp2);
-        //mImageView.setScaleType(ImageView.ScaleType.FIT_START);
+        mImageView.setScaleType(scaleType);
 
         if(bmp.getWidth() > bmp.getHeight()) mImageView.setRotation(90);
+        final LinearLayout ll09 = new LinearLayout(ctx);
+        ll09.setOrientation(LinearLayout.HORIZONTAL);
+        ImageButton imbt_prev = new ImageButton(ctx);
+        imbt_prev.setImageResource(R.drawable.arrow_left128);
+        imbt_prev.setBackgroundColor(Color.TRANSPARENT);
+        imbt_prev.setAlpha(0.3f);
+        ImageButton imbt_next = new ImageButton(ctx);
+        imbt_next.setImageResource(R.drawable.arrow_right128);
+        imbt_next.setBackgroundColor(Color.TRANSPARENT);
+        imbt_next.setAlpha(0.3f);
+        ll09.addView(imbt_prev);
+        ll09.addView(imbt_next);
+        ll09.setHorizontalGravity(Gravity.CENTER_HORIZONTAL);
+        ll09.setVerticalGravity(Gravity.CENTER_VERTICAL);
 
-        final LinearLayout llh = new LinearLayout(ctx);
-        llh.setOrientation(LinearLayout.HORIZONTAL);
-        Button bt_prev = new Button(ctx);
-        bt_prev.setText("Prev");
-        Button bt_next = new Button(ctx);
-        bt_next.setText("Next");
-        llh.addView(bt_prev);
-        llh.addView(bt_next);
-        llh.setHorizontalGravity(Gravity.CENTER_HORIZONTAL);
-        llh.setVerticalGravity(Gravity.BOTTOM);
 
         String inx_str = "" + (index+1) + "/" + myPictureList.size();
         final TextView tv_t = new TextView(ctx);
@@ -157,6 +163,7 @@ public class PhotoUtil {
         tv_t.setAlpha(0.7f);
         String tv_t_str = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n" + mp.picname + "\n                 (" + inx_str + ")";
         tv_t.setText(tv_t_str);
+        tv_t.setPaintFlags(tv_t.getPaintFlags() | Paint.FAKE_BOLD_TEXT_FLAG);
 
         final LinearLayout llh2 = new LinearLayout(ctx);
         llh2.setOrientation(LinearLayout.HORIZONTAL);
@@ -166,11 +173,8 @@ public class PhotoUtil {
 
         flo.addView(mImageView);
         flo.addView(llh2);
-        flo.addView(llh);
+        flo.addView(ll09);
         ll.addView(flo);
-
-
-
 
 //        final TextView tv  = new TextView(ctx); tv.setText(inx_str); tv.setGravity(Gravity.CENTER_HORIZONTAL);
 //        ll.addView(tv);
@@ -178,41 +182,34 @@ public class PhotoUtil {
 //        ll.addView(tv2); tv2.setGravity(Gravity.CENTER_HORIZONTAL);
 
         alertDialog.setView(ll);
-        mImageView.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-//                if(position>=0 && (position+1) < myPictureList.size() ) {
-//
-//                    myPicture mp2 = myPictureList.get(position);
-//                    _alertDialog.setTitle(mp2.picname);
-//                    try {
-//                        Bitmap bmp = BitmapFactory.decodeFile(mp2.filepath);
-//                        //Bitmap bmp2 = scaleBitmap(bmp,500,600);
-//
-//                        picsize = picsize + (int)(picsize * 0.1);
-//                        Bitmap bmp3 = scaleDown(bmp, picsize, true);
-//                        Toast.makeText(cur_context, "" + picsize, Toast.LENGTH_SHORT).show();
-//
-//                        mImageView.setImageBitmap(bmp3);
-//                        mImageView.setRotation(90);
-//
-//                        String inx_str = "" + (position+1)  + "/" + myPictureList.size();
-//                        tv.setText(inx_str);
-//                        tv2.setText(mp2.picname);
-//
-//                        String msg = " file   :" + mp2.picname;
-//                        msg+= "\n size  :" + bmp3.getByteCount();
-//                        msg+= "\n width :" + bmp3.getWidth();
-//                        msg+= "\n height:" + bmp3.getHeight();
-//                        Log.e(TAG, msg);
-//                    }catch(Exception e) {
-//                        e.printStackTrace();
-//                        Log.e(TAG,e.toString());
-//                    }
-//                }
-            }}
-        );
 
-        bt_prev.setOnClickListener(new View.OnClickListener(){
+        mImageView.setOnClickListener(new View.OnClickListener() {
+
+            public void onClick(View v) {
+                if (scaleType == ImageView.ScaleType.FIT_START) {
+                    scaleType = ImageView.ScaleType.CENTER;
+                    Log.e(TAG,"ImageView.ScaleType.CENTER");
+                } else if (scaleType == ImageView.ScaleType.CENTER) {
+                    scaleType = ImageView.ScaleType.MATRIX;
+                    Log.e(TAG,"ImageView.ScaleType.MATRIX");
+                } else if (scaleType == ImageView.ScaleType.MATRIX) {
+                  scaleType = ImageView.ScaleType.CENTER_INSIDE;
+                  Log.e(TAG,"ImageView.ScaleType.CENTER_INSIDE");
+                } else if (scaleType == ImageView.ScaleType.CENTER_CROP) {
+                    scaleType = ImageView.ScaleType.FIT_XY;
+                    Log.e(TAG,"ImageView.ScaleType.FIT_XY");
+                } else if (scaleType == ImageView.ScaleType.FIT_XY) {
+                    scaleType = ImageView.ScaleType.CENTER_INSIDE;
+                     Log.e(TAG,"ImageView.ScaleType.CENTER_INSIDE");
+                } else if (scaleType == ImageView.ScaleType.CENTER_INSIDE) {
+                    scaleType = ImageView.ScaleType.FIT_START;
+                    Log.e(TAG,"ImageView.ScaleType.FIT_START");
+            }
+                mImageView.setScaleType(scaleType);
+            }
+        });
+
+        imbt_prev.setOnClickListener(new View.OnClickListener(){
             public void onClick (View view) {
                 if(position>0 && (position) < myPictureList.size() ) {
                     position--;
@@ -222,7 +219,7 @@ public class PhotoUtil {
                         Bitmap bmp = BitmapFactory.decodeFile(mp2.filepath);
                         Bitmap bmp2 = bmp.createScaledBitmap(bmp, bmp.getWidth()/2, bmp.getHeight()/2, true);
                         if(bmp.getWidth() > bmp.getHeight()) mImageView.setRotation(90);
-                        //mImageView.setImageBitmap(bmp2);
+                        mImageView.setImageBitmap(bmp2);
 
                         String inx_str = "" + (position+1)  + "/" + myPictureList.size();
                         String tv_t_str = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n" + mp2.picname + "\n                 (" + inx_str + ")";
@@ -241,7 +238,7 @@ public class PhotoUtil {
             }
         });
 
-        bt_next.setOnClickListener(new View.OnClickListener(){
+       imbt_next.setOnClickListener(new View.OnClickListener(){
             public void onClick (View view) {
                 if(position>=0 && (position+1) < myPictureList.size() ) {
                     position++;

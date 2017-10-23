@@ -161,7 +161,7 @@ public class PhotoUtil {
         tv_t.setTextColor(Color.WHITE);
         tv_t.setTextSize(18);
         tv_t.setAlpha(0.7f);
-        String tv_t_str = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n" + mp.picname + "\n                 (" + inx_str + ")";
+        String tv_t_str = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n" + mp.picname + "\n                 (" + inx_str + ")";
         tv_t.setText(tv_t_str);
         tv_t.setPaintFlags(tv_t.getPaintFlags() | Paint.FAKE_BOLD_TEXT_FLAG);
 
@@ -222,7 +222,7 @@ public class PhotoUtil {
                         mImageView.setImageBitmap(bmp2);
 
                         String inx_str = "" + (position+1)  + "/" + myPictureList.size();
-                        String tv_t_str = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n" + mp2.picname + "\n                 (" + inx_str + ")";
+                        String tv_t_str = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n" + mp2.picname + "\n                 (" + inx_str + ")";
                         tv_t.setText(tv_t_str);
 
                         String msg = " file   :" + mp2.picname;
@@ -252,7 +252,7 @@ public class PhotoUtil {
                         //mImageView.setRotation(90);
 
                         String inx_str = "" + (position+1)  + "/" + myPictureList.size();
-                        String tv_t_str = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n" + mp2.picname + "\n                 (" + inx_str + ")";
+                        String tv_t_str = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n" + mp2.picname + "\n                 (" + inx_str + ")";
                         tv_t.setText(tv_t_str);
 
                         String msg = " file   :" + mp2.picname;

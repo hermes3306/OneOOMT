@@ -69,6 +69,9 @@ public class AdminActivity extends AppCompatActivity implements View.OnClickList
             case R.id.imageButton_validationcheck4pics:
                 validation_check4pics();
                 break;
+            case R.id.imageButton_rebuildMyPictureList:
+                PhotoUtil.buildFolderPictureList(PhotoUtil.mediaStorageDir);
+                break;
             case R.id.bt_admin_back:
                 finish();
                 break;

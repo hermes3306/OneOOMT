@@ -117,7 +117,7 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
     private static double mMaxAlt = 0;
     private static Location mLastLoc=null;
     private static boolean mDrivingMode=true;
-    private static Location mCurLoc=null;
+    public static Location mCurLoc=null;
     private static double mBearing=0;
     private static PolylineOptions mPlops = null;
     private static Polyline myLine = null;
@@ -335,6 +335,11 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
         alert.show();
     }
 
+    public static LatLng getCurLatLng() {
+        if(mCurLoc == null) return null;
+        LatLng l = new LatLng(mCurLoc.getLatitude(), mCurLoc.getLongitude());
+        return l;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -523,6 +528,9 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
 
     public static int mPos=-1;
     public void dashboard_3pics(boolean next) {
+        next = false;
+
+
         if(!pshowAdjacentPics) return;
         mCurLoc = mService.getLastLocation();
         if(mCurLoc==null) {
@@ -559,7 +567,7 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
         }
 
         final int _mPos = mPos = _t_pos;
-        final String _minDist = (minDist>1000)?  "" + (int)(minDist/1000) + " 킬로" : "" + (int)minDist + " 미터";
+        final String _minDist = (minDist>1000)?  "" + (int)(minDist/1000) + "킬로" : "" + (int)minDist + "미터";
 
         if(mPos != -1) {
             Bitmap bmp = getPreview(PhotoUtil.myPictureList.get(mPos).filepath);
@@ -568,12 +576,14 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
 
             Date date = StringUtil.StringToDate1(mp1.picname);
             //String date_str = StringUtil.DateToString1(date, "yyyy/MM/dd hh:mm:ss");
-            String date_str = StringUtil.DateToString1(date, "MM월dd일 HH시");
+            String date_str = StringUtil.DateToString1(date, "MM월 dd일 HH시");
             String sinfo = " " + date_str + "\n (" + _minDist + " 거리)";
 
+
             tv_onPic1.setText(sinfo );
-            tv_onPic1.setVisibility(VISIBLE);
+            Log.e(TAG,sinfo);
             imv_pic1.setVisibility(VISIBLE);
+            tv_onPic1.setVisibility(VISIBLE);
         }
 
 
@@ -581,18 +591,20 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
             @Override
             public void onClick(View view) {
                 myPicture mp = PhotoUtil.myPictureList.get(_mPos);
+
                 MarkerOptions opt = new MarkerOptions()
                         .position(new LatLng(mp.myactivity.latitude, mp.myactivity.longitude))
                         .title(mp.myactivity.added_on)
                         .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
                         .draggable(true).visible(true).snippet(_minDist);
                 mMap.addMarker(opt).showInfoWindow();
-                //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mp.myactivity.latitude, mp.myactivity.longitude), myzoom));
+
+                PhotoUtil.showPictureAlertDialog(RunningActivity.this,mp, _mPos );
             }
         });
     }
 
-    Bitmap getPreview(String filepath) {
+    public Bitmap getPreview(String filepath) {
         File image = new File(filepath);
 
         BitmapFactory.Options bounds = new BitmapFactory.Options();

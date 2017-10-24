@@ -17,6 +17,7 @@ import android.hardware.Camera;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Environment;
+import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -40,6 +41,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.joonho.oneoomt.R;
 import com.joonho.oneoomt.RunningActivity;
 import com.joonho.oneoomt.ViewCameraPicActivity;
@@ -52,12 +54,14 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Locale;
 
@@ -72,9 +76,10 @@ public class PhotoUtil {
     public static File mediaStorageDir =  null;
 
     public static String TAG = "PhotoUtil";
-    public static String myPictureMetaFilename = "myPicture3.master";
+    public static String myPictureMetaFilename = "myPicture20.master";
     public static ArrayList<myPicture> myPictureList = new ArrayList<myPicture> ();
     public static int position=0;
+    public static boolean ADMIN_MODE=true;
 
     static {
 //        mediaStorageDir = new File(Environment.getExternalStorageDirectory(), "MyCameraApp");
@@ -114,18 +119,15 @@ public class PhotoUtil {
             Toast.makeText(ctx, "File not found!", Toast.LENGTH_LONG).show();
             return;
         }
-        Bitmap bmp = BitmapFactory.decodeFile(mp.filepath);
-        if(bmp == null){
-            Toast.makeText(ctx, "Error while decoding image file " + mp.filepath, Toast.LENGTH_LONG).show();
-            return;
-        }
+
+//        Bitmap bmp = BitmapFactory.decodeFile(mp.filepath);
+//        if(bmp == null){
+//            Toast.makeText(ctx, "Error while decoding image file " + mp.filepath, Toast.LENGTH_LONG).show();
+//            return;
+//        }
 
         final AlertDialog.Builder _alertDialog = alertDialog;
         //alertDialog.setTitle(mp.picname);
-
-        Log.e(TAG,"file size:" + bmp.getByteCount());
-        Log.e(TAG,"width    :" + bmp.getWidth());
-        Log.e(TAG,"height   :" + bmp.getHeight());
 
         final LinearLayout ll = new LinearLayout(ctx);
         ll.setOrientation(LinearLayout.VERTICAL);
@@ -135,44 +137,76 @@ public class PhotoUtil {
         flo.setLayoutParams(floparams);
 
         final ImageView mImageView =  new ImageView(ctx);
-        Bitmap bmp2 = bmp.createScaledBitmap(bmp, bmp.getWidth()/2, bmp.getHeight()/2, true);
-        mImageView.setImageBitmap(bmp2);
+        //Bitmap bmp2 = bmp.createScaledBitmap(bmp, bmp.getWidth()/2, bmp.getHeight()/2, true);
+        Bitmap bmp3 = PhotoUtil.getPreview(mp.filepath, 1400);
+
+        mImageView.setImageBitmap(bmp3);
         mImageView.setScaleType(scaleType);
 
-        if(bmp.getWidth() > bmp.getHeight()) mImageView.setRotation(90);
+//        if(bmp.getWidth() > bmp.getHeight()) mImageView.setRotation(90);
         final LinearLayout ll09 = new LinearLayout(ctx);
         ll09.setOrientation(LinearLayout.HORIZONTAL);
         ImageButton imbt_prev = new ImageButton(ctx);
         imbt_prev.setImageResource(R.drawable.arrow_left128);
         imbt_prev.setBackgroundColor(Color.TRANSPARENT);
-        imbt_prev.setAlpha(0.3f);
+        imbt_prev.setAlpha(0.62f);
         ImageButton imbt_next = new ImageButton(ctx);
         imbt_next.setImageResource(R.drawable.arrow_right128);
         imbt_next.setBackgroundColor(Color.TRANSPARENT);
-        imbt_next.setAlpha(0.3f);
+        imbt_next.setAlpha(0.62f);
+
+
         ll09.addView(imbt_prev);
         ll09.addView(imbt_next);
+
         ll09.setHorizontalGravity(Gravity.CENTER_HORIZONTAL);
         ll09.setVerticalGravity(Gravity.CENTER_VERTICAL);
 
+        LatLng startpos = RunningActivity.getCurLatLng();
+        String sinfo = null;
+        if(startpos != null) {
+            CalDistance cd = new CalDistance(mp.myactivity.latitude, mp.myactivity.longitude, startpos.latitude, startpos.longitude);
+            double minDist = cd.getDistance();
+            final String _minDist = (minDist>1000)?  "" + (int)(minDist/1000) + "킬로" : "" + (int)minDist + "미터";
+            Date date = StringUtil.StringToDate1(mp.picname);
+            String date_str = StringUtil.DateToString1(date, "MM월 dd일 HH시");
+            sinfo = "\n " + date_str + "\n  (" + _minDist + " 거리)";
+        }
 
         String inx_str = "" + (index+1) + "/" + myPictureList.size();
+
+        final TextView tv_h = new TextView(ctx);
+        tv_h.setTextColor(Color.WHITE);
+        tv_h.setTextSize(25);
+        tv_h.setAlpha(0.9f);
+        tv_h.setText(sinfo);
+        tv_h.setPaintFlags(tv_h.getPaintFlags() | Paint.FAKE_BOLD_TEXT_FLAG);
+
+        final LinearLayout llhh = new LinearLayout(ctx);
+        llhh.setOrientation(LinearLayout.HORIZONTAL);
+        llhh.setHorizontalGravity(Gravity.CENTER_HORIZONTAL);
+        llhh.setVerticalGravity(Gravity.TOP);
+        llhh.addView(tv_h);
+
         final TextView tv_t = new TextView(ctx);
         tv_t.setTextColor(Color.WHITE);
-        tv_t.setTextSize(18);
-        tv_t.setAlpha(0.7f);
-        String tv_t_str = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n" + mp.picname + "\n                 (" + inx_str + ")";
+        tv_t.setTextSize(23);
+        tv_t.setAlpha(0.8f);
+        //String tv_t_str = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n" + /*mp.picname*/  "\n                 " + inx_str + "";
+        //String tv_t_str = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n" + inx_str;
+        String tv_t_str = inx_str +"\n";
         tv_t.setText(tv_t_str);
         tv_t.setPaintFlags(tv_t.getPaintFlags() | Paint.FAKE_BOLD_TEXT_FLAG);
 
         final LinearLayout llh2 = new LinearLayout(ctx);
         llh2.setOrientation(LinearLayout.HORIZONTAL);
         llh2.setHorizontalGravity(Gravity.CENTER_HORIZONTAL);
-        llh2.setVerticalGravity(Gravity.CENTER);
+        llh2.setVerticalGravity(Gravity.BOTTOM);
         llh2.addView(tv_t);
 
         flo.addView(mImageView);
         flo.addView(llh2);
+        flo.addView(llhh);
         flo.addView(ll09);
         ll.addView(flo);
 
@@ -216,19 +250,32 @@ public class PhotoUtil {
                     myPicture mp2 = myPictureList.get(position);
                     _alertDialog.setTitle(mp2.picname);
                     try {
-                        Bitmap bmp = BitmapFactory.decodeFile(mp2.filepath);
-                        Bitmap bmp2 = bmp.createScaledBitmap(bmp, bmp.getWidth()/2, bmp.getHeight()/2, true);
-                        if(bmp.getWidth() > bmp.getHeight()) mImageView.setRotation(90);
-                        mImageView.setImageBitmap(bmp2);
+//                        Bitmap bmp = BitmapFactory.decodeFile(mp2.filepath);
+//                        Bitmap bmp2 = bmp.createScaledBitmap(bmp, bmp.getWidth()/2, bmp.getHeight()/2, true);
+                        //if(bmp.getWidth() > bmp.getHeight()) mImageView.setRotation(90);
+                        Bitmap bmp3 = PhotoUtil.getPreview(mp2.filepath, 1400);
+                        mImageView.setImageBitmap(bmp3);
+
+                        LatLng startpos = RunningActivity.getCurLatLng();
+                        String sinfo = null;
+                        if(startpos != null) {
+                            CalDistance cd = new CalDistance(mp2.myactivity.latitude, mp2.myactivity.longitude, startpos.latitude, startpos.longitude);
+                            double minDist = cd.getDistance();
+                            final String _minDist = (minDist>1000)?  "" + (int)(minDist/1000) + "킬로" : "" + (int)minDist + "미터";
+                            Date date = StringUtil.StringToDate1(mp2.picname);
+                            String date_str = StringUtil.DateToString1(date, "MM월 dd일 HH시");
+                            sinfo = "\n " + date_str + "\n  (" + _minDist + " 거리)";
+                        }
+                        tv_h.setText(sinfo);
 
                         String inx_str = "" + (position+1)  + "/" + myPictureList.size();
-                        String tv_t_str = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n" + mp2.picname + "\n                 (" + inx_str + ")";
-                        tv_t.setText(tv_t_str);
+                        //String tv_t_str = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n" + mp2.picname + "\n                 (" + inx_str + ")";
+                        tv_t.setText(inx_str + "\n");
 
                         String msg = " file   :" + mp2.picname;
-                        msg+= "\n size  :" + bmp.getByteCount();
-                        msg+= "\n width :" + bmp.getWidth();
-                        msg+= "\n height:" + bmp.getHeight();
+                        msg+= "\n size  :" + bmp3.getByteCount();
+                        msg+= "\n width :" + bmp3.getWidth();
+                        msg+= "\n height:" + bmp3.getHeight();
                         Log.e(TAG, msg);
                     }catch(Exception e) {
                         e.printStackTrace();
@@ -245,20 +292,32 @@ public class PhotoUtil {
                     myPicture mp2 = myPictureList.get(position);
                     _alertDialog.setTitle(mp2.picname);
                     try {
-                        Bitmap bmp = BitmapFactory.decodeFile(mp2.filepath);
-                        Bitmap bmp2 = bmp.createScaledBitmap(bmp, bmp.getWidth()/2, bmp.getHeight()/2, true);
-                        mImageView.setImageBitmap(bmp2);
-                        if(bmp.getWidth() > bmp.getHeight()) mImageView.setRotation(90);
-                        //mImageView.setRotation(90);
+//                        Bitmap bmp = BitmapFactory.decodeFile(mp2.filepath);
+//                        Bitmap bmp2 = bmp.createScaledBitmap(bmp, bmp.getWidth()/2, bmp.getHeight()/2, true);
+                        //if(bmp.getWidth() > bmp.getHeight()) mImageView.setRotation(90);
+                        Bitmap bmp3 = PhotoUtil.getPreview(mp2.filepath, 1400);
+                        mImageView.setImageBitmap(bmp3);
+
+                        LatLng startpos = RunningActivity.getCurLatLng();
+                        String sinfo = null;
+                        if(startpos != null) {
+                            CalDistance cd = new CalDistance(mp2.myactivity.latitude, mp2.myactivity.longitude, startpos.latitude, startpos.longitude);
+                            double minDist = cd.getDistance();
+                            final String _minDist = (minDist>1000)?  "" + (int)(minDist/1000) + "킬로" : "" + (int)minDist + "미터";
+                            Date date = StringUtil.StringToDate1(mp2.picname);
+                            String date_str = StringUtil.DateToString1(date, "MM월 dd일 HH시");
+                            sinfo = "\n " + date_str + "\n  (" + _minDist + " 거리)";
+                        }
+                        tv_h.setText(sinfo);
 
                         String inx_str = "" + (position+1)  + "/" + myPictureList.size();
-                        String tv_t_str = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n" + mp2.picname + "\n                 (" + inx_str + ")";
-                        tv_t.setText(tv_t_str);
+                        //String tv_t_str = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n" + mp2.picname + "\n                 (" + inx_str + ")";
+                        tv_t.setText(inx_str + "\n");
 
                         String msg = " file   :" + mp2.picname;
-                        msg+= "\n size  :" + bmp.getByteCount();
-                        msg+= "\n width :" + bmp.getWidth();
-                        msg+= "\n height:" + bmp.getHeight();
+                        msg+= "\n size  :" + bmp3.getByteCount();
+                        msg+= "\n width :" + bmp3.getWidth();
+                        msg+= "\n height:" + bmp3.getHeight();
                         Log.e(TAG, msg);
                     }catch(Exception e) {
                         e.printStackTrace();
@@ -358,7 +417,6 @@ public class PhotoUtil {
             while(i < myPictureList.size()) {
                 myPicture mp = myPictureList.get(i);
                 out.writeObject(mp);
-                Log.e(TAG, "" + i + "th Picture(" + mp.toString() + ") OK!" );
                 i++;
             }
             out.close();
@@ -676,4 +734,144 @@ public class PhotoUtil {
         canvas.drawBitmap(bitmap, m, new Paint());
         return output;
     }
+
+    public static Bitmap getPreview(String filepath, int thumsize) {
+        File image = new File(filepath);
+
+        BitmapFactory.Options bounds = new BitmapFactory.Options();
+        bounds.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(image.getPath(), bounds);
+
+        if ((bounds.outWidth == -1) || (bounds.outHeight == -1))
+            return null;
+
+        int originalSize = (bounds.outHeight > bounds.outWidth) ? bounds.outHeight
+                : bounds.outWidth;
+
+        BitmapFactory.Options opts = new BitmapFactory.Options();
+        opts.inSampleSize = originalSize / thumsize ;//Thumb size
+        Bitmap bitmap =  BitmapFactory.decodeFile(image.getPath(), opts);
+        if(bitmap == null) return null;
+
+        Matrix matrix = new Matrix();
+        matrix.postRotate(90);
+        Bitmap rotated = bitmap;
+
+        boolean  go_rotate=false;
+        if(bounds.outHeight < bounds.outWidth) go_rotate = true;
+
+        if(go_rotate) {
+            try {
+                rotated = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(),
+                        matrix, true);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return rotated;
+    }
+
+    public static void buildFolderPictureList(File folder) {
+        /*
+            1) sort Folder
+            2) for each file in Folder
+                check file in Picture List
+            3) if not exist
+                check best adjacent picture in Picture List
+                add Picture information with Location of adjacent picture
+            4) save Picture List file and serialize it
+             */
+
+        Log.e(TAG+"ADMIN" , "Folder: "+folder.getAbsolutePath());
+
+        if(!folder.exists()) {
+            Log.e(TAG+"ADMIN" , "Folder: "+folder.getAbsolutePath() + " not found!");
+            return;
+        }
+
+
+        FilenameFilter fnf = new FilenameFilter() {
+            @Override
+            public boolean accept(File file, String s) {
+                return s.toLowerCase().endsWith(".jpg");
+            }
+        };
+
+        File[] flist  = folder.listFiles(fnf);
+
+        if(flist==null) {
+            Log.e(TAG+"ADMIN" , "flist is null");
+            return;
+        }
+
+        Log.e(TAG+"ADMIN" , "Folder size: "+flist.length);
+
+        String folderlist[] = new String[flist.length];
+        for(int i=0;i<folderlist.length;i++) {
+            folderlist[i] = flist[i].getName();
+        }
+
+        String[] piclist = new String[myPictureList.size()];
+        for(int i=0;i<myPictureList.size();i++) {
+            myPicture mp = myPictureList.get(i);
+            piclist[i] = mp.picname;
+        }
+
+        Log.e(TAG,">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+        Log.e(TAG, "folderlist[1]" + folderlist[1] + "piclist[1]" + piclist[1]);
+        Log.e(TAG,">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+
+
+
+        for(int i=0;i<folderlist.length;i++) {
+            boolean found = false;
+
+            for(int j=0;j<piclist.length;j++) {
+                if(folderlist[i].substring(4).equalsIgnoreCase(piclist[j].substring(4)+".jpg")) {
+                    found = true;
+                    break;
+                }
+            }
+
+            if(!found) {
+                String t_cr_date = folderlist[i].substring(4, 19);
+                Date t_date = StringUtil.StringToDate(t_cr_date, "yyyyMMdd_HHmmss");
+                String p_name = "PIC_" + StringUtil.DateToString1(t_date, "yyyy_MM_dd_HH_mm_ss");  // 저장될 대상
+                String str= StringUtil.DateToString1(t_date, "yyyy년MM월dd일HH시mm분ss초");
+
+                long time_gap[] = new long [piclist.length];
+                for(int q=0;q<piclist.length;q++) {
+                    Date t2_date = StringUtil.StringToDate1(piclist[q]);   // PIC_2017_10_21_09_49_51
+                    time_gap[q] =  t_date.getTime() - t2_date.getTime();
+                    if(time_gap[q] < 0) time_gap[q] = time_gap[q] * -1;
+                }
+
+                int m_adjacent_pos = -1;
+                long m_tg_min = Long.MAX_VALUE;
+                for(int q=0;q<piclist.length;q++) {
+                    if(m_tg_min > time_gap[q]) {
+                        m_tg_min = time_gap[q];
+                        m_adjacent_pos = q;
+                    }
+                }
+
+                myPicture myPictureFound = myPictureList.get(m_adjacent_pos);
+                myActivity ma = new myActivity(myPictureFound.myactivity.latitude, myPictureFound.myactivity.longitude, str);
+                File f = new File(folderlist[i]);
+
+                myPicture mp = new myPicture(ma, p_name, folder.getAbsolutePath() + "/"+ folderlist[i]);
+                myPictureList.add(mp);
+            }
+        }
+
+        PhotoUtil pu = new PhotoUtil();
+        pu.saveMyPictueList();
+
+        Log.e(TAG+"ADMIN" , "REBUILD DONE !!!!! ");
+        Log.e(TAG+"ADMIN" , "REBUILD DONE !!!!! ");
+        Log.e(TAG+"ADMIN" , "REBUILD DONE !!!!! ");
+    }
+
 }
+
+

@@ -2181,8 +2181,4 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
     }
 
 
-    private GoogleMap mapa;
-    private android.support.v4.app.FragmentManager fragmentManager;
-    private SupportMapFragment mapFragment;
-
 }

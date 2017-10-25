@@ -93,6 +93,7 @@ import com.joonho.oneoomt.db.DBGateway;
 import com.joonho.oneoomt.db.PropsDB;
 import com.joonho.oneoomt.file.myActivity;
 import com.joonho.oneoomt.file.myPicture;
+import com.joonho.oneoomt.util.ActivityUtil;
 import com.joonho.oneoomt.util.CalBearing;
 import com.joonho.oneoomt.util.CalDistance;
 import com.joonho.oneoomt.util.PhotoUtil;
@@ -123,8 +124,8 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
     private static Polyline myLine = null;
 
 
-    private static List<LatLng> mLatLngList = new ArrayList<LatLng>();
-    private static Vector mLocTime = new Vector();
+    public static List<LatLng> mLatLngList = new ArrayList<LatLng>();
+    public static Vector mLocTime = new Vector();
     private static List<myPicture> mMyPicture = new ArrayList<myPicture>();
     private static List<Marker> mMarkerList = new ArrayList<Marker>();
 
@@ -371,6 +372,8 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
 
 
         mLatLngList = dbgateway.allLatLng(getApplicationContext());
+
+        //  버그 0001
         mLocTime = new Vector();for(int i=0;i<mLatLngList.size();i++) mLocTime.add(System.currentTimeMillis());
 
         btn_event();
@@ -1757,7 +1760,12 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
 
             alertDialog.setPositiveButton("Serialize", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whichButton) {
+                //  BUG 00002
+                //  현재 두곳 모두 쓰지만 한곳만 쓰도록 함
                 if(et.getText()!= null) dbgateway.serailizeActivitywithName(getApplicationContext(), et.getText().toString() + ".ser");
+                if(et.getText() != null) ActivityUtil.serialize();
+
+
                 activity_file_name = et.getText().toString();
 
                 mEditor.putString("pLatestFilename", activity_file_name);
@@ -1857,6 +1865,7 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
             return true;
         }
 
+        //  DB에서 파일 리스트 보는 것으로 변경 필요함.
         if (id == R.id.item_list_files) {
             File list[] = dbgateway.getallActivities(getApplicationContext());
             int msize = list.length;

@@ -225,16 +225,31 @@ public class HistoryGoogleMapsActivity extends AppCompatActivity /*FragmentActiv
 
     public void btn_event() {
         final Button bt_redraw = (Button)findViewById(R.id.bt_redraw);
-        final Button bt_delete = (Button)findViewById(R.id.bt_delete);
         final Button bt_rename = (Button)findViewById(R.id.bt_rename);
+        final Button bt_intent = (Button)findViewById(R.id.bt_intent);
 
 
-        bt_delete.setOnClickListener(new View.OnClickListener() {
+        bt_intent.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                File f = new File(fname);
-                f.delete();
-                Toast.makeText(HistoryGoogleMapsActivity.this, "File(" + fname + ") deleted OK!", Toast.LENGTH_LONG).show();
-                finish();
+
+                // Create the text message with a string
+                Intent sendIntent = new Intent();
+                sendIntent.setAction(Intent.ACTION_SEND);
+                sendIntent.putExtra(Intent.EXTRA_TEXT, "Activity File");
+                //sendIntent.setType("text/plain");
+
+                // Verify that the intent will resolve to an activity
+                if (sendIntent.resolveActivity(getPackageManager()) != null) {
+                    startActivity(sendIntent);
+                }
+
+
+
+
+//                File f = new File(fname);
+//                f.delete();
+//                Toast.makeText(HistoryGoogleMapsActivity.this, "File(" + fname + ") deleted OK!", Toast.LENGTH_LONG).show();
+//                finish();
             }
         });
 

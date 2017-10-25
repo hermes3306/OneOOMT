@@ -33,6 +33,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
@@ -40,6 +41,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.PopupMenu;
 import android.util.Log;
 import android.view.DragEvent;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -57,6 +59,7 @@ import android.widget.ToggleButton;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
@@ -175,7 +178,6 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
     private void setSharedPrefrences() {
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(RunningActivity.this);
         alertDialog.setTitle("Property Setting");
-
 
         final EditText      et_pMarkerInterval = new EditText(RunningActivity.this);
         final ToggleButton  tg_pdrawMarker = new ToggleButton(RunningActivity.this);
@@ -1746,10 +1748,9 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
 
             final EditText et = new EditText(RunningActivity.this);
 
-            SimpleDateFormat formatter = new SimpleDateFormat("yyyy_MM_dd", Locale.KOREA);
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy년MM월dd일_HH시mm분ss초", Locale.KOREA);
             Date now = new Date();
-            final String fileName = "_" + formatter.format(now);
-
+            String fileName = formatter.format(now);  // + ".ser";
 
             activity_file_name = mPref.getString("pLatestFilename", fileName);
             if(activity_file_name != null) et.setText(activity_file_name);
@@ -1763,11 +1764,9 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
                 //  BUG 00002
                 //  현재 두곳 모두 쓰지만 한곳만 쓰도록 함
                 if(et.getText()!= null) dbgateway.serailizeActivitywithName(getApplicationContext(), et.getText().toString() + ".ser");
-                if(et.getText() != null) ActivityUtil.serialize();
-
+                if(et.getText() != null) ActivityUtil.serialize(et.getText().toString() + ".ser");
 
                 activity_file_name = et.getText().toString();
-
                 mEditor.putString("pLatestFilename", activity_file_name);
                 mEditor.commit();
                 getSharedPreferences();
@@ -1786,6 +1785,37 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
             return true;
         }
 
+        if (id == R.id.sync_from_file) {
+            AlertDialog.Builder alertDialog = new AlertDialog.Builder(RunningActivity.this);
+            alertDialog.setTitle("ReLoad Activity");
+            final EditText et = new EditText(RunningActivity.this);
+            final String fileName = ActivityUtil.getLastActivityFile().getName();
+            if(activity_file_name != null) et.setText(activity_file_name);
+            else { et.setText(fileName); activity_file_name = fileName;}
+
+            alertDialog.setView(et);
+
+            alertDialog.setPositiveButton("Append", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    ActivityUtil.deserialize(fileName, true);
+                    Toast.makeText(getApplicationContext(), fileName + " Append OK!", Toast.LENGTH_LONG).show();
+                }
+            });
+
+            alertDialog.setNegativeButton("Replace", new DialogInterface.OnClickListener(){
+                public void onClick (DialogInterface dialog, int whichButton) {
+                    ActivityUtil.deserialize(fileName, false);
+                    Toast.makeText(getApplicationContext(), fileName + " Replace OK!", Toast.LENGTH_LONG).show();
+                }
+            });
+
+            AlertDialog alert = alertDialog.create();
+            alert.show();
+            return true;
+        }
+
+
+        /* OLD version
         if (id == R.id.sync_from_file) {
             mLatLngList = dbgateway.syncLastActivityFilewithScreen(getApplicationContext());
             mLocTime = new Vector(); for(int i=0;i<mLatLngList.size();i++) mLocTime.add(System.currentTimeMillis());
@@ -1820,6 +1850,9 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
             return true;
 
         }
+        */
+
+
 
         if (id == R.id.item_admin) {
             Intent i = new Intent (RunningActivity.this, AdminActivity.class);
@@ -1865,9 +1898,8 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
             return true;
         }
 
-        //  DB에서 파일 리스트 보는 것으로 변경 필요함.
-        if (id == R.id.item_list_files) {
-            File list[] = dbgateway.getallActivities(getApplicationContext());
+        if(id == R.id.item_list_files_v2) {
+            File list[] = ActivityUtil.getFiles();
             int msize = list.length;
 
             final CharSequence items[] = new CharSequence[msize];
@@ -1881,21 +1913,49 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
 
             AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
             //alertDialog.setIcon(R.drawable.window);
-            alertDialog.setTitle("Choose a file to sync");
+            alertDialog.setTitle("Select An Activity");
             alertDialog.setItems(items, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int index) {
-                         Log.e(TAG, "" + items[index] + "chosen ");
-                         mLatLngList = dbgateway.syncActivityFilewithScreen(getApplicationContext(), filepath[index]);
-                         mLocTime = new Vector();for(int i=0;i<mLatLngList.size();i++) mLocTime.add(System.currentTimeMillis());
-                         dbgateway.ListToDB(getApplicationContext(), mLatLngList);
-
-                         Log.e(TAG, "" + items[index] + "Sync Ok!");
-                         Toast.makeText(getApplicationContext(),"" + items[index] + "Sync Ok!",Toast.LENGTH_SHORT).show();
+                    File afile = new File(filepath[index]);
+                    // ActivityUtil.showActivityAlertDialog(RunningActivity.this, afile, index);
                 }
             });
             alertDialog.setNegativeButton("Back",null);
+            AlertDialog alert = alertDialog.create();
+            alert.show();
+            return true;
+        }
 
+        //  DB에서 파일 리스트 보는 것으로 변경 필요함.
+        if (id == R.id.item_list_files) {
+            File list[] = ActivityUtil.getFiles();
+            int msize = list.length;
+
+            final CharSequence items[] = new CharSequence[msize];
+            final String filepath[] = new String[msize];
+
+            for(int i=0;i<msize;i++) {
+                items[i] = list[i].getName();
+                filepath[i] = list[i].getAbsolutePath();
+            }
+            //final CharSequence items[] = {" A "," B "};
+
+            AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+            //alertDialog.setIcon(R.drawable.window);
+            alertDialog.setTitle("Select An Activity");
+            alertDialog.setItems(items, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int index) {
+                    File afile = new File(filepath[index]);
+                    ActivityUtil.deserialize(afile, true);
+                    // 아직은  DB에도 이중으로 쓰도록 함.
+                    dbgateway.ListToDB(getApplicationContext(), mLatLngList);
+                    Log.e(TAG, "" + items[index] + " Reload & Append Ok!");
+                    Toast.makeText(getApplicationContext(),"" + items[index] + " Reload & Append Ok!",Toast.LENGTH_SHORT).show();
+                }
+            });
+            alertDialog.setNegativeButton("Back",null);
             AlertDialog alert = alertDialog.create();
             alert.show();
             return true;
@@ -2074,7 +2134,6 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
             PhotoUtil.showPictureAlertDialog(RunningActivity.this, mp, index);
             Log.e(TAG,"Picture Marker Found at : " + index + " th location");
 
-
         }
         return true;
     }
@@ -2120,4 +2179,10 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
         Log.e(TAG, "**** Dup removed from " + mLatLngList.size() + " to " + newList.size() );
         mLatLngList = newList;
     }
+
+
+    private GoogleMap mapa;
+    private android.support.v4.app.FragmentManager fragmentManager;
+    private SupportMapFragment mapFragment;
+
 }

@@ -12,13 +12,13 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
         <fragment
-            android:id="@+id/map"
+            android:id="@+id/map100"
             android:name="com.google.android.gms.maps.SupportMapFragment"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            tools:context="com.joonho.oneoomt.actview" />
+            android:layout_height="match_parent" />
+
         <ImageButton
-            android:id="@+id/imgbt_menu_popup"
+            android:id="@+id/imgbt_menu_popup100"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_gravity="bottom|left"
@@ -29,30 +29,30 @@
             android:layout_gravity="right|center_vertical"
             android:orientation="vertical">
             <ImageButton
-                android:id="@+id/imb_hist"
+                android:id="@+id/imb_hist100"
                 android:layout_width="match_parent"
                 android:layout_height="30dp"
                 android:layout_weight="1"
                 app:srcCompat="@drawable/list2_24" />
             <ImageButton
-                android:id="@+id/imb_save"
+                android:id="@+id/imb_save100"
                 android:layout_width="match_parent"
                 android:layout_height="30dp"
                 android:layout_weight="1"
                 app:srcCompat="@drawable/save_2_24" />
             <ImageButton
-                android:id="@+id/imb_pic"
+                android:id="@+id/imb_pic100"
                 android:layout_width="match_parent"
                 android:layout_height="30dp"
                 android:layout_weight="1"
                 app:srcCompat="@drawable/camera2_24" />
             <TextView
-                android:id="@+id/textView9"
+                android:id="@+id/textView9100"
                 android:layout_width="match_parent"
                 android:layout_height="15dp"
                 android:layout_weight="1" />
             <ImageButton
-                android:id="@+id/imgbt_refresh"
+                android:id="@+id/imgbt_refresh100"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:srcCompat="@drawable/refresh24" />

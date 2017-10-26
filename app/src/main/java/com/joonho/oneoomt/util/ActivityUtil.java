@@ -252,6 +252,7 @@ public class ActivityUtil {
         Log.e(TAG, "# of Activities: " + list.size() );
 
         if(!mode_append) {
+            mActivityList.clear();
             gmap.clear();
         }
 
@@ -371,11 +372,18 @@ public class ActivityUtil {
                 ImageButton imbt_prev = (ImageButton) alert.findViewById(R.id.imbt_prev);
                 ImageButton imbt_next = (ImageButton) alert.findViewById(R.id.imbt_next);
                 final TextView tv_cursor = (TextView) alert.findViewById(R.id.tv_cursor);
+                final TextView tv_heading = (TextView) alert.findViewById(R.id.tv_heading);
+
 
                 final File flist[] = getFiles();
                 String inx_str = "" + (position+1)  + "/" + flist.length;
                 tv_cursor.setText(inx_str);
 
+                Date date = new Date(_file.lastModified());
+                String date_str = StringUtil.DateToString1(date, "MM월 dd일 HH시");
+                String _minDist = "";
+                String sinfo = "\n " + date_str + "\n  (" + _minDist + " 거리)";
+                tv_heading.setText(sinfo);
 
                 imbt_prev.setOnClickListener(new View.OnClickListener(){
                     public void onClick (View view) {
@@ -392,7 +400,7 @@ public class ActivityUtil {
                 imbt_next.setOnClickListener(new View.OnClickListener(){
                     public void onClick (View view) {
                         File flist[] = getFiles();
-                        if (position > 0 && position < flist.length) {
+                        if (position >= 0 && position < flist.length-1) {
                             position++;
                             final File myfile = flist[position];
                             deserializeIntoMap(_ctx, myfile, googleMap, false);

@@ -114,7 +114,7 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
 
     private String TAG = "RunningActivity";
     private GoogleMap mMap;
-    private static float myzoom=16.0f;
+    public static float myzoom=16.0f;
     private static LocalLocationService mService;
     private static boolean mBound=false;
     private static boolean isOnStartCalled=false;
@@ -1899,6 +1899,7 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
         }
 
         if(id == R.id.item_list_files_v2) {
+
             File list[] = ActivityUtil.getFiles();
             int msize = list.length;
 
@@ -1918,7 +1919,7 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
                 @Override
                 public void onClick(DialogInterface dialogInterface, int index) {
                     File afile = new File(filepath[index]);
-                    // ActivityUtil.showActivityAlertDialog(RunningActivity.this, afile, index);
+                    ActivityUtil.showActivityAlertDialog(RunningActivity.this, afile, index);
                 }
             });
             alertDialog.setNegativeButton("Back",null);

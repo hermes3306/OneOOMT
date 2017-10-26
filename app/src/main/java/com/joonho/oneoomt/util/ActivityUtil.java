@@ -69,7 +69,9 @@ public class ActivityUtil {
     public static File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "OneOOMT");
     public static String TAG = "ActivityUtil";
     public static ArrayList<myActivity> mActivityList = new ArrayList<myActivity>();
+    public static float myzoom = 14;
     public static ArrayList<Marker> markers = new ArrayList<Marker>();
+
 
     public static void serialize(String fileName) {
         if(!mediaStorageDir.exists()) mediaStorageDir.mkdirs();
@@ -201,8 +203,6 @@ public class ActivityUtil {
         }
     }
 
-
-
     public static void deserializeIntoMap(Context ctx, File file, GoogleMap gmap, boolean mode_append) {
         if(file == null)  {
             Log.e(TAG, "No File to deserialized");
@@ -263,8 +263,10 @@ public class ActivityUtil {
         }
 
         Log.e(TAG, "Before drawMarkers()");
-        drawMarkers(ctx, gmap, mActivityList);
+
         drawTrack(gmap, mActivityList);
+        drawMarkers(ctx, gmap, mActivityList);
+
         Log.e(TAG, "After drawMarkers()");
     }
 
@@ -288,7 +290,7 @@ public class ActivityUtil {
                 googleMap.addMarker(new MarkerOptions().position(posisiabsen).title("Yout title"));
                 googleMap.moveCamera(CameraUpdateFactory.newLatLng(posisiabsen));
                 googleMap.getUiSettings().setZoomControlsEnabled(true);
-                googleMap.animateCamera(CameraUpdateFactory.zoomTo(15), 2000, null);
+                googleMap.animateCamera(CameraUpdateFactory.zoomTo(14), 2000, null);
             }
         });
 
@@ -300,9 +302,9 @@ public class ActivityUtil {
         // 마지막 위치에 대해서 이동함.
         myActivity last = list.get(list.size()-1);
         LatLng lastll = new LatLng(last.latitude, last.longitude);
-        gmap.moveCamera(CameraUpdateFactory.newLatLngZoom(lastll, 10));
+        gmap.moveCamera(CameraUpdateFactory.newLatLngZoom(lastll, 14));
 
-        CameraPosition cameraPosition = new CameraPosition.Builder().target(lastll).zoom(10).build();
+        CameraPosition cameraPosition = new CameraPosition.Builder().target(lastll).zoom(14).build();
         gmap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
     }
 

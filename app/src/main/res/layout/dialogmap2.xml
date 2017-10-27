@@ -161,7 +161,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text=" Km"
+                        android:text="   Km"
                         android:textColor="@android:color/darker_gray"
                         android:textSize="16sp" />
 
@@ -179,7 +179,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Min/km"
+                        android:text=" Min/km"
                         android:textColor="@android:color/darker_gray"
                         android:textSize="16sp" />
 

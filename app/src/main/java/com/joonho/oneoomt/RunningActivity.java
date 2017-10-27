@@ -885,6 +885,7 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
     }
 
     public static String activity_file_name = null;
+    public static boolean zoombt_clicked = false;
     // **  ----------------------------------------------------------------------------------------
     //        Button Event Registration , 9/27/17, jhpark
     // **  -------------------------------------------------------------------------------------- **
@@ -905,6 +906,8 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
         zoomin.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 myzoom = myzoom+1.0f;
+                zoombt_clicked = true;
+                Log.e(TAG,"myzoom(+):" + myzoom);
                 show_cur_loc();
             }}
         );
@@ -915,6 +918,8 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
         zoomout.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 myzoom = myzoom-1.0f;
+                zoombt_clicked = true;
+                Log.e(TAG,"myzoom(-):" + myzoom);
                 show_cur_loc();
             }}
         );
@@ -1108,7 +1113,7 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
         }
         LatLng curloc = new LatLng(mCurLoc.getLatitude(), mCurLoc.getLongitude());
 
-        myzoom = mMap.getCameraPosition().zoom;
+        if(! zoombt_clicked)  myzoom = mMap.getCameraPosition().zoom; else zoombt_clicked = false;
         Log.e(TAG,"myzoom:" + myzoom);
 
         if(mDrivingMode) {
@@ -1760,7 +1765,7 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
 //            activity_file_name = mPref.getString("pLatestFilename", fileName);
 //            if(activity_file_name != null) et.setText(activity_file_name);
 //            else { et.setText(fileName); activity_file_name = fileName;}
-            
+
             alertDialog.setView(et);
 
             alertDialog.setPositiveButton("Serialize", new DialogInterface.OnClickListener() {
@@ -1905,6 +1910,11 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
         if(id == R.id.item_list_files_v2) {
 
             File list[] = ActivityUtil.getFiles();
+            if(list == null) {
+                Toast.makeText(getApplicationContext(), "ERR: No Activities to show !", Toast.LENGTH_LONG).show();
+                return false;
+            }
+
             int msize = list.length;
 
             final CharSequence items[] = new CharSequence[msize];

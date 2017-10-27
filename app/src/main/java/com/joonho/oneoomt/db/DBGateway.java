@@ -12,6 +12,7 @@ import android.widget.Toast;
 import com.google.android.gms.maps.model.LatLng;
 import com.joonho.oneoomt.HistoryActivity;
 import com.joonho.oneoomt.file.myActivity;
+import com.joonho.oneoomt.util.StringUtil;
 import com.joonho.oneoomt.util.modifiedDate;
 
 import java.io.BufferedInputStream;
@@ -112,6 +113,46 @@ public class DBGateway {
         }
         return lll;
     }
+
+    public Vector allLocTime(Context ctx) {
+        init (ctx);
+
+        StringBuffer sql = new StringBuffer();
+        sql.append("select added_on from mylocation6");
+        Cursor cursor = mDB.rawQuery(sql.toString(), null);
+
+
+        Vector vt = new Vector();
+        while(cursor.moveToNext()) {
+            String  added_on  = cursor.getString(0);
+            Date date = StringUtil.StringToDate(added_on,"yyyy-MM-dd HH:mm:ss");
+            vt.add(date.getTime());
+            Log.e(TAG, "" + "" + added_on + "     > " + date.getTime());
+        }
+        return vt;
+    }
+
+    public ArrayList<myActivity> allActivitiy(Context ctx) {
+        init (ctx);
+
+        StringBuffer sql = new StringBuffer();
+        sql.append("select latitude, longitude, added_on from mylocation6");
+        Cursor cursor = mDB.rawQuery(sql.toString(), null);
+
+
+        ArrayList <myActivity> lll = new ArrayList<myActivity>();
+        while(cursor.moveToNext()) {
+            double latitude = cursor.getDouble(0);
+            double longitude = cursor.getDouble(1);
+            String  added_on  = cursor.getString(2);
+
+            myActivity ma = new myActivity(latitude, longitude, added_on);
+            Log.e(TAG, ma.toString());
+            lll.add(ma);
+        }
+        return lll;
+    }
+
 
     public int LocSize(Context ctx) {
         init(ctx);

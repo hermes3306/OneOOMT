@@ -358,8 +358,9 @@ public class ActivityUtil {
                 Log.e(TAG, "Double.NaN between ("+bef_lat + ","+ bef_lon +") ~ ("+ aft_lat + ","+ aft_lon + ")" ) ;
                 continue;
             }
-            Log.e(TAG, "" + dist_2 + " sum: " + dist_meter);
             dist_meter = dist_meter + dist_2;
+            Log.e(TAG, "" + i + "]" +  list.get(i).added_on + dist_2 + " sum: " + dist_meter +  " ("+bef_lat + ","+ bef_lon +") ~ ("+ aft_lat + ","+ aft_lon + ")");
+            //Log.e(TAG, "" + dist_2 + " sum: " + dist_meter);
         }
         return dist_meter;
     }
@@ -411,16 +412,58 @@ public class ActivityUtil {
     }
 
     public static void drawMarkers(Context ctx, GoogleMap gmap, ArrayList<myActivity> list) {
+        double tot_distance = getTotalDistanceDouble(list);
+
+        int disunit = 1000;
+        String unitstr = "미터";
+        if (tot_distance > 1000) {  // 1km 이상
+            disunit = 1000;
+            unitstr = "킬로";
+        } else disunit = 100;
+
+        double t_distance = 0;
+        double t_lap = disunit;
         for(int i=0; i < list.size(); i++) {
             LatLng ll = new LatLng(list.get(i).latitude, list.get(i).longitude);
             float color = (i==0) ?  BitmapDescriptorFactory.HUE_GREEN : ((i==list.size()-1)? BitmapDescriptorFactory.HUE_RED  :  BitmapDescriptorFactory.HUE_CYAN);
+
             String title = list.get(i).added_on;
-            Marker marker = gmap.addMarker(new MarkerOptions().position(ll).title(title)
+            if(i==0) {
+                Marker marker = gmap.addMarker(new MarkerOptions().position(ll).title(title)
                         .icon(BitmapDescriptorFactory.defaultMarker(color))
                         .draggable(true)
                         .visible(true)
-                        .snippet("위도: " + ll.latitude + "경도: " + ll.longitude));
-            markers.add(marker);
+                        .snippet("출발"));
+                markers.add(marker);
+            } else if(i==list.size()-1) {
+                Marker marker = gmap.addMarker(new MarkerOptions().position(ll).title(title)
+                        .icon(BitmapDescriptorFactory.defaultMarker(color))
+                        .draggable(true)
+                        .visible(true)
+                        .snippet("종료"));
+                markers.add(marker);
+            }
+            else {
+                CalDistance cd = new CalDistance(list.get(i-1).latitude, list.get(i-1).longitude, list.get(i).latitude, list.get(i).longitude);
+                double dist = cd.getDistance();
+                if(Double.isNaN(dist)) continue;
+                if(Double.isNaN(dist + t_distance)) continue;
+
+                t_distance = t_distance + dist;
+                if(t_distance > t_lap) {
+                    int interval = (int)(t_distance / disunit);
+                    Log.e(TAG, "" + interval + unitstr);
+                    t_lap += disunit;
+
+
+                    Marker marker = gmap.addMarker(new MarkerOptions().position(ll).title(title)
+                            .icon(BitmapDescriptorFactory.defaultMarker(color))
+                            .draggable(true)
+                            .visible(true)
+                            .snippet(""+interval + unitstr));
+                    markers.add(marker);
+                }
+            }
         }
 
         LatLngBounds.Builder builder= new LatLngBounds.Builder();
@@ -431,7 +474,7 @@ public class ActivityUtil {
 
         int width = ctx.getResources().getDisplayMetrics().widthPixels;
         int height = ctx.getResources().getDisplayMetrics().heightPixels;
-        int padding = (int) (width * 0.10); // offset from edges of the map 10% of screen
+        int padding = (int) (width * 0.20); // offset from edges of the map 10% of screen
 
         CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
         gmap.moveCamera(cu);
@@ -475,15 +518,25 @@ public class ActivityUtil {
                 tv_cursor.setText(inx_str);
 
                 String date_str = getStartTime(mActivityList);
+                if(activityStat !=null) {
 
-                String _minDist = String.format("%.2f", activityStat.distanceKm);
-                String sinfo = "\n " + date_str + "\n  (" + _minDist + "Km)";
-                tv_heading.setText(sinfo);
-
-                tv_distance.setText(_minDist);
-                tv_duration.setText(activityStat.duration);
-                tv_minperkm.setText(String.format("  %.2f",activityStat.minperKm));
-                tv_carolies.setText("   " + activityStat.calories);
+                    String _minDist = String.format("%.2f", activityStat.distanceKm);
+                    String sinfo = "\n " + date_str + "\n  (" + _minDist + "Km)";
+                    tv_heading.setText(sinfo);
+                    tv_distance.setText(_minDist);
+                    tv_duration.setText(activityStat.duration);
+                    tv_minperkm.setText(String.format("  %.2f",activityStat.minperKm));
+                    tv_carolies.setText("   " + activityStat.calories);
+                } else {
+                    Toast.makeText(alert.getContext(), "ERR: No Statistics Information !", Toast.LENGTH_LONG).show();
+                    String _minDist = String.format("-");
+                    String sinfo = "\n " + date_str + "\n  (" + _minDist + "Km)";
+                    tv_heading.setText(sinfo);
+                    tv_distance.setText(_minDist);
+                    tv_duration.setText("-");
+                    tv_minperkm.setText("-");
+                    tv_carolies.setText("-");
+                }
             }
 
             @Override

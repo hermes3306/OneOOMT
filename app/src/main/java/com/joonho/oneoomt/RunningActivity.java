@@ -374,9 +374,11 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
 
 
         mLatLngList = dbgateway.allLatLng(getApplicationContext());
+        mLocTime = dbgateway.allLocTime(getApplicationContext());
 
+        //ArrayList<myActivity>  myActivityList = dbgateway.allActivitiy(getApplicationContext());
         //  버그 0001
-        mLocTime = new Vector();for(int i=0;i<mLatLngList.size();i++) mLocTime.add(System.currentTimeMillis());
+        // mLocTime = new Vector();for(int i=0;i<mLatLngList.size();i++) mLocTime.add(System.currentTimeMillis());
 
         btn_event();
         doMyTimeTask();
@@ -397,7 +399,8 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
         getSharedPreferences();
 
         mLatLngList = dbgateway.allLatLng(getApplicationContext());
-        mLocTime = new Vector();for(int i=0;i<mLatLngList.size();i++) mLocTime.add(System.currentTimeMillis());
+        mLocTime = dbgateway.allLocTime(getApplicationContext());
+        //mLocTime = new Vector();for(int i=0;i<mLatLngList.size();i++) mLocTime.add(System.currentTimeMillis());
 
         btn_event();
         doMyTimeTask();
@@ -1752,11 +1755,12 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
             Date now = new Date();
             String fileName = formatter.format(now);  // + ".ser";
 
-            activity_file_name = mPref.getString("pLatestFilename", fileName);
-            if(activity_file_name != null) et.setText(activity_file_name);
-            else { et.setText(fileName); activity_file_name = fileName;}
+            et.setText(fileName);
 
-
+//            activity_file_name = mPref.getString("pLatestFilename", fileName);
+//            if(activity_file_name != null) et.setText(activity_file_name);
+//            else { et.setText(fileName); activity_file_name = fileName;}
+            
             alertDialog.setView(et);
 
             alertDialog.setPositiveButton("Serialize", new DialogInterface.OnClickListener() {

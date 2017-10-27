@@ -40,6 +40,7 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.joonho.oneoomt.R;
 import com.joonho.oneoomt.RunningActivity;
+import com.joonho.oneoomt.file.ActivityStat;
 import com.joonho.oneoomt.file.myActivity;
 import com.joonho.oneoomt.file.myPicture;
 
@@ -51,6 +52,7 @@ import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -69,7 +71,7 @@ public class ActivityUtil {
     public static File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "OneOOMT");
     public static String TAG = "ActivityUtil";
     public static ArrayList<myActivity> mActivityList = new ArrayList<myActivity>();
-    public static float myzoom = 14;
+    public static float myzoom = 16;
     public static ArrayList<Marker> markers = new ArrayList<Marker>();
 
 
@@ -253,6 +255,7 @@ public class ActivityUtil {
 
         if(!mode_append) {
             mActivityList.clear();
+            markers.clear();
             gmap.clear();
         }
 
@@ -275,7 +278,7 @@ public class ActivityUtil {
         //dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         /////make map clear
         dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-        dialog.setContentView(R.layout.dialogmap);////your custom content
+        dialog.setContentView(R.layout.dialogmap2);////your custom content
 
         MapView mMapView = (MapView) dialog.findViewById(R.id.mapView);
         MapsInitializer.initialize(ctx);
@@ -290,7 +293,7 @@ public class ActivityUtil {
                 googleMap.addMarker(new MarkerOptions().position(posisiabsen).title("Yout title"));
                 googleMap.moveCamera(CameraUpdateFactory.newLatLng(posisiabsen));
                 googleMap.getUiSettings().setZoomControlsEnabled(true);
-                googleMap.animateCamera(CameraUpdateFactory.zoomTo(14), 2000, null);
+                googleMap.animateCamera(CameraUpdateFactory.zoomTo(myzoom), 2000, null);
             }
         });
 
@@ -302,9 +305,9 @@ public class ActivityUtil {
         // 마지막 위치에 대해서 이동함.
         myActivity last = list.get(list.size()-1);
         LatLng lastll = new LatLng(last.latitude, last.longitude);
-        gmap.moveCamera(CameraUpdateFactory.newLatLngZoom(lastll, 14));
+        gmap.moveCamera(CameraUpdateFactory.newLatLngZoom(lastll, myzoom));
 
-        CameraPosition cameraPosition = new CameraPosition.Builder().target(lastll).zoom(14).build();
+        CameraPosition cameraPosition = new CameraPosition.Builder().target(lastll).zoom(myzoom).build();
         gmap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
     }
 
@@ -321,6 +324,91 @@ public class ActivityUtil {
         line.setPoints(l);
     }
 
+    public static double  getTotalDistanceKm(ArrayList<myActivity> list) {
+        double dist_meter = getTotalDistanceDouble(list);
+        double dist_kilo = dist_meter / 1000f;
+        return dist_kilo;
+    }
+
+    public static double getMinPerKm(Date start, Date end, double km) {
+        long dur_sec = (end.getTime() - start.getTime())/1000;
+        long dur_min = dur_sec/60;
+
+        double minpk = (double)(dur_min / km);
+        return minpk;
+    }
+
+    public static double getTotalDistanceDouble(ArrayList<myActivity> list) {
+        if(list == null) return 0;
+        if(list.size() ==2) return 0;
+
+        double dist_meter = 0;
+        for(int i=0; i<list.size()-1; i++) {
+            double bef_lat = list.get(i).latitude;
+            double bef_lon = list.get(i).longitude;
+            double aft_lat = list.get(i+1).latitude;
+            double aft_lon = list.get(i+1).longitude;
+
+            CalDistance cd = new CalDistance(bef_lat, bef_lon, aft_lat, aft_lon);
+            double dist_2 = cd.getDistance();
+            if(Double.isNaN(dist_2)) {
+                Log.e(TAG, "Double.NaN between ("+bef_lat + ","+ bef_lon +") ~ ("+ aft_lat + ","+ aft_lon + ")" ) ;
+                continue;
+            } else if ( Double.isNaN(dist_meter + dist_2)) {
+                Log.e(TAG, "Double.NaN between ("+bef_lat + ","+ bef_lon +") ~ ("+ aft_lat + ","+ aft_lon + ")" ) ;
+                continue;
+            }
+            Log.e(TAG, "" + dist_2 + " sum: " + dist_meter);
+            dist_meter = dist_meter + dist_2;
+        }
+        return dist_meter;
+    }
+
+
+
+    public static ActivityStat getActivityStat(ArrayList <myActivity> list) {
+        if(list == null) return null;
+        if(list.size() ==2) return null;
+
+        myActivity start, stop;
+        start = list.get(0);
+        stop = list.get(list.size()-1);
+
+        Date start_date, stop_date;
+        start_date = StringUtil.StringToDate(start.added_on,"yyyy년MM월dd일_HH시mm분ss초"); // <-
+        stop_date = StringUtil.StringToDate(stop.added_on,"yyyy년MM월dd일_HH시mm분ss초");  // <-
+
+        Log.e(TAG, start.toString());
+        Log.e(TAG, stop.toString());
+
+        String duration = StringUtil.Duration(start_date, stop_date); // <-
+        Log.e(TAG, duration);
+
+        double total_distM = getTotalDistanceDouble(list);  // <-
+        double total_distKm = total_distM / 1000f;
+        double minpk = getMinPerKm(start_date, stop_date, total_distKm); // <-
+        ActivityStat as = new ActivityStat(start_date, stop_date, duration, total_distM, total_distKm, minpk, 0);
+        return as;
+    }
+
+
+    public static String getStartTime(ArrayList<myActivity> list) {
+        if(list == null) return null;
+        if(list.size()==0) return null;
+
+        Date date = StringUtil.StringToDate(list.get(0).added_on, "yyyy년MM월dd일_HH시mm분ss초");
+        String date_str = StringUtil.DateToString1(date, "MM월 dd일 HH시 mm분");
+        return date_str;
+    }
+
+    public static String getEndTime(ArrayList<myActivity> list) {
+        if(list == null) return null;
+        if(list.size()-1 <0) return null;
+
+        Date date = StringUtil.StringToDate(list.get(list.size()-1).added_on, "yyyy년MM월dd일_HH시mm분ss초");
+        String date_str = StringUtil.DateToString1(date, "MM월 dd일 HH시 mm분");
+        return date_str;
+    }
 
     public static void drawMarkers(Context ctx, GoogleMap gmap, ArrayList<myActivity> list) {
         for(int i=0; i < list.size(); i++) {
@@ -355,7 +443,7 @@ public class ActivityUtil {
         final Context _ctx = ctx;
         final AlertDialog.Builder alertDialog = new AlertDialog.Builder(ctx);
         final File _file = file;
-        alertDialog.setView(R.layout.dialogmap);
+        alertDialog.setView(R.layout.dialogmap2);
 
         alertDialog.setNegativeButton("Back",null);
         final AlertDialog alert = alertDialog.create();
@@ -368,33 +456,45 @@ public class ActivityUtil {
         mMapView.onResume();
 
         mMapView.getMapAsync(new OnMapReadyCallback() {
-            @Override
-            public void onMapReady(final GoogleMap googleMap) {
-                deserializeIntoMap(_ctx, _file, googleMap, false);
-                ImageButton imbt_prev = (ImageButton) alert.findViewById(R.id.imbt_prev);
-                ImageButton imbt_next = (ImageButton) alert.findViewById(R.id.imbt_next);
-                final TextView tv_cursor = (TextView) alert.findViewById(R.id.tv_cursor);
-                final TextView tv_heading = (TextView) alert.findViewById(R.id.tv_heading);
+            final TextView tv_cursor = (TextView) alert.findViewById(R.id.tv_cursor);
+            final TextView tv_heading = (TextView) alert.findViewById(R.id.tv_heading);
+            final ImageButton imbt_prev = (ImageButton) alert.findViewById(R.id.imbt_prev);
+            final ImageButton imbt_next = (ImageButton) alert.findViewById(R.id.imbt_next);
+            final TextView tv_distance = (TextView)alert.findViewById(R.id.tv_distance);
+            final TextView tv_duration = (TextView)alert.findViewById(R.id.tv_duration);
+            final TextView tv_minperkm = (TextView)alert.findViewById(R.id.tv_minperkm);
+            final TextView tv_carolies = (TextView)alert.findViewById(R.id.tv_carolies);
 
+            final File flist[] = getFiles();
 
-                final File flist[] = getFiles();
-                String inx_str = "" + (position+1)  + "/" + flist.length;
+            public void GO(final GoogleMap googleMap, File myfile) {
+                deserializeIntoMap(_ctx, myfile, googleMap, false);
+                ActivityStat activityStat = getActivityStat(mActivityList);
+
+                String inx_str = "" + (position+1)  + "/" + flist.length + "\n";
                 tv_cursor.setText(inx_str);
 
-                Date date = new Date(_file.lastModified());
-                String date_str = StringUtil.DateToString1(date, "MM월 dd일 HH시");
-                String _minDist = "";
-                String sinfo = "\n " + date_str + "\n  (" + _minDist + " 거리)";
+                String date_str = getStartTime(mActivityList);
+
+                String _minDist = String.format("%.2f", activityStat.distanceKm);
+                String sinfo = "\n " + date_str + "\n  (" + _minDist + "Km)";
                 tv_heading.setText(sinfo);
+
+                tv_distance.setText(_minDist);
+                tv_duration.setText(activityStat.duration);
+                tv_minperkm.setText(String.format("  %.2f",activityStat.minperKm));
+                tv_carolies.setText("   " + activityStat.calories);
+            }
+
+            @Override
+            public void onMapReady(final GoogleMap googleMap) {
+                GO(googleMap, _file);
 
                 imbt_prev.setOnClickListener(new View.OnClickListener(){
                     public void onClick (View view) {
                         if (position > 0 && position < flist.length) {
                             position--;
-                            final File myfile = flist[position];
-                            deserializeIntoMap(_ctx, myfile, googleMap, false);
-                            String inx_str = "" + (position+1)  + "/" + flist.length;
-                            tv_cursor.setText(inx_str);
+                            GO(googleMap, flist[position]);
                         }
                     }
                 });
@@ -404,10 +504,7 @@ public class ActivityUtil {
                         File flist[] = getFiles();
                         if (position >= 0 && position < flist.length-1) {
                             position++;
-                            final File myfile = flist[position];
-                            deserializeIntoMap(_ctx, myfile, googleMap, false);
-                            String inx_str = "" + (position+1)  + "/" + flist.length;
-                            tv_cursor.setText(inx_str);
+                            GO(googleMap, flist[position]);
                         }
                     }
                 });

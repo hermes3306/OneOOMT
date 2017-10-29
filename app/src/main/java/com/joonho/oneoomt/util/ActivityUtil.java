@@ -57,7 +57,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Set;
+import java.util.Vector;
 
 import static com.joonho.oneoomt.RunningActivity.mCurLoc;
 import static com.joonho.oneoomt.RunningActivity.mLatLngList;
@@ -74,8 +77,76 @@ public class ActivityUtil {
     public static float myzoom = 16;
     public static ArrayList<Marker> markers = new ArrayList<Marker>();
 
+    public static void Admin_Task() {
+        // Task 1:
+        Admin_Deserialize_All();
+    }
 
-    public static void serialize(String fileName) {
+
+    public static void Admin_Deserialize_All() {
+        File aflist[] = getFiles();
+        if (aflist == null) return;
+        if (aflist.length == 0) return;
+
+        ArrayList<myActivity> amyActList = new ArrayList<myActivity>();
+        HashMap<String, ArrayList<myActivity>> mHashMap = new HashMap<String, ArrayList<myActivity>>();
+
+        for (int i = 0; i < aflist.length; i++) {
+            String afname = aflist[i].getName();
+            if(afname.endsWith(".day")) continue;
+
+            Log.e(TAG, "" + i + " ]" + aflist[i].getName() + "\n");
+            ArrayList<myActivity> list = deserializeFile(aflist[i]);
+            if(list == null) {
+                Log.e(TAG, "File (" + aflist[i] + ") deserialzation failed !"  );
+                continue;
+            }
+            for (int j = 0; j < list.size(); j++) {
+                myActivity ma = list.get(j);
+                //ma.added_on;
+                Date tdate = StringUtil.StringToDate(ma.added_on, "yyyy년MM월dd일_HH시mm분ss초");
+                String key = StringUtil.DateToString1(tdate, "yyyy년MM월dd일(E)");
+
+                if (mHashMap.containsKey(key)) {
+                    ArrayList<myActivity> daylist = mHashMap.get(key);
+                    daylist.add(ma);
+                } else {
+                    ArrayList<myActivity> daylist = new ArrayList<myActivity>();
+                    daylist.add(ma);
+                    mHashMap.put(key, daylist);
+                }
+            }
+        }
+
+        String[] keyset = new String[mHashMap.size()];
+        int inx=0;
+        for(String key : mHashMap.keySet()) {
+            keyset[inx] = key;
+            inx++;
+        }
+
+        Arrays.sort(keyset);
+
+        for(int i=0;i<keyset.length;i++) {
+            ArrayList<myActivity> daylist = mHashMap.get(keyset[i]);
+            Log.e(TAG, keyset[i] + "" + daylist.size());
+            serializeActivityIntoFile(daylist, keyset[i] + ".day");
+        }
+
+//        for (String key: mHashMap.keySet()) {
+//            ArrayList<myActivity> daylist = mHashMap.get(key);
+//            Log.e(TAG, key + "" + daylist.size());
+//            serializeActivityIntoFile(daylist, key + ".ser");
+//        }
+    }
+
+    public static void serializeActivityIntoFile(ArrayList<myActivity> list, String fileName) {
+        if(list== null) return;
+        if(fileName == null) return;
+
+        if(list.size()==0) return;
+        if(fileName.length() ==0 ) return;
+
         if(!mediaStorageDir.exists()) mediaStorageDir.mkdirs();
         File file = new File(mediaStorageDir, fileName);
 
@@ -86,10 +157,8 @@ public class ActivityUtil {
             BufferedOutputStream bos = new BufferedOutputStream(fos);
             ObjectOutputStream out = new ObjectOutputStream(bos);
 
-            for(int i=0;i<mLatLngList.size();i++) {
-                Date t_date = new Date((long)mLocTime.get(i));
-                String addon = StringUtil.DateToString1(t_date, "yyyy년MM월dd일_HH시mm분ss초");
-                myActivity ma = new myActivity(mLatLngList.get(i).latitude, mLatLngList.get(i).longitude, addon);
+            for(int i=0;i<list.size();i++) {
+                myActivity ma = list.get(i);
                 out.writeObject(ma);
             }
             out.close();
@@ -97,6 +166,18 @@ public class ActivityUtil {
             e.printStackTrace();
             Log.e(TAG, e.toString());
         }
+    }
+
+
+    public static void serialize(String fileName) {   //  현재 스크린상의  Activity를 저장함.
+        ArrayList<myActivity> malist = new ArrayList<myActivity>();
+        for (int i = 0; i < mLatLngList.size(); i++) {
+            Date t_date = new Date((long) mLocTime.get(i));
+            String addon = StringUtil.DateToString1(t_date, "yyyy년MM월dd일_HH시mm분ss초");
+            myActivity ma = new myActivity(mLatLngList.get(i).latitude, mLatLngList.get(i).longitude, addon);
+            malist.add(ma);
+        }
+        serializeActivityIntoFile(malist, fileName);
     }
 
     public static File[] getFiles() {
@@ -151,7 +232,28 @@ public class ActivityUtil {
     }
 
     public static void deserialize(File file, boolean mode_append) {
-        if(file == null)  return;
+        ArrayList list = deserializeFile(file);
+        if (list==null) return;
+        if (list.size()==0) return;
+
+        if(!mode_append) {
+            mLatLngList.clear();
+            mLocTime.clear();
+        }
+
+        for(int i=0;i<list.size();i++) {
+            myActivity ma = (myActivity)list.get(i);
+            mLatLngList.add(new LatLng(ma.latitude, ma.longitude));
+            Date tdate = StringUtil.StringToDate(ma.added_on, "yyyy년MM월dd일_HH시mm분ss초");
+            mLocTime.add(tdate.getTime());
+        }
+    }
+
+    public static ArrayList<myActivity> deserializeFile(File file) {
+        if(file == null)  {
+            Log.e(TAG,"ERR] Try to deserialize null file.....");
+            return null;
+        }
 
         FileInputStream fis = null;
         BufferedInputStream bis = null;
@@ -171,12 +273,10 @@ public class ActivityUtil {
                     ma = (myActivity) in.readObject();
                     list.add(ma);
                 }catch(Exception ex) {
-                    if(list != null) return;
+                    if(list != null) return list;
                 }
             } while(ma != null);
-
-
-         } catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         } finally {
             try {
@@ -191,18 +291,7 @@ public class ActivityUtil {
                 }
             }catch(Exception e) {}
         }
-
-        if(mode_append) {
-            mLatLngList.clear();
-            mLocTime.clear();
-        }
-
-        for(int i=0;i<list.size();i++) {
-            myActivity ma = (myActivity)list.get(i);
-            mLatLngList.add(new LatLng(ma.latitude, ma.longitude));
-            Date tdate = StringUtil.StringToDate(ma.added_on, "yyyy년MM월dd일_HH시mm분ss초");
-            mLocTime.add(tdate.getTime());
-        }
+        return list;
     }
 
     public static void deserializeIntoMap(Context ctx, File file, GoogleMap gmap, boolean mode_append) {
@@ -398,7 +487,7 @@ public class ActivityUtil {
         if(list.size()==0) return null;
 
         Date date = StringUtil.StringToDate(list.get(0).added_on, "yyyy년MM월dd일_HH시mm분ss초");
-        String date_str = StringUtil.DateToString1(date, "MM월 dd일 HH시 mm분");
+        String date_str = StringUtil.DateToString1(date, "M월 d일 (E) H시 m분");
         return date_str;
     }
 
@@ -407,7 +496,7 @@ public class ActivityUtil {
         if(list.size()-1 <0) return null;
 
         Date date = StringUtil.StringToDate(list.get(list.size()-1).added_on, "yyyy년MM월dd일_HH시mm분ss초");
-        String date_str = StringUtil.DateToString1(date, "MM월 dd일 HH시 mm분");
+        String date_str = StringUtil.DateToString1(date, "M월 d일 (E) H시 m분");
         return date_str;
     }
 
@@ -427,7 +516,7 @@ public class ActivityUtil {
             LatLng ll = new LatLng(list.get(i).latitude, list.get(i).longitude);
             float color = (i==0) ?  BitmapDescriptorFactory.HUE_GREEN : ((i==list.size()-1)? BitmapDescriptorFactory.HUE_RED  :  BitmapDescriptorFactory.HUE_CYAN);
 
-            String title = list.get(i).added_on;
+             String title = list.get(i).added_on;
             if(i==0) {
                 Marker marker = gmap.addMarker(new MarkerOptions().position(ll).title(title)
                         .icon(BitmapDescriptorFactory.defaultMarker(color))

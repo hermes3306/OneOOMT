@@ -17,6 +17,7 @@ import android.widget.Toast;
 import com.joonho.oneoomt.db.DBGateway;
 import com.joonho.oneoomt.file.myActivity;
 import com.joonho.oneoomt.file.myPicture;
+import com.joonho.oneoomt.util.ActivityUtil;
 import com.joonho.oneoomt.util.FileUtils;
 import com.joonho.oneoomt.util.PhotoUtil;
 import com.joonho.oneoomt.util.modifiedDate;
@@ -71,6 +72,9 @@ public class AdminActivity extends AppCompatActivity implements View.OnClickList
                 break;
             case R.id.imageButton_rebuildMyPictureList:
                 PhotoUtil.buildFolderPictureList(PhotoUtil.mediaStorageDir);
+                break;
+            case R.id.imageButton_rebuildDailyActivities:
+                ActivityUtil.Admin_Deserialize_All();
                 break;
             case R.id.bt_admin_back:
                 finish();

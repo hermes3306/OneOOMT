@@ -192,6 +192,18 @@ public class ActivityUtil {
         return flist;
     }
 
+    public static File[] getFilesDaily() {
+        FilenameFilter fnf = new FilenameFilter() {
+            @Override
+            public boolean accept(File file, String s) {
+                return s.toLowerCase().endsWith(".day");
+            }
+        };
+
+        File[] flist  = mediaStorageDir.listFiles(fnf);
+        return flist;
+    }
+
     public static void serialize() {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy년MM월dd일_HH시mm분ss초", Locale.KOREA);
         Date now = new Date();

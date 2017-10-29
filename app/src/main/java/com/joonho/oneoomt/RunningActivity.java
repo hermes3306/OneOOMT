@@ -1942,6 +1942,40 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
             return true;
         }
 
+        if(id == R.id.item_list_files_v3) {
+            File list[] = ActivityUtil.getFilesDaily();
+            if(list == null) {
+                Toast.makeText(getApplicationContext(), "ERR: No Activities to show !", Toast.LENGTH_LONG).show();
+                return false;
+            }
+
+            int msize = list.length;
+
+            final CharSequence items[] = new CharSequence[msize];
+            final String filepath[] = new String[msize];
+
+            for(int i=0;i<msize;i++) {
+                items[i] = list[i].getName();
+                filepath[i] = list[i].getAbsolutePath();
+            }
+            //final CharSequence items[] = {" A "," B "};
+
+            AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+            //alertDialog.setIcon(R.drawable.window);
+            alertDialog.setTitle("Select An Activity");
+            alertDialog.setItems(items, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int index) {
+                    File afile = new File(filepath[index]);
+                    ActivityUtil.showActivityAlertDialog(RunningActivity.this, afile, index);
+                }
+            });
+            alertDialog.setNegativeButton("Back",null);
+            AlertDialog alert = alertDialog.create();
+            alert.show();
+            return true;
+        }
+
         //  DB에서 파일 리스트 보는 것으로 변경 필요함.
         if (id == R.id.item_list_files) {
             File list[] = ActivityUtil.getFiles();

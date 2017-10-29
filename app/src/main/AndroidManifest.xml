@@ -87,7 +87,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".AdminActivity"></activity>
+        <activity android:name=".AdminActivity" />
+        <activity
+            android:name=".StartRunActivity"
+            android:label="@string/title_activity_start_run"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".StartRunning2Activity"></activity>
     </application>
 
 </manifest>

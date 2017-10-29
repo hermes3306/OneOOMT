@@ -561,7 +561,7 @@ public class MapsActivity extends AppCompatActivity /*FragmentActivity*/ impleme
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.mainoptmenu, menu);
+        getMenuInflater().inflate(R.menu.mainoptmenu2, menu);
         return true;
     }
 
@@ -589,11 +589,6 @@ public class MapsActivity extends AppCompatActivity /*FragmentActivity*/ impleme
         if (id == R.id.main_opt_menu_item_conf) {
             Intent i = new Intent(MapsActivity.this, PropsActivity.class);
             startActivity(i);
-            return true;
-        }
-
-        if (id == R.id.main_opt_menu_item_cam) {
-            dispatchTakePictureIntent();
             return true;
         }
 
@@ -629,16 +624,6 @@ public class MapsActivity extends AppCompatActivity /*FragmentActivity*/ impleme
             if (mtype == GoogleMap.MAP_TYPE_NORMAL) mtype = GoogleMap.MAP_TYPE_SATELLITE;
             else mtype = GoogleMap.MAP_TYPE_NORMAL;
             mMap.setMapType(mtype);
-            return true;
-        }
-
-        if (id == R.id.main_opt_menu_item_zoomin) {
-            mMap.animateCamera(CameraUpdateFactory.zoomIn());
-            return true;
-        }
-
-        if (id == R.id.main_opt_menu_item_zoomout) {
-            mMap.animateCamera(CameraUpdateFactory.zoomOut());
             return true;
         }
 

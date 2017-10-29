@@ -1233,6 +1233,13 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
+
+        if (id == R.id.main_opt_menu_item_startActivity) {
+            Intent intent = new Intent(RunningActivity.this, StartRunning2Activity.class);
+            startActivity(intent);
+            return true;
+        }
+
         if (id == R.id.main_opt_menu_item_save) {
             btn_save();
             return true;
@@ -1248,11 +1255,6 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
         if (id == R.id.main_opt_menu_item_conf) {
             Intent i = new Intent(RunningActivity.this, PropsActivity.class);
             startActivity(i);
-            return true;
-        }
-
-        if (id == R.id.main_opt_menu_item_cam) {
-            dispatchTakePictureIntent();
             return true;
         }
 
@@ -1288,16 +1290,6 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
             if (mtype == GoogleMap.MAP_TYPE_NORMAL) mtype = GoogleMap.MAP_TYPE_SATELLITE;
             else mtype = GoogleMap.MAP_TYPE_NORMAL;
             mMap.setMapType(mtype);
-            return true;
-        }
-
-        if (id == R.id.main_opt_menu_item_zoomin) {
-            mMap.animateCamera(CameraUpdateFactory.zoomIn());
-            return true;
-        }
-
-        if (id == R.id.main_opt_menu_item_zoomout) {
-            mMap.animateCamera(CameraUpdateFactory.zoomOut());
             return true;
         }
 
@@ -1908,7 +1900,7 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
         }
 
         if(id == R.id.item_list_files_v2) {
-
+            ActivityUtil._default_ext = ".ser";
             File list[] = ActivityUtil.getFiles();
             if(list == null) {
                 Toast.makeText(getApplicationContext(), "ERR: No Activities to show !", Toast.LENGTH_LONG).show();
@@ -1943,7 +1935,8 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
         }
 
         if(id == R.id.item_list_files_v3) {
-            File list[] = ActivityUtil.getFilesDaily();
+            ActivityUtil._default_ext=".day";
+            File list[] = ActivityUtil.getFiles();
             if(list == null) {
                 Toast.makeText(getApplicationContext(), "ERR: No Activities to show !", Toast.LENGTH_LONG).show();
                 return false;

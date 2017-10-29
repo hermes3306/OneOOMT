@@ -76,6 +76,7 @@ public class ActivityUtil {
     public static ArrayList<myActivity> mActivityList = new ArrayList<myActivity>();
     public static float myzoom = 16;
     public static ArrayList<Marker> markers = new ArrayList<Marker>();
+    public static String _default_ext = ".ser";
 
     public static void Admin_Task() {
         // Task 1:
@@ -84,6 +85,7 @@ public class ActivityUtil {
 
 
     public static void Admin_Deserialize_All() {
+        _default_ext = ".ser";
         File aflist[] = getFiles();
         if (aflist == null) return;
         if (aflist.length == 0) return;
@@ -109,6 +111,26 @@ public class ActivityUtil {
 
                 if (mHashMap.containsKey(key)) {
                     ArrayList<myActivity> daylist = mHashMap.get(key);
+
+                    if(daylist.contains(ma)) {
+
+                        Log.e(TAG, "Dup Data[MA] : " + ma);
+                        continue;
+                    }
+
+                    boolean found = false;
+                    for(int q=0;q<daylist.size();q++) {
+                        myActivity qma = daylist.get(q);
+                        if ( qma.added_on.equals(ma.added_on) ) {
+                            found = true;
+                            break;
+                        }
+                    }
+                    if(found) {
+                        Log.e(TAG, "Dup Date[DT} : " + ma);
+                        continue;
+                    }
+
                     daylist.add(ma);
                 } else {
                     ArrayList<myActivity> daylist = new ArrayList<myActivity>();
@@ -180,15 +202,18 @@ public class ActivityUtil {
         serializeActivityIntoFile(malist, fileName);
     }
 
+
+
     public static File[] getFiles() {
         FilenameFilter fnf = new FilenameFilter() {
             @Override
             public boolean accept(File file, String s) {
-                return s.toLowerCase().endsWith(".ser");
+                return s.toLowerCase().endsWith(_default_ext);
             }
         };
 
         File[] flist  = mediaStorageDir.listFiles(fnf);
+        Arrays.sort(flist);
         return flist;
     }
 
@@ -201,6 +226,7 @@ public class ActivityUtil {
         };
 
         File[] flist  = mediaStorageDir.listFiles(fnf);
+        Arrays.sort(flist);
         return flist;
     }
 
@@ -366,12 +392,12 @@ public class ActivityUtil {
             mActivityList.add(ma);
         }
 
-        Log.e(TAG, "Before drawMarkers()");
+        //Log.e(TAG, "Before drawMarkers()");
 
         drawTrack(gmap, mActivityList);
         drawMarkers(ctx, gmap, mActivityList);
 
-        Log.e(TAG, "After drawMarkers()");
+        //Log.e(TAG, "After drawMarkers()");
     }
 
     public static  void showActivityAlertDialog_2(Context ctx, File file, int index) {
@@ -460,7 +486,7 @@ public class ActivityUtil {
                 continue;
             }
             dist_meter = dist_meter + dist_2;
-            Log.e(TAG, "" + i + "]" +  list.get(i).added_on + dist_2 + " sum: " + dist_meter +  " ("+bef_lat + ","+ bef_lon +") ~ ("+ aft_lat + ","+ aft_lon + ")");
+            //Log.e(TAG, "" + i + "]" +  list.get(i).added_on + dist_2 + " sum: " + dist_meter +  " ("+bef_lat + ","+ bef_lon +") ~ ("+ aft_lat + ","+ aft_lon + ")");
             //Log.e(TAG, "" + dist_2 + " sum: " + dist_meter);
         }
         return dist_meter;
@@ -553,7 +579,7 @@ public class ActivityUtil {
                 t_distance = t_distance + dist;
                 if(t_distance > t_lap) {
                     int interval = (int)(t_distance / disunit);
-                    Log.e(TAG, "" + interval + unitstr);
+                    //Log.e(TAG, "" + interval + unitstr);
                     t_lap += disunit;
 
 
@@ -593,11 +619,13 @@ public class ActivityUtil {
         final AlertDialog alert = alertDialog.create();
         alert.show();
 
-        MapView mMapView = (MapView) alert.findViewById(R.id.mapView);
+        final MapView mMapView = (MapView) alert.findViewById(R.id.mapView);
         MapsInitializer.initialize(ctx);
 
         mMapView.onCreate(alert.onSaveInstanceState());
         mMapView.onResume();
+
+
 
         mMapView.getMapAsync(new OnMapReadyCallback() {
             final TextView tv_cursor = (TextView) alert.findViewById(R.id.tv_cursor);

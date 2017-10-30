@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.location.Location;
 import android.os.Environment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -42,6 +43,7 @@ import com.joonho.oneoomt.R;
 import com.joonho.oneoomt.RunningActivity;
 import com.joonho.oneoomt.file.ActivityStat;
 import com.joonho.oneoomt.file.myActivity;
+import com.joonho.oneoomt.file.myActivity2;
 import com.joonho.oneoomt.file.myPicture;
 
 import java.io.BufferedInputStream;
@@ -202,7 +204,36 @@ public class ActivityUtil {
         serializeActivityIntoFile(malist, fileName);
     }
 
+    public static String serializeWithCurrentTime(ArrayList<myActivity> list) {
 
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy년MM월dd일_HH시mm분ss초", Locale.KOREA);
+        Date now = new Date();
+        String fileName = formatter.format(now);
+        serializeActivityIntoFile(list,fileName + ".ser");
+        return fileName;
+    }
+
+    public static ArrayList<myActivity> Loc2Activity(ArrayList<Location> loclist) {
+        ArrayList<myActivity> mylist = new ArrayList<myActivity>();
+        for(int i=0;i<loclist.size();i++ ) {
+            Location loc = (Location)loclist.get(i);
+            String added_on = StringUtil.DateToString1(new Date(loc.getTime()), "yyyy년MM월dd일_HH시mm분ss초" );
+            myActivity ma = new myActivity(loc.getLatitude(), loc.getLongitude(), added_on);
+            mylist.add(ma);
+        }
+        return mylist;
+    }
+
+    public static ArrayList<myActivity2> Loc2Activity2(ArrayList<Location> loclist) {
+        ArrayList<myActivity2> mylist = new ArrayList<myActivity2>();
+        for(int i=0;i<loclist.size();i++ ) {
+            Location loc = (Location)loclist.get(i);
+            String added_on = StringUtil.DateToString1(new Date(loc.getTime()), "yyyy년MM월dd일_HH시mm분ss초" );
+            myActivity2 ma = new myActivity2(loc.getLatitude(), loc.getLongitude(), loc.getAltitude(), added_on);
+            mylist.add(ma);
+        }
+        return mylist;
+    }
 
     public static File[] getFiles() {
         FilenameFilter fnf = new FilenameFilter() {

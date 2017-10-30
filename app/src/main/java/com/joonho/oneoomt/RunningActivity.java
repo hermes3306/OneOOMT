@@ -1240,6 +1240,12 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
             return true;
         }
 
+        if (id == R.id.main_opt_menu_item_startActivity2) {
+            Intent intent = new Intent(RunningActivity.this, StartRunActivity.class);
+            startActivity(intent);
+            return true;
+        }
+
         if (id == R.id.main_opt_menu_item_save) {
             btn_save();
             return true;

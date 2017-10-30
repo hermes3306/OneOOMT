@@ -197,12 +197,13 @@
         android:orientation="horizontal">
 
         <ImageButton
-            android:id="@+id/imageButton"
+            android:id="@+id/imb_stop1"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="center"
             android:layout_weight="1"
             android:background="@android:color/transparent"
+            android:onClick="onClick"
             app:srcCompat="@drawable/pause_64" />
 
     </LinearLayout>

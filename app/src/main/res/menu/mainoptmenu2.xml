@@ -3,8 +3,11 @@
 
     <item
         android:id="@+id/main_opt_menu_item_startActivity"
-        android:title="Start Activity)" />
+        android:title="Start Activity" />
 
+    <item
+        android:id="@+id/main_opt_menu_item_startActivity2"
+        android:title="Start Activity(v2)" />
 
     <item android:id="@+id/map_ui" android:title="Map UI(v1)" >
         <menu>

@@ -36,6 +36,35 @@ public class StringUtil {
         return date;
     }
 
+    public static String getMinPerKM(double dist_kilo, long elapsed) {
+        double elaped_min = elapsed / 60f;
+        double minpk = (double) (elaped_min / dist_kilo);
+        String minpk_str = null;
+
+        int minpk_hour = (int)(minpk/3600f);
+        int minpk_min =  (int)((minpk - minpk_hour*3600f) /60f);
+        int minpk_sec =  (int)(minpk - minpk_hour*3600f - minpk_min * 60f);
+
+        if(Double.isInfinite(minpk) || Double.isNaN(minpk)) minpk_str = "--:--";
+        else if(minpk_hour != 0)          minpk_str = String.format("%2d:%02d:%02d", minpk_hour, minpk_min, minpk_sec);
+        else                        minpk_str = String.format("%2d:%02d", minpk_min, minpk_sec);
+        return minpk_str;
+    }
+
+    public static String getElapsedTimeStr(long elapsed) {
+        double elaped_min = elapsed / 60f;
+        double minpk = elaped_min;
+        String minpk_str = null;
+
+        int minpk_hour = (int)(minpk/3600f);
+        int minpk_min =  (int)((minpk - minpk_hour*3600f) /60f);
+        int minpk_sec =  (int)(minpk - minpk_hour*3600f - minpk_min * 60f);
+
+        if(Double.isInfinite(minpk) || Double.isNaN(minpk)) minpk_str = "--:--";
+        else if(minpk_hour != 0)          minpk_str = String.format("%2d:%02d:%02d", minpk_hour, minpk_min, minpk_sec);
+        else                        minpk_str = String.format("%2d:%02d", minpk_min, minpk_sec);
+        return minpk_str;
+    }
 
     public static String DateToString1(Date date, String format) { // eg) format = "yyyy/MM/dd HH:mm:ss"
         String dformat = format;
@@ -52,6 +81,7 @@ public class StringUtil {
         startTime = start_date.getTime();
         endTime = end_date.getTime();
         long duration = endTime - startTime;
+
         long dur_sec = duration / 1000;
         long duration_r;
 

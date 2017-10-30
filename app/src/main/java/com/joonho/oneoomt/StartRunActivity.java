@@ -17,6 +17,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -88,7 +89,7 @@ public class StartRunActivity extends AppCompatActivity {
     /**
      * A placeholder fragment containing a simple view.
      */
-    public static class PlaceholderFragment extends Fragment {
+    public static class PlaceholderFragment extends Fragment{
         /**
          * The fragment argument representing the section number for this
          * fragment.
@@ -113,13 +114,6 @@ public class StartRunActivity extends AppCompatActivity {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
-
-
-
-//            View rootView = inflater.inflate(R.layout.fragment_start_run, container, false);
-//            TextView textView = (TextView) rootView.findViewById(R.id.section_label);
-//            textView.setText(getString(R.string.section_format, getArguments().getInt(ARG_SECTION_NUMBER)));
-
             int _section_number = getArguments().getInt(ARG_SECTION_NUMBER);
             View rootView = null;
             Log.e(TAG, "Section_Number:" + _section_number);
@@ -135,7 +129,29 @@ public class StartRunActivity extends AppCompatActivity {
                 default:
                     break;
             }
-            Toast.makeText(rootView.getContext(), "" + getArguments().getInt(ARG_SECTION_NUMBER) + " Screen !", Toast.LENGTH_LONG).show();
+            //Toast.makeText(rootView.getContext(), "" + getArguments().getInt(ARG_SECTION_NUMBER) + " Screen !", Toast.LENGTH_LONG).show();
+
+            if(getArguments().getInt(ARG_SECTION_NUMBER) ==1) {
+                ImageButton imb_stop1 = (ImageButton) rootView.findViewById(R.id.imb_stop1);
+                imb_stop1.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Toast.makeText(view.getContext(), "Image Button 1 On Click !", Toast.LENGTH_LONG).show();
+                        Log.e(TAG, "Image Button 1 On Click !");
+                    }
+                });
+            }
+
+            if(getArguments().getInt(ARG_SECTION_NUMBER) ==2) {
+                ImageButton imb_stop2 = (ImageButton) rootView.findViewById(R.id.imb_stop2);
+                imb_stop2.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Toast.makeText(view.getContext(), "Image Button 2 On Click !", Toast.LENGTH_LONG).show();
+                        Log.e(TAG, "Image Button 2 On Click !");
+                    }
+                });
+            }
             return rootView;
         }
     }
@@ -160,7 +176,7 @@ public class StartRunActivity extends AppCompatActivity {
         @Override
         public int getCount() {
             // Show 3 total pages.
-            return 3;
+            return 2;
         }
     }
 }

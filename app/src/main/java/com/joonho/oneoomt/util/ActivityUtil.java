@@ -496,6 +496,16 @@ public class ActivityUtil {
         return minpk;
     }
 
+    public static double getMinPerKm(long start, long end, double km) {
+        long dur_sec = (end-start) /1000;
+        long dur_min = dur_sec/60;
+
+        double minpk = (double)(dur_min / km);
+        return minpk;
+    }
+
+
+
     public static double getTotalDistanceDouble(ArrayList<myActivity> list) {
         if(list == null) return 0;
         if(list.size() ==2) return 0;

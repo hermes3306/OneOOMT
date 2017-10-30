@@ -36,6 +36,7 @@ import static com.joonho.oneoomt.RunningActivity.pTimerPeriod;
 
 public class StartRunning2Activity extends AppCompatActivity implements View.OnClickListener {
     private String TAG = "StartRunning2Activity";
+
     private long start_time, end_time;
     private TextView tv_time_elapsed = null;
     private TextView tv_total_distance = null;

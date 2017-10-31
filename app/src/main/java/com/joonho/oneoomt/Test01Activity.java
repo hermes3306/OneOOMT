@@ -21,71 +21,141 @@ public class Test01Activity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_test01);
 
-        new AsyncTask<Void,Void,Void>(){
+//        new AsyncTask<Void,Void,Void>(){
+//            String strUrl = null;
+//            URL Url = null;
+//            String strCookie = null;
+//            String result;
+//            ProgressDialog progressDialog;
+//
+//            @Override
+//            protected void onPreExecute() {
+//                super.onPreExecute();
+//                progressDialog = ProgressDialog.show(Test01Activity.this,
+//                        "ProgressDialog",
+//                        "이제 "+ 60 + " 초 동안 기다려 주세요.");
+//                        strUrl = "http://www.naver.com"; //탐색하고 싶은 URL이다.
+//            }
+//
+//            @Override
+//            protected Void doInBackground(Void... voids) {
+//                publishProgress();
+//                try{
+//                    Url = new URL(strUrl); // URL화 한다.
+//                    HttpURLConnection conn = (HttpURLConnection) Url.openConnection(); // URL을 연결한 객체 생성.
+//                    conn.setRequestMethod("GET"); // get방식 통신
+//                    conn.setDoOutput(true); // 쓰기모드 지정
+//                    conn.setDoInput(true); // 읽기모드 지정
+//                    conn.setUseCaches(false); // 캐싱데이터를 받을지 안받을지
+//                    conn.setDefaultUseCaches(false); // 캐싱데이터 디폴트 값 설정
+//
+//                    strCookie = conn.getHeaderField("Set-Cookie"); //쿠키데이터 보관
+//
+//
+//                    InputStream is = conn.getInputStream(); //input스트림 개방
+//
+//                    StringBuilder builder = new StringBuilder(); //문자열을 담기 위한 객체
+//                    BufferedReader reader = new BufferedReader(new InputStreamReader(is,"UTF-8")); //문자열 셋 세팅
+//                    String line;
+//
+//                    while ((line = reader.readLine()) != null) {
+//
+//                        try {
+//                            Thread.sleep(100);
+//                        }catch(Exception e) {
+//                            e.printStackTrace();
+//                        }
+//                        builder.append(line+ "\n");
+//                    }
+//
+//                    result = builder.toString();
+//
+//                }catch(MalformedURLException | ProtocolException exception) {
+//                    exception.printStackTrace();
+//                }catch(IOException io){
+//                    io.printStackTrace();
+//                }
+//                return null;
+//            }
+//
+//            @Override
+//            protected void onPostExecute(Void aVoid) {
+//                super.onPostExecute(aVoid);
+//                progressDialog.dismiss();
+//                System.out.println(result);
+//            }
+//        }.execute();
+
+
+        new AsyncTask<Void,Void,Void>() {
             String strUrl = null;
             URL Url = null;
             String strCookie = null;
             String result;
-            ProgressDialog progressDialog;
+
+            ProgressDialog asyncDialog = new ProgressDialog(Test01Activity.this);
 
             @Override
             protected void onPreExecute() {
+                asyncDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                asyncDialog.setMessage("로딩중입니다..");
+                asyncDialog.show();
                 super.onPreExecute();
-                progressDialog = ProgressDialog.show(Test01Activity.this,
-                        "ProgressDialog",
-                        "이제 "+ 60 + " 초 동안 기다려 주세요.");
-                        strUrl = "http://www.naver.com"; //탐색하고 싶은 URL이다.
             }
 
             @Override
             protected Void doInBackground(Void... voids) {
-                publishProgress();
-                try{
-                    Url = new URL(strUrl); // URL화 한다.
-                    HttpURLConnection conn = (HttpURLConnection) Url.openConnection(); // URL을 연결한 객체 생성.
-                    conn.setRequestMethod("GET"); // get방식 통신
-                    conn.setDoOutput(true); // 쓰기모드 지정
-                    conn.setDoInput(true); // 읽기모드 지정
-                    conn.setUseCaches(false); // 캐싱데이터를 받을지 안받을지
-                    conn.setDefaultUseCaches(false); // 캐싱데이터 디폴트 값 설정
-
-                    strCookie = conn.getHeaderField("Set-Cookie"); //쿠키데이터 보관
-
-
-                    InputStream is = conn.getInputStream(); //input스트림 개방
-
-                    StringBuilder builder = new StringBuilder(); //문자열을 담기 위한 객체
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(is,"UTF-8")); //문자열 셋 세팅
-                    String line;
-
-                    while ((line = reader.readLine()) != null) {
-
-                        try {
-                            Thread.sleep(1000);
-                        }catch(Exception e) {
-                            e.printStackTrace();
-                        }
-                        builder.append(line+ "\n");
+                try {
+                    for (int i = 0; i < 5; i++) {
+                        asyncDialog.setProgress(i * 30);
+                        Thread.sleep(500);
                     }
-
-                    result = builder.toString();
-
-                }catch(MalformedURLException | ProtocolException exception) {
-                    exception.printStackTrace();
-                }catch(IOException io){
-                    io.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
                 return null;
             }
 
             @Override
-            protected void onPostExecute(Void aVoid) {
-                super.onPostExecute(aVoid);
-                progressDialog.dismiss();
-                System.out.println(result);
+            protected void onPostExecute(Void result) {
+                asyncDialog.dismiss();
+                super.onPostExecute(result);
             }
         }.execute();
 
 
+
     }
 }
+
+
+
+/*
+
+   new AsyncTask<Void,Void,Void>() {
+            String result;
+            ProgressDialog asyncDialog = new ProgressDialog(context);
+
+            @Override
+            protected Void doInBackground(Void... voids) {
+                return null;
+            }
+
+            @Override
+            protected void onPreExecute() {
+                asyncDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                asyncDialog.setMessage("로딩중입니다..");
+                asyncDialog.show();
+                super.onPreExecute();
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                asyncDialog.dismiss();
+                super.onPostExecute(aVoid);
+            }
+        }.execute();
+
+
+
+ */

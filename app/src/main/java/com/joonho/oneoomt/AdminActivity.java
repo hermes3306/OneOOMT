@@ -71,10 +71,13 @@ public class AdminActivity extends AppCompatActivity implements View.OnClickList
                 validation_check4pics();
                 break;
             case R.id.imageButton_rebuildMyPictureList:
-                PhotoUtil.buildFolderPictureList(PhotoUtil.mediaStorageDir);
+                PhotoUtil.buildFolderPictureList(AdminActivity.this, PhotoUtil.mediaStorageDir);
+                break;
+            case R.id.imageButton_checkCurrptedPic:
+                PhotoUtil.checkCurruptedPic(AdminActivity.this);
                 break;
             case R.id.imageButton_rebuildDailyActivities:
-                ActivityUtil.Admin_Deserialize_All();
+                ActivityUtil.Admin_Deserialize_All(AdminActivity.this);
                 break;
             case R.id.bt_admin_back:
                 finish();

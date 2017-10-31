@@ -220,6 +220,31 @@
                 android:layout_height="match_parent">
 
                 <TextView
+                    android:id="@+id/textView123"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="100dp"
+                    android:text="check Currupted Image Files"
+                    android:textSize="18sp" />
+
+                <ImageButton
+                    android:id="@+id/imageButton_checkCurrptedPic"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right"
+                    android:layout_marginRight="1dp"
+                    android:background="@android:color/transparent"
+                    android:onClick="onClick"
+                    app:srcCompat="@drawable/oksign_32" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
                     android:id="@+id/textView20"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

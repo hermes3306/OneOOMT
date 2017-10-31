@@ -9,6 +9,17 @@
         android:id="@+id/main_opt_menu_item_startActivity2"
         android:title="Start Activity(v2)" />
 
+    <item android:id="@+id/test" android:title="Test">
+        <menu>
+            <item
+                android:id="@+id/main_opt_menu_asynctask"
+                android:title="AsyncTask" />
+            <item
+                android:id="@+id/main_opt_menu_asynctask2"
+                android:title="AsyncTask2" />
+        </menu>
+    </item>
+
     <item android:id="@+id/map_ui" android:title="Map UI(v1)" >
         <menu>
             <item

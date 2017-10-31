@@ -2,12 +2,14 @@ package com.joonho.oneoomt.util;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Environment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -39,8 +41,10 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.joonho.oneoomt.AdminActivity;
 import com.joonho.oneoomt.R;
 import com.joonho.oneoomt.RunningActivity;
+import com.joonho.oneoomt.Test01Activity;
 import com.joonho.oneoomt.file.ActivityStat;
 import com.joonho.oneoomt.file.myActivity;
 import com.joonho.oneoomt.file.myActivity2;
@@ -55,6 +59,7 @@ import java.io.FilenameFilter;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.lang.reflect.Array;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -80,88 +85,124 @@ public class ActivityUtil {
     public static ArrayList<Marker> markers = new ArrayList<Marker>();
     public static String _default_ext = ".ser";
 
-    public static void Admin_Task() {
-        // Task 1:
-        Admin_Deserialize_All();
-    }
-
-
-    public static void Admin_Deserialize_All() {
+    public static void Admin_Deserialize_All(final Context context) {
         _default_ext = ".ser";
-        File aflist[] = getFiles();
+        final File aflist[] = getFiles();
         if (aflist == null) return;
         if (aflist.length == 0) return;
 
-        ArrayList<myActivity> amyActList = new ArrayList<myActivity>();
-        HashMap<String, ArrayList<myActivity>> mHashMap = new HashMap<String, ArrayList<myActivity>>();
+        final ArrayList<myActivity> amyActList = new ArrayList<myActivity>();
+        final  HashMap<String, ArrayList<myActivity>> mHashMap = new HashMap<String, ArrayList<myActivity>>();
 
-        for (int i = 0; i < aflist.length; i++) {
-            String afname = aflist[i].getName();
-            if(afname.endsWith(".day")) continue;
 
-            Log.e(TAG, "" + i + " ]" + aflist[i].getName() + "\n");
-            ArrayList<myActivity> list = deserializeFile(aflist[i]);
-            if(list == null) {
-                Log.e(TAG, "File (" + aflist[i] + ") deserialzation failed !"  );
-                continue;
+        new AsyncTask<Void,Void,Void>() {
+            String result;
+            ProgressDialog asyncDialog = new ProgressDialog(context);
+
+            @Override
+            protected void onPreExecute() {
+                asyncDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                asyncDialog.setMessage("로딩중입니다..");
+                asyncDialog.show();
+                super.onPreExecute();
             }
-            for (int j = 0; j < list.size(); j++) {
-                myActivity ma = list.get(j);
-                //ma.added_on;
-                Date tdate = StringUtil.StringToDate(ma.added_on, "yyyy년MM월dd일_HH시mm분ss초");
-                String key = StringUtil.DateToString1(tdate, "yyyy년MM월dd일(E)");
 
-                if (mHashMap.containsKey(key)) {
-                    ArrayList<myActivity> daylist = mHashMap.get(key);
+            @Override
+            protected Void doInBackground(Void... voids) {
+                try {
 
-                    if(daylist.contains(ma)) {
+                    // -------------------------------------------
+                    for (int i = 0; i < aflist.length; i++) {
 
-                        Log.e(TAG, "Dup Data[MA] : " + ma);
-                        continue;
-                    }
 
-                    boolean found = false;
-                    for(int q=0;q<daylist.size();q++) {
-                        myActivity qma = daylist.get(q);
-                        if ( qma.added_on.equals(ma.added_on) ) {
-                            found = true;
-                            break;
+                        float ratio = (float) ((float) i / (float)aflist.length);
+                               ratio = ratio * 100f;
+
+                        Log.e(TAG, "Progress Ratio: " + (int)ratio);
+                        asyncDialog.setProgress((int)ratio);
+
+
+                        String afname = aflist[i].getName();
+                        if(afname.endsWith(".day")) continue;
+
+                        Log.e(TAG, "" + i + " ]" + aflist[i].getName() + "\n");
+                        ArrayList<myActivity> list = deserializeFile(aflist[i]);
+                        if(list == null) {
+                            Log.e(TAG, "File (" + aflist[i] + ") deserialzation failed !"  );
+                            continue;
                         }
-                    }
-                    if(found) {
-                        Log.e(TAG, "Dup Date[DT} : " + ma);
-                        continue;
+                        for (int j = 0; j < list.size(); j++) {
+                            myActivity ma = list.get(j);
+                            //ma.added_on;
+                            Date tdate = StringUtil.StringToDate(ma.added_on, "yyyy년MM월dd일_HH시mm분ss초");
+                            String key = StringUtil.DateToString1(tdate, "yyyy년MM월dd일(E)");
+
+                            if (mHashMap.containsKey(key)) {
+                                ArrayList<myActivity> daylist = mHashMap.get(key);
+
+                                if(daylist.contains(ma)) {
+
+                                    Log.e(TAG, "Dup Data[MA] : " + ma);
+                                    continue;
+                                }
+
+                                boolean found = false;
+                                for(int q=0;q<daylist.size();q++) {
+                                    myActivity qma = daylist.get(q);
+                                    if ( qma.added_on.equals(ma.added_on) ) {
+                                        found = true;
+                                        break;
+                                    }
+                                }
+                                if(found) {
+                                    Log.e(TAG, "Dup Date[DT} : " + ma);
+                                    continue;
+                                }
+
+                                daylist.add(ma);
+                            } else {
+                                ArrayList<myActivity> daylist = new ArrayList<myActivity>();
+                                daylist.add(ma);
+                                mHashMap.put(key, daylist);
+                            }
+                        }
+
                     }
 
-                    daylist.add(ma);
-                } else {
-                    ArrayList<myActivity> daylist = new ArrayList<myActivity>();
-                    daylist.add(ma);
-                    mHashMap.put(key, daylist);
+                    // --------------------------------------------
+
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
+                return null;
             }
-        }
 
-        String[] keyset = new String[mHashMap.size()];
-        int inx=0;
-        for(String key : mHashMap.keySet()) {
-            keyset[inx] = key;
-            inx++;
-        }
+            @Override
+            protected void onPostExecute(Void result) {
 
-        Arrays.sort(keyset);
+                String[] keyset = new String[mHashMap.size()];
+                int inx=0;
+                for(String key : mHashMap.keySet()) {
+                    keyset[inx] = key;
+                    inx++;
+                }
 
-        for(int i=0;i<keyset.length;i++) {
-            ArrayList<myActivity> daylist = mHashMap.get(keyset[i]);
-            Log.e(TAG, keyset[i] + "" + daylist.size());
-            serializeActivityIntoFile(daylist, keyset[i] + ".day");
-        }
+                Arrays.sort(keyset);
 
-//        for (String key: mHashMap.keySet()) {
-//            ArrayList<myActivity> daylist = mHashMap.get(key);
-//            Log.e(TAG, key + "" + daylist.size());
-//            serializeActivityIntoFile(daylist, key + ".ser");
-//        }
+                for(int i=0;i<keyset.length;i++) {
+                    ArrayList<myActivity> daylist = mHashMap.get(keyset[i]);
+                    Log.e(TAG, keyset[i] + "" + daylist.size());
+                    serializeActivityIntoFile(daylist, keyset[i] + ".day");
+                }
+
+                asyncDialog.dismiss();
+                super.onPostExecute(result);
+            }
+        }.execute();
+
+
+
+
     }
 
     public static void serializeActivityIntoFile(ArrayList<myActivity> list, String fileName) {

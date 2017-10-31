@@ -15,7 +15,7 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/tv_time_elapsed"
+            android:id="@+id/tv_time_elapsed01"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
@@ -54,7 +54,7 @@
             android:layout_height="90sp" />
 
         <TextView
-            android:id="@+id/tv_total_distance"
+            android:id="@+id/tv_total_distance01"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
@@ -63,7 +63,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.943"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/tv_avg_pace" />
+            app:layout_constraintTop_toTopOf="@+id/tv_avg_pace02" />
 
         <TextView
             android:id="@+id/textView29"
@@ -102,7 +102,7 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/tv_cur_pace"
+                android:id="@+id/tv_cur_pace01"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
@@ -133,7 +133,7 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/tv_avg_pace"
+                android:id="@+id/tv_avg_pace01"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
@@ -197,7 +197,7 @@
         android:orientation="horizontal">
 
         <ImageButton
-            android:id="@+id/imb_stop_timer"
+            android:id="@+id/imb_stop_timer01"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="center"

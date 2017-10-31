@@ -63,7 +63,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.943"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/tv_avg_pace" />
+            app:layout_constraintTop_toTopOf="@+id/tv_avg_pace02" />
 
         <TextView
             android:id="@+id/textView29"
@@ -133,7 +133,7 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/tv_avg_pace"
+                android:id="@+id/tv_avg_pace02"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"

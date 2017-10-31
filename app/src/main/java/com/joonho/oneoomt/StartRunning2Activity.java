@@ -18,20 +18,16 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.maps.model.LatLng;
-import com.joonho.oneoomt.file.ActivityStat;
 import com.joonho.oneoomt.file.myActivity;
 import com.joonho.oneoomt.util.ActivityUtil;
 import com.joonho.oneoomt.util.CalDistance;
 import com.joonho.oneoomt.util.StringUtil;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import static com.joonho.oneoomt.RunningActivity.mCurLoc;
 import static com.joonho.oneoomt.RunningActivity.pTimerPeriod;
 
 public class StartRunning2Activity extends AppCompatActivity implements View.OnClickListener {
@@ -64,7 +60,7 @@ public class StartRunning2Activity extends AppCompatActivity implements View.OnC
         // start information
         tv_time_elapsed = (TextView) findViewById(R.id.tv_time_elapsed);
         tv_total_distance = (TextView) findViewById(R.id.tv_total_distance);
-        tv_avg_pace = (TextView) findViewById(R.id.tv_avg_pace);
+        tv_avg_pace = (TextView) findViewById(R.id.tv_avg_pace02);
         tv_cur_pace = (TextView) findViewById(R.id.tv_cur_pace);
         imb_stop_timer = (ImageButton) findViewById(R.id.imb_stop_timer);
 

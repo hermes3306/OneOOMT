@@ -170,7 +170,7 @@ public class AdminActivity extends AppCompatActivity implements View.OnClickList
                     ado.add(((myActivity)(list.get(x))).added_on);
                 }
 
-                Log.e(TAG, ">>>> AdminActivirtywill call HistoryGoogleActivity ! ");
+                Log.e(TAG, ">>>> Admin Activity will call HistoryGoogleActivity ! ");
 
                 Intent intent = new Intent(AdminActivity.this, HistoryGoogleMapsActivity.class);
                 intent.putExtra("latitudes", lat);
@@ -221,10 +221,8 @@ public class AdminActivity extends AppCompatActivity implements View.OnClickList
         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         String fileName = "myPicture.master";
 
-
         File file = new File(storageDir, fileName);
         File bakFile = new File(storageDir, fileName +".Bak");
-
 
         try {
             FileUtils.copyFileUsingFileStreams(file, bakFile);

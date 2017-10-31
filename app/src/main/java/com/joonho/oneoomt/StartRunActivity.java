@@ -8,7 +8,6 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
@@ -47,11 +46,17 @@ public class StartRunActivity extends AppCompatActivity {
     private static String TAG = "StartRunActivity";
 
     private static long start_time, end_time;
-    private static TextView tv_time_elapsed = null;
-    private static TextView tv_total_distance = null;
-    private static TextView tv_avg_pace = null;
-    private static TextView tv_cur_pace = null;
+    private static TextView tv_time_elapsed01 = null;
+    private static TextView tv_total_distance01 = null;
+    private static TextView tv_avg_pace01 = null;
+    private static TextView tv_cur_pace01 = null;
     private static ImageButton imb_stop_timer = null;
+    private static TextView tv_time_elapsed02 = null;
+    private static TextView tv_total_distance02 = null;
+    private static TextView tv_avg_pace02 = null;
+    private static TextView tv_cur_pace02 = null;
+    private static ImageButton imb_stop_timer01 = null;
+    private static ImageButton imb_stop_timer02 = null;
 
     private static TimerTask mTask = null;
     private static Timer mTimer = null;
@@ -204,7 +209,9 @@ public class StartRunActivity extends AppCompatActivity {
                     end_time = new Date().getTime();
                     long elapsed_time = end_time - start_time;
                     String duration = StringUtil.Duration(new Date(start_time), new Date(end_time));
-                    tv_time_elapsed.setText(duration);
+                    if(tv_time_elapsed01 != null) tv_time_elapsed01.setText(duration);
+                    if(tv_time_elapsed02 != null) tv_time_elapsed02.setText(duration);
+
                     Log.e(TAG, "" + duration + "");
 
                     // distance
@@ -236,12 +243,12 @@ public class StartRunActivity extends AppCompatActivity {
                         total_distance = total_distance + dist;
                         double dist_kilo = total_distance / 1000f;
                         String distance_str = String.format("%.2f", dist_kilo);
-                        tv_total_distance.setText(distance_str);
-
+                        if(tv_total_distance01 != null) tv_total_distance01.setText(distance_str);
+                        if(tv_total_distance02 != null) tv_total_distance02.setText(distance_str);
                         double mpk = ActivityUtil.getMinPerKm(start_time, end_time, dist_kilo);
                         String mstr = String.format("%.2f", mpk);
-                        tv_avg_pace.setText(mstr);  //  00:00로 변경 필요
-                        tv_cur_pace.setText(mstr);
+                        if(tv_avg_pace01 != null) tv_avg_pace01.setText(mstr);  //  00:00로 변경 필요
+                        if(tv_cur_pace02 != null) tv_cur_pace02.setText(mstr);
                     }
                 }
             });
@@ -352,26 +359,31 @@ public class StartRunActivity extends AppCompatActivity {
             }
 
             if(getArguments().getInt(ARG_SECTION_NUMBER) ==1) {
-                tv_time_elapsed = (TextView) rootView.findViewById(R.id.tv_time_elapsed);
-                tv_total_distance = (TextView) rootView.findViewById(R.id.tv_total_distance);
-                tv_avg_pace = (TextView) rootView.findViewById(R.id.tv_avg_pace);
-                tv_cur_pace = (TextView) rootView.findViewById(R.id.tv_cur_pace);
-//                imb_stop_timer = (ImageButton) rootView.findViewById(R.id.imb_stop_timer);
-//                imb_stop_timer.setOnClickListener(new View.OnClickListener() {
-//                    @Override
-//                    public void onClick(View view) {
-//                        alertDialogChoice();
-//                    }
-//                });
+                tv_time_elapsed01 = (TextView) rootView.findViewById(R.id.tv_time_elapsed01);
+                tv_total_distance01 = (TextView) rootView.findViewById(R.id.tv_total_distance01);
+                tv_avg_pace01 = (TextView) rootView.findViewById(R.id.tv_avg_pace01);
+                tv_cur_pace01 = (TextView) rootView.findViewById(R.id.tv_cur_pace01);
+                imb_stop_timer01 = (ImageButton) rootView.findViewById(R.id.imb_stop_timer01);
+                imb_stop_timer01.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        //alertDialogChoice();
+                        Toast.makeText(view.getContext(), "Image Button 1 On Click !", Toast.LENGTH_LONG).show();
+                    }
+                });
             }
 
             if(getArguments().getInt(ARG_SECTION_NUMBER) ==2) {
-                ImageButton imb_stop2 = (ImageButton) rootView.findViewById(R.id.imb_stop_timer);
-                imb_stop2.setOnClickListener(new View.OnClickListener() {
+                tv_time_elapsed02 = (TextView) rootView.findViewById(R.id.tv_time_elapsed02);
+                //tv_total_distance = (TextView) rootView.findViewById(R.id.tv_total_distance);
+                tv_avg_pace02 = (TextView) rootView.findViewById(R.id.tv_avg_pace02);
+                tv_cur_pace02 = (TextView) rootView.findViewById(R.id.tv_cur_pace02);
+                imb_stop_timer02 = (ImageButton) rootView.findViewById(R.id.imb_stop_timer02);
+                imb_stop_timer02.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
+                        //alertDialogChoice();
                         Toast.makeText(view.getContext(), "Image Button 2 On Click !", Toast.LENGTH_LONG).show();
-                        Log.e(TAG, "Image Button 2 On Click !");
                     }
                 });
             }

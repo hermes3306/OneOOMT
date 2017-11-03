@@ -27,17 +27,21 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_marginLeft="5dp"
-                    android:layout_marginRight="100dp"
+                    android:layout_marginRight="80dp"
                     android:text="Copy PICs to Pictures Dir   "
                     android:textSize="18sp" />
 
                 <ImageButton
                     android:id="@+id/imageButton_copy"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="right"
+                    android:layout_marginRight="10dp"
                     android:background="@android:color/transparent"
                     android:onClick="onClick"
                     app:srcCompat="@drawable/oksign_32" />
+
+
             </TableRow>
 
             <TableRow
@@ -50,7 +54,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_marginLeft="5dp"
-                    android:layout_marginRight="100dp"
+                    android:layout_marginRight="80dp"
                     android:text="Load PICs From Pic Dir    "
                     android:textSize="18sp" />
 
@@ -59,7 +63,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="right"
-                    android:layout_marginRight="1dp"
+                    android:layout_marginRight="10dp"
                     android:background="@android:color/transparent"
                     android:onClick="onClick"
                     app:srcCompat="@drawable/oksign_32" />
@@ -75,7 +79,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_marginLeft="5dp"
-                    android:layout_marginRight="100dp"
+                    android:layout_marginRight="80dp"
                     android:text="Rebuild Master File            "
                     android:textSize="18sp" />
 
@@ -84,7 +88,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="right"
-                    android:layout_marginRight="1dp"
+                    android:layout_marginRight="10dp"
                     android:background="@android:color/transparent"
                     android:onClick="onClick"
                     app:srcCompat="@drawable/oksign_32" />
@@ -100,7 +104,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_marginLeft="5dp"
-                    android:layout_marginRight="100dp"
+                    android:layout_marginRight="80dp"
                     android:text="Manage internal Activities "
                     android:textSize="18sp" />
 
@@ -109,7 +113,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="right"
-                    android:layout_marginRight="1dp"
+                    android:layout_marginRight="10dp"
                     android:background="@android:color/transparent"
                     android:onClick="onClick"
                     app:srcCompat="@drawable/oksign_32" />
@@ -125,7 +129,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_marginLeft="5dp"
-                    android:layout_marginRight="100dp"
+                    android:layout_marginRight="80dp"
                     android:text="Manage external Activities "
                     android:textSize="18sp" />
 
@@ -134,7 +138,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="right"
-                    android:layout_marginRight="1dp"
+                    android:layout_marginRight="10dp"
                     android:background="@android:color/transparent"
                     android:onClick="onClick"
                     app:srcCompat="@drawable/oksign_32" />
@@ -150,7 +154,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_marginLeft="5dp"
-                    android:layout_marginRight="100dp"
+                    android:layout_marginRight="80dp"
                     android:text="Copy PICs to Gallery           "
                     android:textSize="18sp" />
 
@@ -159,7 +163,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="right"
-                    android:layout_marginRight="1dp"
+                    android:layout_marginRight="10dp"
                     android:background="@android:color/transparent"
                     android:onClick="onClick"
                     app:srcCompat="@drawable/oksign_32" />
@@ -175,7 +179,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_marginLeft="5dp"
-                    android:layout_marginRight="100dp"
+                    android:layout_marginRight="80dp"
                     android:text="Validation Check for PICs   "
                     android:textSize="18sp" />
 
@@ -184,7 +188,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="right"
-                    android:layout_marginRight="1dp"
+                    android:layout_marginRight="10dp"
                     android:background="@android:color/transparent"
                     android:onClick="onClick"
                     app:srcCompat="@drawable/oksign_32" />
@@ -200,16 +204,16 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_marginLeft="5dp"
-                    android:layout_marginRight="100dp"
-                    android:text="Rebuild MyPictures          "
+                    android:layout_marginRight="80dp"
+                    android:text="Add Unregistered Pictures"
                     android:textSize="18sp" />
 
                 <ImageButton
-                    android:id="@+id/imageButton_rebuildMyPictureList"
+                    android:id="@+id/imageButton_Add_Unregistered_Pictures"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="right"
-                    android:layout_marginRight="1dp"
+                    android:layout_marginRight="10dp"
                     android:background="@android:color/transparent"
                     android:onClick="onClick"
                     app:srcCompat="@drawable/oksign_32" />
@@ -225,7 +229,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_marginLeft="5dp"
-                    android:layout_marginRight="100dp"
+                    android:layout_marginRight="80dp"
                     android:text="check Currupted Image Files"
                     android:textSize="18sp" />
 
@@ -234,7 +238,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="right"
-                    android:layout_marginRight="1dp"
+                    android:layout_marginRight="10dp"
                     android:background="@android:color/transparent"
                     android:onClick="onClick"
                     app:srcCompat="@drawable/oksign_32" />
@@ -250,7 +254,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_marginLeft="5dp"
-                    android:layout_marginRight="100dp"
+                    android:layout_marginRight="80dp"
                     android:text="Activity Rebuild Daily"
                     android:textSize="18sp" />
 
@@ -259,7 +263,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="right"
-                    android:layout_marginRight="1dp"
+                    android:layout_marginRight="10dp"
                     android:background="@android:color/transparent"
                     android:onClick="onClick"
                     app:srcCompat="@drawable/oksign_32" />
@@ -280,7 +284,7 @@
             android:layout_width="30dp"
             android:layout_height="wrap_content"
             android:layout_marginLeft="100dp"
-            android:layout_marginRight="100dp"
+            android:layout_marginRight="80dp"
             android:layout_marginBottom="10dp"
             android:layout_weight="33"
             android:onClick="onClick"

@@ -70,14 +70,14 @@ public class AdminActivity extends AppCompatActivity implements View.OnClickList
             case R.id.imageButton_validationcheck4pics:
                 validation_check4pics();
                 break;
-            case R.id.imageButton_rebuildMyPictureList:
-                PhotoUtil.buildFolderPictureList(AdminActivity.this, PhotoUtil.mediaStorageDir);
+            case R.id.imageButton_Add_Unregistered_Pictures:
+                PhotoUtil.Admin_Add_Unregistered_Pictures(AdminActivity.this, PhotoUtil.mediaStorageDir);
                 break;
             case R.id.imageButton_checkCurrptedPic:
-                PhotoUtil.checkCurruptedPic(AdminActivity.this);
+                PhotoUtil.Admin_Remove_Currupted_Pictues(AdminActivity.this);
                 break;
             case R.id.imageButton_rebuildDailyActivities:
-                ActivityUtil.Admin_Deserialize_All(AdminActivity.this);
+                ActivityUtil.Admin_Rebuild_Activities_Daily(AdminActivity.this);
                 break;
             case R.id.bt_admin_back:
                 finish();
@@ -88,7 +88,7 @@ public class AdminActivity extends AppCompatActivity implements View.OnClickList
     }
 
     private void validation_check4pics() {
-        PhotoUtil.validatePictures();
+        PhotoUtil.validatePictures(AdminActivity.this);
         PhotoUtil pu = new PhotoUtil();
         pu.saveMyPictueList();
     }

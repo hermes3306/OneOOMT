@@ -78,14 +78,71 @@ import static com.joonho.oneoomt.RunningActivity.mLocTime;
  */
 
 public class ActivityUtil {
-    public static File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "OneOOMT");
+    public static File mediaStorageDir = null;
+    public static File backupDir = null;
     public static String TAG = "ActivityUtil";
     public static ArrayList<myActivity> mActivityList = new ArrayList<myActivity>();
     public static float myzoom = 16;
     public static ArrayList<Marker> markers = new ArrayList<Marker>();
     public static String _default_ext = ".ser";
 
-    public static void Admin_Deserialize_All(final Context context) {
+    static {
+        mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "OneOOMT");
+        String backupdir = StringUtil.DateToString1(new Date(), "yyyyMMdd");
+        backupDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "OneOOMT" + backupdir);
+    }
+
+    public static void Admin_Backup_All_Activities(final Context context) {
+        new AsyncTask<Void,Void,Void>() {
+            String result;
+            ProgressDialog asyncDialog = new ProgressDialog(context);
+            File flist[] = getFiles();
+
+            @Override
+            protected Void doInBackground(Void... voids) {
+
+                asyncDialog.setMax(flist.length);
+                for(int i=0;i<flist.length;i++) {
+                    asyncDialog.setProgress(i);
+                    File _src = flist[i];
+                    if(_src == null ) continue;
+                    if(!_src.exists()) continue;
+
+                    if(!backupDir.exists()) backupDir.mkdir();
+                    File _tar = new File(backupDir, _src.getName());
+                    Log.e(TAG, "Backup " + _src.getAbsolutePath() + " To " + _tar.getAbsolutePath());
+                    try {
+                        FileUtils.copyFileUsingFileStreams(_src, _tar);
+                    }catch(Exception e) {
+                        e.printStackTrace();
+                        Log.e(TAG, e.toString());
+                    }
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPreExecute() {
+                asyncDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                asyncDialog.setMessage("로딩중입니다..");
+                asyncDialog.show();
+                super.onPreExecute();
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                asyncDialog.dismiss();
+                super.onPostExecute(aVoid);
+                Toast.makeText(context, "Total " + flist.length + " activities Backup Success !!", Toast.LENGTH_LONG).show();
+            }
+        }.execute();
+    }
+
+
+
+
+
+    public static void Admin_Rebuild_Activities_Daily(final Context context) {
         _default_ext = ".ser";
         final File aflist[] = getFiles();
         if (aflist == null) return;
@@ -112,16 +169,9 @@ public class ActivityUtil {
                 try {
 
                     // -------------------------------------------
+                    asyncDialog.setMax(aflist.length);
                     for (int i = 0; i < aflist.length; i++) {
-
-
-                        float ratio = (float) ((float) i / (float)aflist.length);
-                               ratio = ratio * 100f;
-
-                        Log.e(TAG, "Progress Ratio: " + (int)ratio);
-                        asyncDialog.setProgress((int)ratio);
-
-
+                        asyncDialog.setProgress(i);
                         String afname = aflist[i].getName();
                         if(afname.endsWith(".day")) continue;
 

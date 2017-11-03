@@ -1,13 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item
-        android:id="@+id/main_opt_menu_item_startActivity"
-        android:title="Start Activity" />
+    <item android:id="@+id/activity_group" android:title="Activity">
+        <menu>
+            <item
+                android:id="@+id/main_opt_menu_item_startActivity"
+                android:title="Start Activity" />
+            <item
+                android:id="@+id/main_opt_menu_item_startActivity2"
+                android:title="Start Activity(v2)" />
+        </menu>
+    </item>
 
-    <item
-        android:id="@+id/main_opt_menu_item_startActivity2"
-        android:title="Start Activity(v2)" />
+    <item android:id="@+id/admin_group" android:title="Admin...">
+        <menu>
+            <item
+                android:id="@+id/main_opt_menu_item_Rebuild_Activities_by_day"
+                android:title="Rebuild_Activitites Daily" />
+
+            <item
+                android:id="@+id/main_opt_menu_item_Admin_Backup_All_Pictures"
+                android:title="Backup All Pictures" />
+
+
+            <item
+                android:id="@+id/main_opt_menu_item_Admin_Backup_All_Activities"
+                android:title="Backup All Activities" />
+
+            <item
+                android:id="@+id/main_opt_menu_item_Remove_Currupted_Pictues"
+                android:title="Remove Currupted Pictures" />
+            <item
+                android:id="@+id/main_opt_menu_item_Add_Unregistered_Pictures"
+                android:title="Add Unregistered Pictures" />
+            <item
+                android:id="@+id/main_opt_menu_item_Admin_Remove_Missed_Pictures"
+                android:title="Remove MissedPictures" />
+
+        </menu>
+    </item>
+
+
+
+
+
 
     <item android:id="@+id/test" android:title="Test">
         <menu>

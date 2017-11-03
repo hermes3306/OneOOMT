@@ -1234,6 +1234,38 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
         int id = item.getItemId();
 
 
+        if (id == R.id.main_opt_menu_item_Rebuild_Activities_by_day) {
+            ActivityUtil.Admin_Rebuild_Activities_Daily(RunningActivity.this);
+            return true;
+        }
+
+        if (id == R.id.main_opt_menu_item_Remove_Currupted_Pictues) {
+            PhotoUtil.Admin_Remove_Currupted_Pictues(RunningActivity.this);
+            return true;
+        }
+
+        if (id == R.id.main_opt_menu_item_Add_Unregistered_Pictures) {
+            PhotoUtil.Admin_Add_Unregistered_Pictures(RunningActivity.this, PhotoUtil.mediaStorageDir);
+            return true;
+        }
+
+        if (id == R.id.main_opt_menu_item_Admin_Remove_Missed_Pictures) {
+            PhotoUtil.Admin_Remove_Missed_Pictures(RunningActivity.this);
+            return true;
+        }
+
+
+        if (id == R.id.main_opt_menu_item_Admin_Backup_All_Pictures) {
+            PhotoUtil.Admin_Backup_All_Pictures(RunningActivity.this);
+            return true;
+        }
+
+
+        if (id == R.id.main_opt_menu_item_Admin_Backup_All_Activities) {
+            ActivityUtil.Admin_Backup_All_Activities(RunningActivity.this);
+            return true;
+        }
+
         if (id == R.id.main_opt_menu_item_startActivity) {
             Intent intent = new Intent(RunningActivity.this, StartRunning2Activity.class);
             startActivity(intent);

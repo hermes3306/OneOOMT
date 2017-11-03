@@ -419,6 +419,20 @@ public class PhotoUtil {
                 try {
                     mp = (myPicture) in.readObject();
                     Log.e(TAG, "" + i + "th Picture(" + mp.toString() + ")" );
+
+                    if(mp.myactivity.added_on == "" ) {
+
+                        String t_cr_date = mp.picname.substring(4);
+                        Date t_date = StringUtil.StringToDate(t_cr_date, "yyyy_MM_dd_HH_mm_ss");
+                        String str= StringUtil.DateToString1(t_date, "yyyy년MM월dd일HH시mm분ss초");
+                        mp.myactivity.added_on = str;
+
+                        Log.e(TAG, "added on ====> " + mp.myactivity.added_on);
+                    }
+
+
+
+
                     list.add(mp);
                     i++;
                 }catch(Exception ex) {
@@ -937,7 +951,7 @@ public class PhotoUtil {
             protected Void doInBackground(Void... voids) {
                 asyncDialog.setMax(myPictureList.size());
                 for(int i=myPictureList.size()-1; i>0; i--) {
-                    asyncDialog.setProgress(i);
+                    asyncDialog.setProgress(myPictureList.size() - i);
                     myPicture mp = myPictureList.get(i);
                     Bitmap bmp3 = PhotoUtil.getPreview(mp.filepath, 1400);
                     if (bmp3 == null) myPictureList.remove(i);
@@ -966,23 +980,12 @@ public class PhotoUtil {
     }
 
     public static void Admin_Add_Unregistered_Pictures(final Context context, final File folder) {
-        /*
-            1) sort Folder
-            2) for each file in Folder
-                check file in Picture List
-            3) if not exist
-                check best adjacent picture in Picture List
-                add Picture information with Location of adjacent picture
-            4) save Picture List file and serialize it
-             */
-
         Log.e(TAG+"ADMIN" , "Folder: "+folder.getAbsolutePath());
 
         if(!folder.exists()) {
             Log.e(TAG+"ADMIN" , "Folder: "+folder.getAbsolutePath() + " not found!");
             return;
         }
-
 
         FilenameFilter fnf = new FilenameFilter() {
             @Override
@@ -1005,7 +1008,13 @@ public class PhotoUtil {
             String fname = flist[i].getName();
             if(!fname.startsWith("IMG_")) {
                 File rfile = new File(mediaStorageDir, "IMG_" + flist[i].getName());
-                rfile.renameTo(rfile);
+                boolean ismoved = flist[i].renameTo(rfile);
+                if(ismoved) {
+                    Log.e(TAG, "(성공)Renamed to : " + rfile.getAbsolutePath());
+                }else {
+                    Log.e(TAG, "(실패)Renamed to : " + rfile.getAbsolutePath());
+                }
+
                 flist_tmp[i] = rfile;
             } else flist_tmp[i] = flist[i];
         }
@@ -1014,7 +1023,6 @@ public class PhotoUtil {
 
         for(int i=0;i<folderlist.length;i++) {
             folderlist[i] = flist_tmp[i].getName();
-            Log.e(TAG, "folderlist[i]" + flist[i].getName());
         }
 
 
@@ -1028,78 +1036,37 @@ public class PhotoUtil {
 
         final String mylist[]  = mylist_org;
 
-        new AsyncTask<Void, Void, Void> () {
-            ProgressDialog asyncDialog = new ProgressDialog(context);
+        for(int i=0;i<mylist.length;i++) {
+            // rebuild
 
-            @Override
-            protected Void doInBackground(Void... voids) {
 
-                for(int i=0;i<mylist.length;i++) {
-                    // rebuild
-                    asyncDialog.setProgress(i);
+            String mylist2[] = new String[myPictureList.size()];
+            for(int x=0;x<myPictureList.size();x++) {
+                myPicture mp = myPictureList.get(x);
+                mylist2[x] = mp.filepath.substring(mp.filepath.indexOf("IMG_"));
+            }
 
-                    String mylist2[] = new String[myPictureList.size()];
-                    for(int x=0;x<myPictureList.size();x++) {
-                        myPicture mp = myPictureList.get(x);
-                        mylist2[x] = mp.filepath.substring(mp.filepath.indexOf("IMG_"));
-                    }
+            String src = null;
+            if(i< mylist2.length) {
+                src = mylist2[i];
+            } else {
+                continue;
+            }
 
-                    String src = null;
-                    if(i< mylist2.length) {
-                        src = mylist2[i];
-                    } else {
-                        continue;
-                    }
+            // dupcheck
+            for(int j=mylist2.length-1; j>i; j--)  {
 
-                    // dupcheck
-                    for(int j=mylist2.length-1; j>i; j--)  {
+                //Log.e(TAG, "i=" + i + "  j=" + j + " mylist.length = " + mylist.length + " mPictureList.size()= " + myPictureList.size());
 
-                        //Log.e(TAG, "i=" + i + "  j=" + j + " mylist.length = " + mylist.length + " mPictureList.size()= " + myPictureList.size());
+                String tar = mylist2[j];
+                //Log.e(TAG, "src=" + src + "  tar=" + tar);
 
-                        String tar = mylist2[j];
-                        //Log.e(TAG, "src=" + src + "  tar=" + tar);
-
-                        if( src.equalsIgnoreCase(tar) ) {
-                            Log.e(TAG, "DUPPPPP Pic !! " + i + " =" + j  + " " + mylist[i]) ;
-                            myPictureList.remove(j);
-                        }
-                    }
+                if( src.equalsIgnoreCase(tar) ) {
+                    Log.e(TAG, "DUPPPPP Pic !! " + i + " =" + j  + " " + mylist[i]) ;
+                    myPictureList.remove(j);
                 }
-
-                return null;
             }
-
-            @Override
-            protected void onPreExecute() {
-                asyncDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-                asyncDialog.setMessage("로딩중입니다..");
-                asyncDialog.show();
-                asyncDialog.setMax(mylist.length);
-                super.onPreExecute();
-            }
-
-            @Override
-            protected void onPostExecute(Void aVoid) {
-                super.onPostExecute(aVoid);
-                asyncDialog.dismiss();
-            }
-
-            @Override
-            protected void onProgressUpdate(Void... values) {
-                super.onProgressUpdate(values);
-            }
-
-            @Override
-            protected void onCancelled(Void aVoid) {
-                super.onCancelled(aVoid);
-            }
-
-            @Override
-            protected void onCancelled() {
-                super.onCancelled();
-            }
-        }.execute();
-
+        }
 
         final String[] piclist = new String[myPictureList.size()];
         for(int i=0;i<myPictureList.size();i++) {
@@ -1108,23 +1075,16 @@ public class PhotoUtil {
         }
 
         Log.e(TAG,">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-        Log.e(TAG, "folderlist[1]" + folderlist[1] + "piclist[1]" + piclist[1]);
+        Log.e(TAG, "folderlist[1]" + folderlist[1] + "   piclist[1]" + piclist[1]);
         Log.e(TAG,">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 
 
 
         // --
         for(int i=0;i<folderlist.length;i++) {
-
-            float ratio = (float) ((float) i / (float)folderlist.length);
-            ratio = ratio * 100f;
-            Log.e(TAG, "Progress Ratio: " + (int)ratio);
-
-
             boolean found = false;
             for(int j=0;j<piclist.length;j++) {
 
-                //Log.e(TAG, folderlist[i].substring(4) + " vs"  + piclist[j].substring(4));
                 if(folderlist[i].substring(4).equalsIgnoreCase(piclist[j].substring(4))) {
                     found = true;
                     break;
@@ -1132,26 +1092,17 @@ public class PhotoUtil {
             }
 
             if(!found) {
+                //파일의 포맷에서 데이트포맷을 찾음.
+
                 String t_cr_date = folderlist[i].substring(4, 19);
                 Date t_date = StringUtil.StringToDate(t_cr_date, "yyyyMMdd_HHmmss");
 
                 String p_name = "PIC_" + StringUtil.DateToString1(t_date, "yyyy_MM_dd_HH_mm_ss");  // 저장될 대상
                 String str= StringUtil.DateToString1(t_date, "yyyy년MM월dd일HH시mm분ss초");
 
-                /////////////////////////////////////
-                //////// 여기 ///////////////////////
-                /////////////////////////////////////
-
 
                 long time_gap[] = new long [piclist.length];
                 for(int q=0;q<piclist.length;q++) {
-
-
-
-                    //Log.e(TAG, "JHPARK -- folder" + folderlist[i] + "pic" + piclist[q] );
-
-
-
                     Date t2_date = StringUtil.StringToDate(piclist[q].substring(4,19),"yyyyMMdd_HHmmss");
 
                     time_gap[q] =  t_date.getTime() - t2_date.getTime();
@@ -1173,7 +1124,7 @@ public class PhotoUtil {
 
                 myPicture mp = new myPicture(ma, p_name, folder.getAbsolutePath() + "/"+ folderlist[i]);
                 myPictureList.add(mp);
-                Log.e(TAG, "Not Found " + folderlist[i]);
+                Log.e(TAG, "Not Found file  (" + folderlist[i] + ") added a new mp -->" + mp.toString() );
             } else {
                 Log.e(TAG, "Found " + folderlist[i]);
             }
@@ -1187,6 +1138,7 @@ public class PhotoUtil {
         Log.e(TAG+"ADMIN" , "REBUILD DONE !!!!! ");
         Log.e(TAG+"ADMIN" , "REBUILD DONE !!!!! ");
     }
+
 
 }
 

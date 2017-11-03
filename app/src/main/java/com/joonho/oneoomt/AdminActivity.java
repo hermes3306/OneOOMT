@@ -281,7 +281,6 @@ public class AdminActivity extends AppCompatActivity implements View.OnClickList
                 e.printStackTrace();
                 Log.e(TAG, e.toString());
             }
-
         }
         Toast.makeText(getApplicationContext(),"copyPICstoPIC_DIR end", Toast.LENGTH_LONG).show();
     }

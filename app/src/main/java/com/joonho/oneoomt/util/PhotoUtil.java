@@ -980,6 +980,8 @@ public class PhotoUtil {
     }
 
     public static void Admin_Add_Unregistered_Pictures(final Context context, final File folder) {
+
+
         Log.e(TAG+"ADMIN" , "Folder: "+folder.getAbsolutePath());
 
         if(!folder.exists()) {
@@ -1074,69 +1076,91 @@ public class PhotoUtil {
             piclist[i] = mp.filepath.substring(mp.filepath.indexOf("IMG_"));
         }
 
-        Log.e(TAG,">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-        Log.e(TAG, "folderlist[1]" + folderlist[1] + "   piclist[1]" + piclist[1]);
-        Log.e(TAG,">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+        new AsyncTask<Void,Void,Void>() {
+            String result;
+            ProgressDialog asyncDialog = new ProgressDialog(context);
+
+            @Override
+            protected Void doInBackground(Void... voids) {
+
+                // --
+
+                for(int i=0;i<folderlist.length;i++) {
+                    asyncDialog.setProgress(i);
+                    boolean found = false;
+                    for(int j=0;j<piclist.length;j++) {
+
+                        if(folderlist[i].substring(4).equalsIgnoreCase(piclist[j].substring(4))) {
+                            found = true;
+                            break;
+                        }
+                    }
+
+                    if(!found) {
+                        //파일의 포맷에서 데이트포맷을 찾음.
+
+                        String t_cr_date = folderlist[i].substring(4, 19);
+                        Date t_date = StringUtil.StringToDate(t_cr_date, "yyyyMMdd_HHmmss");
+
+                        String p_name = "PIC_" + StringUtil.DateToString1(t_date, "yyyy_MM_dd_HH_mm_ss");  // 저장될 대상
+                        String str= StringUtil.DateToString1(t_date, "yyyy년MM월dd일HH시mm분ss초");
 
 
+                        long time_gap[] = new long [piclist.length];
+                        for(int q=0;q<piclist.length;q++) {
+                            Date t2_date = StringUtil.StringToDate(piclist[q].substring(4,19),"yyyyMMdd_HHmmss");
 
-        // --
-        for(int i=0;i<folderlist.length;i++) {
-            boolean found = false;
-            for(int j=0;j<piclist.length;j++) {
+                            time_gap[q] =  t_date.getTime() - t2_date.getTime();
+                            if(time_gap[q] < 0) time_gap[q] = time_gap[q] * -1;
+                        }
 
-                if(folderlist[i].substring(4).equalsIgnoreCase(piclist[j].substring(4))) {
-                    found = true;
-                    break;
-                }
-            }
+                        int m_adjacent_pos = -1;
+                        long m_tg_min = Long.MAX_VALUE;
+                        for(int q=0;q<piclist.length;q++) {
+                            if(m_tg_min > time_gap[q]) {
+                                m_tg_min = time_gap[q];
+                                m_adjacent_pos = q;
+                            }
+                        }
 
-            if(!found) {
-                //파일의 포맷에서 데이트포맷을 찾음.
+                        myPicture myPictureFound = myPictureList.get(m_adjacent_pos);
+                        myActivity ma = new myActivity(myPictureFound.myactivity.latitude, myPictureFound.myactivity.longitude, str);
+                        File f = new File(folderlist[i]);
 
-                String t_cr_date = folderlist[i].substring(4, 19);
-                Date t_date = StringUtil.StringToDate(t_cr_date, "yyyyMMdd_HHmmss");
-
-                String p_name = "PIC_" + StringUtil.DateToString1(t_date, "yyyy_MM_dd_HH_mm_ss");  // 저장될 대상
-                String str= StringUtil.DateToString1(t_date, "yyyy년MM월dd일HH시mm분ss초");
-
-
-                long time_gap[] = new long [piclist.length];
-                for(int q=0;q<piclist.length;q++) {
-                    Date t2_date = StringUtil.StringToDate(piclist[q].substring(4,19),"yyyyMMdd_HHmmss");
-
-                    time_gap[q] =  t_date.getTime() - t2_date.getTime();
-                    if(time_gap[q] < 0) time_gap[q] = time_gap[q] * -1;
-                }
-
-                int m_adjacent_pos = -1;
-                long m_tg_min = Long.MAX_VALUE;
-                for(int q=0;q<piclist.length;q++) {
-                    if(m_tg_min > time_gap[q]) {
-                        m_tg_min = time_gap[q];
-                        m_adjacent_pos = q;
+                        myPicture mp = new myPicture(ma, p_name, folder.getAbsolutePath() + "/"+ folderlist[i]);
+                        myPictureList.add(mp);
+                        Log.e(TAG, "Not Found file  (" + folderlist[i] + ") added a new mp -->" + mp.toString() );
+                    } else {
+                        Log.e(TAG, "Found " + folderlist[i]);
                     }
                 }
 
-                myPicture myPictureFound = myPictureList.get(m_adjacent_pos);
-                myActivity ma = new myActivity(myPictureFound.myactivity.latitude, myPictureFound.myactivity.longitude, str);
-                File f = new File(folderlist[i]);
-
-                myPicture mp = new myPicture(ma, p_name, folder.getAbsolutePath() + "/"+ folderlist[i]);
-                myPictureList.add(mp);
-                Log.e(TAG, "Not Found file  (" + folderlist[i] + ") added a new mp -->" + mp.toString() );
-            } else {
-                Log.e(TAG, "Found " + folderlist[i]);
+                return null;
             }
-        }
+
+            @Override
+            protected void onPreExecute() {
+                asyncDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                asyncDialog.setMessage("로딩중입니다..");
+                asyncDialog.setMax(folderlist.length);
+                asyncDialog.show();
+                super.onPreExecute();
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+
+                PhotoUtil pu = new PhotoUtil();
+                pu.saveMyPictueList();
+
+                Log.e(TAG+"ADMIN" , "REBUILD DONE !!!!! ");
 
 
-        PhotoUtil pu = new PhotoUtil();
-        pu.saveMyPictueList();
+                asyncDialog.dismiss();
+                super.onPostExecute(aVoid);
+            }
+        }.execute();
 
-        Log.e(TAG+"ADMIN" , "REBUILD DONE !!!!! ");
-        Log.e(TAG+"ADMIN" , "REBUILD DONE !!!!! ");
-        Log.e(TAG+"ADMIN" , "REBUILD DONE !!!!! ");
     }
 
 

@@ -8,6 +8,8 @@ import android.content.DialogInterface;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Environment;
@@ -65,6 +67,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.Vector;
@@ -647,6 +650,7 @@ public class ActivityUtil {
         double total_distM = getTotalDistanceDouble(list);  // <-
         double total_distKm = total_distM / 1000f;
         double minpk = getMinPerKm(start_date, stop_date, total_distKm); // <-
+
         ActivityStat as = new ActivityStat(start_date, stop_date, duration, total_distM, total_distKm, minpk, 0);
         return as;
     }
@@ -768,12 +772,29 @@ public class ActivityUtil {
             final TextView tv_duration = (TextView)alert.findViewById(R.id.tv_duration);
             final TextView tv_minperkm = (TextView)alert.findViewById(R.id.tv_minperkm);
             final TextView tv_carolies = (TextView)alert.findViewById(R.id.tv_carolies);
+            final TextView tv_address = (TextView)alert.findViewById(R.id.tv_address);
 
             final File flist[] = getFiles();
 
             public void GO(final GoogleMap googleMap, File myfile) {
                 deserializeIntoMap(_ctx, myfile, googleMap, false);
                 ActivityStat activityStat = getActivityStat(mActivityList);
+
+                Geocoder geocoder = new Geocoder(_ctx, Locale.getDefault());
+                List<Address> addresses = null;
+                try {
+                    addresses = geocoder.getFromLocation(mActivityList.get(0).latitude, mActivityList.get(0).longitude,1);
+                }catch(Exception e) {
+                    e.printStackTrace();
+                    Log.e(TAG, e.toString());
+                }
+
+                String addinfo = null;
+                if(addresses == null || addresses.size() ==0) {
+                    Log.e(TAG, "No Addresses found !!");
+                }else {
+                    addinfo = addresses.get(0).getAddressLine(0).toString();
+                }
 
                 String inx_str = "" + (position+1)  + "/" + flist.length + "\n";
                 tv_cursor.setText(inx_str);
@@ -782,8 +803,11 @@ public class ActivityUtil {
                 if(activityStat !=null) {
 
                     String _minDist = String.format("%.2f", activityStat.distanceKm);
-                    String sinfo = "\n " + date_str + "\n  (" + _minDist + "Km)";
+                    //String sinfo = "\n " + date_str + "\n  (" + _minDist + "Km)";
+                    String sinfo = "\n " + date_str;
+
                     tv_heading.setText(sinfo);
+                    tv_address.setText(addinfo);
                     tv_distance.setText(_minDist);
                     tv_duration.setText(activityStat.duration);
                     tv_minperkm.setText(String.format("  %.2f",activityStat.minperKm));

@@ -15,6 +15,8 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.hardware.Camera;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -66,6 +68,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE;
@@ -222,10 +225,35 @@ public class PhotoUtil {
             final String _minDist = (minDist>1000)?  "" + (int)(minDist/1000) + "킬로" : "" + (int)minDist + "미터";
             Date date = StringUtil.StringToDate1(mp.picname);
             String date_str = StringUtil.DateToString1(date, "MM월 dd일 HH시");
-            sinfo = "\n " + date_str + "\n  (" + _minDist + " 거리)";
+            sinfo = "" + date_str + "(" + _minDist + ")";
         }
 
         String inx_str = "" + (index+1) + "/" + myPictureList.size();
+
+        Geocoder geocoder = new Geocoder(ctx, Locale.getDefault());
+        List<Address> addresses = null;
+        try {
+            addresses = geocoder.getFromLocation(mp.myactivity.latitude, mp.myactivity.longitude,10);
+
+//            for(int i=0;i<addresses.size(); i++ ) {
+//                Log.e(TAG, "addresses " + i + " :" + addresses.get(i)  );
+//            }
+
+        }catch(Exception e) {
+            e.printStackTrace();
+            Log.e(TAG, e.toString());
+        }
+
+
+
+        String addinfo = null;
+        if(addresses == null || addresses.size() ==0) {
+            Log.e(TAG, "No Addresses found !!");
+        }else {
+            addinfo = addresses.get(0).getAddressLine(0).toString();
+        }
+
+        //sinfo = sinfo + "\n" + addinfo;
 
         final TextView tv_h = new TextView(ctx);
         tv_h.setTextColor(Color.WHITE);
@@ -238,15 +266,32 @@ public class PhotoUtil {
         llhh.setOrientation(LinearLayout.HORIZONTAL);
         llhh.setHorizontalGravity(Gravity.CENTER_HORIZONTAL);
         llhh.setVerticalGravity(Gravity.TOP);
+        llhh.setHorizontalGravity(Gravity.CENTER_HORIZONTAL);
         llhh.addView(tv_h);
+
+        final TextView tv_a = new TextView(ctx);
+        tv_a.setTextColor(Color.WHITE);
+        tv_a.setTextSize(25);
+        tv_a.setAlpha(0.9f);
+        tv_a.setText(addinfo);
+        tv_a.setPaintFlags(tv_h.getPaintFlags() | Paint.FAKE_BOLD_TEXT_FLAG);
+
+        final LinearLayout llhh2 = new LinearLayout(ctx);
+        llhh2.setOrientation(LinearLayout.HORIZONTAL);
+        llhh2.setHorizontalGravity(Gravity.CENTER_HORIZONTAL);
+        llhh2.setVerticalGravity(Gravity.CENTER_VERTICAL);
+
+        FrameLayout.LayoutParams floparams2 = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        floparams2.setMargins(0,150,0,0);
+        llhh2.setLayoutParams(floparams2);
+        llhh2.addView(tv_a);
+
 
         final TextView tv_t = new TextView(ctx);
         tv_t.setTextColor(Color.WHITE);
         tv_t.setTextSize(23);
         tv_t.setAlpha(0.8f);
-        //String tv_t_str = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n" + /*mp.picname*/  "\n                 " + inx_str + "";
-        //String tv_t_str = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n" + inx_str;
-        String tv_t_str = inx_str +"\n";
+        String tv_t_str = inx_str +"";
         tv_t.setText(tv_t_str);
         tv_t.setPaintFlags(tv_t.getPaintFlags() | Paint.FAKE_BOLD_TEXT_FLAG);
 
@@ -259,6 +304,7 @@ public class PhotoUtil {
         flo.addView(mImageView);
         flo.addView(llh2);
         flo.addView(llhh);
+        flo.addView(llhh2);
         flo.addView(ll09);
         ll.addView(flo);
 

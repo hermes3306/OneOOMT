@@ -234,18 +234,10 @@ public class PhotoUtil {
         List<Address> addresses = null;
         try {
             addresses = geocoder.getFromLocation(mp.myactivity.latitude, mp.myactivity.longitude,10);
-
-//            for(int i=0;i<addresses.size(); i++ ) {
-//                Log.e(TAG, "addresses " + i + " :" + addresses.get(i)  );
-//            }
-
         }catch(Exception e) {
             e.printStackTrace();
             Log.e(TAG, e.toString());
         }
-
-
-
         String addinfo = null;
         if(addresses == null || addresses.size() ==0) {
             Log.e(TAG, "No Addresses found !!");
@@ -362,13 +354,30 @@ public class PhotoUtil {
                             final String _minDist = (minDist>1000)?  "" + (int)(minDist/1000) + "킬로" : "" + (int)minDist + "미터";
                             Date date = StringUtil.StringToDate1(mp2.picname);
                             String date_str = StringUtil.DateToString1(date, "MM월 dd일 HH시");
-                            sinfo = "\n " + date_str + "\n  (" + _minDist + " 거리)";
+                            sinfo = "" + date_str + "(" + _minDist + ")";
                         }
                         tv_h.setText(sinfo);
 
                         String inx_str = "" + (position+1)  + "/" + myPictureList.size();
+                        Geocoder geocoder = new Geocoder(cur_context, Locale.getDefault());
+                        List<Address> addresses = null;
+                        try {
+                            addresses = geocoder.getFromLocation(mp2.myactivity.latitude, mp2.myactivity.longitude,10);
+                        }catch(Exception e) {
+                            e.printStackTrace();
+                            Log.e(TAG, e.toString());
+                        }
+                        String addinfo = null;
+                        if(addresses == null || addresses.size() ==0) {
+                            Log.e(TAG, "No Addresses found !!");
+                        }else {
+                            addinfo = addresses.get(0).getAddressLine(0).toString();
+                        }
+
+
                         //String tv_t_str = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n" + mp2.picname + "\n                 (" + inx_str + ")";
-                        tv_t.setText(inx_str + "\n");
+                        tv_t.setText(inx_str);
+                        tv_a.setText(addinfo);
 
                         String msg = " file   :" + mp2.picname;
                         msg+= "\n size  :" + bmp3.getByteCount();
@@ -404,13 +413,30 @@ public class PhotoUtil {
                             final String _minDist = (minDist>1000)?  "" + (int)(minDist/1000) + "킬로" : "" + (int)minDist + "미터";
                             Date date = StringUtil.StringToDate1(mp2.picname);
                             String date_str = StringUtil.DateToString1(date, "MM월 dd일 HH시");
-                            sinfo = "\n " + date_str + "\n  (" + _minDist + " 거리)";
+                            sinfo = "" + date_str + "(" + _minDist + ")";
                         }
                         tv_h.setText(sinfo);
 
                         String inx_str = "" + (position+1)  + "/" + myPictureList.size();
+                        Geocoder geocoder = new Geocoder(cur_context, Locale.getDefault());
+                        List<Address> addresses = null;
+                        try {
+                            addresses = geocoder.getFromLocation(mp2.myactivity.latitude, mp2.myactivity.longitude,10);
+                        }catch(Exception e) {
+                            e.printStackTrace();
+                            Log.e(TAG, e.toString());
+                        }
+                        String addinfo = null;
+                        if(addresses == null || addresses.size() ==0) {
+                            Log.e(TAG, "No Addresses found !!");
+                        }else {
+                            addinfo = addresses.get(0).getAddressLine(0).toString();
+                        }
+
+
                         //String tv_t_str = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n" + mp2.picname + "\n                 (" + inx_str + ")";
-                        tv_t.setText(inx_str + "\n");
+                        tv_t.setText(inx_str);
+                        tv_a.setText(addinfo);
 
                         String msg = " file   :" + mp2.picname;
                         msg+= "\n size  :" + bmp3.getByteCount();

@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -27,12 +28,15 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.joonho.oneoomt.file.myActivity;
+import com.joonho.oneoomt.file.myPicture;
 import com.joonho.oneoomt.util.ActivityUtil;
 import com.joonho.oneoomt.util.CalDistance;
+import com.joonho.oneoomt.util.PhotoUtil;
 import com.joonho.oneoomt.util.StringUtil;
 
 import java.util.ArrayList;
@@ -40,6 +44,8 @@ import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import static android.view.View.VISIBLE;
+import static com.joonho.oneoomt.RunningActivity.mPos;
 import static com.joonho.oneoomt.RunningActivity.pTimerPeriod;
 
 public class StartRunActivity extends AppCompatActivity {
@@ -50,7 +56,6 @@ public class StartRunActivity extends AppCompatActivity {
     private static TextView tv_total_distance01 = null;
     private static TextView tv_avg_pace01 = null;
     private static TextView tv_cur_pace01 = null;
-    private static ImageButton imb_stop_timer = null;
     private static TextView tv_time_elapsed02 = null;
     private static TextView tv_total_distance02 = null;
     private static TextView tv_avg_pace02 = null;
@@ -154,6 +159,41 @@ public class StartRunActivity extends AppCompatActivity {
 
     }
 
+
+    public void showAdjacentPicture(Location location) {
+        int __t_pos=-1;
+        int __msize = PhotoUtil.myPictureList.size();
+        double __minDist = Double.MAX_VALUE;
+        for(int i=0;i<__msize;i++) {
+            myPicture mp = PhotoUtil.myPictureList.get(i);
+            CalDistance cd = new CalDistance(mp.myactivity.latitude, mp.myactivity.longitude, location.getLatitude(), location.getLongitude());
+            if(__minDist > cd.getDistance()) {
+                __minDist = cd.getDistance();
+                __t_pos  = i;
+            }
+        }
+
+        if(__t_pos != -1) {
+            String filepath = PhotoUtil.myPictureList.get(__t_pos).filepath;
+            Bitmap bmp = PhotoUtil.getPreview(filepath, __t_pos);
+
+            ImageView iv = (ImageView)findViewById(R.id.imageview_adj_pic);
+            iv.setImageBitmap(bmp);
+            myPicture mp1= PhotoUtil.myPictureList.get(__t_pos);
+
+//            Date date = StringUtil.StringToDate1(mp1.picname);
+//            String date_str = StringUtil.DateToString1(date, "MM월 dd일 HH시");
+//            String sinfo = " " + date_str + "\n (" + __minDist + " 거리)";
+//
+
+//            tv_onPic1.setText(sinfo );
+//            Log.e(TAG,sinfo);
+//            imv_pic1.setVisibility(VISIBLE);
+//            tv_onPic1.setVisibility(VISIBLE);
+        }
+    }
+
+
     public Location getLocation() {
         // 수동으로 위치 구하기
         String locationProvider = LocationManager.GPS_PROVIDER;
@@ -247,8 +287,14 @@ public class StartRunActivity extends AppCompatActivity {
                         if(tv_total_distance02 != null) tv_total_distance02.setText(distance_str);
                         double mpk = ActivityUtil.getMinPerKm(start_time, end_time, dist_kilo);
                         String mstr = String.format("%.2f", mpk);
+                        if(Double.isInfinite(mpk)) mstr="--:--";
+                        if(Double.isNaN(mpk)) mstr="--:--";
                         if(tv_avg_pace01 != null) tv_avg_pace01.setText(mstr);  //  00:00로 변경 필요
-                        if(tv_cur_pace02 != null) tv_cur_pace02.setText(mstr);
+                        if(tv_avg_pace02 != null) tv_avg_pace02.setText(mstr);
+                        if(tv_cur_pace01 != null) tv_cur_pace01.setText(mstr);
+                        if(tv_cur_pace02 != null) tv_cur_pace02.setText(mstr);  //  00:00로 변경 필요
+
+                        showAdjacentPicture(cur_loc);
                     }
                 }
             });

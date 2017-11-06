@@ -59,6 +59,7 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:text="0.00"
+            android:textColor="@android:color/black"
             android:textSize="120sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.943"

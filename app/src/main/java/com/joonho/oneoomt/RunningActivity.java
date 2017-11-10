@@ -1380,12 +1380,10 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
             File photoFile = null;
             try {
                 Log.e(">>>>","before createImageFile");
-                //photoFile = createImageFile();
-                File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-                //File storageDir = new File(Environment.getExternalStorageDirectory(), "MyCameraApp");
+                File storageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "OneOOMT");
 
                 String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-                String imageFileName = "JPEG_" + timeStamp + "_.jpeg";
+                String imageFileName = "IMG_" + timeStamp + ".jpeg";
                 photoFile = new File(storageDir, imageFileName);
                 Log.e(">>>>","after createImageFile");
             } catch (Exception ex) {
@@ -1413,13 +1411,13 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
     private File createImageFile() throws IOException {
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = "JPEG_" + timeStamp + "_";
+        String imageFileName = "IMG_" + timeStamp;
 
 
         //File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         //File storageDir = new File(Environment.getExternalStorageDirectory(), "MyCameraApp");
-
-        File storageDir = Environment.getExternalStorageDirectory();
+        File storageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "OneOOMT");
+        //File storageDir = Environment.getExternalStorageDirectory();
         File image = File.createTempFile(
                 imageFileName,  /* prefix */
                 ".jpg",         /* suffix */
@@ -2168,13 +2166,6 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
                     Log.e(TAG, e.toString());
                 }
             }
-
-
-
-
-
-
-
 
             Marker marker = mMap.addMarker(opt);
             marker.setTag(mp); //setTag, getTag with myPicture

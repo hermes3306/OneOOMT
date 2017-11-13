@@ -1929,6 +1929,10 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
         }
 
         if (id == R.id.item_info) {
+            if(mCurLoc == null) {
+                Toast.makeText(getApplicationContext(), "ERR: Try again after you get current location !", Toast.LENGTH_LONG).show();
+                return true;
+            }
             File list[] = dbgateway.getallActivities(getApplicationContext());
             AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
             alertDialog.setTitle("Information Brief");

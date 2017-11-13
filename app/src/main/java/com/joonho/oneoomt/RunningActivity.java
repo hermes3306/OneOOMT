@@ -1303,6 +1303,14 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
             return true;
         }
 
+
+        if (id == R.id.main_opt_menu_item_mymain) {
+            Intent i = new Intent(RunningActivity.this, MyMainActivity.class);
+            startActivity(i);
+            return true;
+        }
+
+
         if (id == R.id.main_opt_menu_item_marker) {
             if(marker_enabled) {
                 mMap.clear();
@@ -1351,6 +1359,8 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
             else ll_bottom_buttons.setVisibility(View.GONE);
             return true;
         }
+
+
         return super.onOptionsItemSelected(item);
     }
 

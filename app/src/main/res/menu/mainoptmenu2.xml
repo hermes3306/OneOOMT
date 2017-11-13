@@ -89,4 +89,9 @@
     <item
         android:id="@+id/main_opt_menu_item_conf"
         android:title="Settings..." />
+
+    <item
+        android:id="@+id/main_opt_menu_item_mymain"
+        android:title="MyMain" />
+
 </menu>

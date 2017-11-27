@@ -14,6 +14,8 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -29,38 +31,35 @@ import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
-
-
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
-private String TAG = "MainActivity";
+    private String TAG = "MainActivity";
 
-private long start_time, end_time;
-private TextView tv_time_elapsed = null;
-private TextView tv_total_distance = null;
-private TextView tv_avg_pace = null;
-private TextView tv_cur_pace = null;
-private ImageButton imb_stop_timer = null;
+    private long start_time, end_time;
+    private TextView tv_time_elapsed = null;
+    private TextView tv_total_distance = null;
+    private TextView tv_avg_pace = null;
+    private TextView tv_cur_pace = null;
+    private ImageButton imb_stop_timer = null;
 
-private TimerTask mTask = null;
-private Timer mTimer = null;
+    private TimerTask mTask = null;
+    private Timer mTimer = null;
 
-private boolean isStarted = true;
+    private boolean isStarted = true;
 
-private double total_distance = 0;
+    private double total_distance = 0;
 
-private double paces[] = new double[1000]; //upto 1000 km
-private long   startime_paces[] = new long[1000]; // upto 1000 start time
+    private double paces[] = new double[1000]; //upto 1000 km
+    private long   startime_paces[] = new long[1000]; // upto 1000 start time
 
-private Location start_loc;
-private ArrayList<Location> mList = new ArrayList<Location>();
+    private Location start_loc;
+    private ArrayList<Location> mList = new ArrayList<Location>();
 
-@Override
-protected void onCreate(Bundle savedInstanceState) {
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         initialize_Location_Manager();
-
 
         // start information
         tv_time_elapsed = (TextView) findViewById(R.id.tv_time_elapsed);
@@ -70,13 +69,18 @@ protected void onCreate(Bundle savedInstanceState) {
         imb_stop_timer = (ImageButton) findViewById(R.id.imb_stop_timer);
 
         doMyTimeTask();
-        }
+    }
 
-        LocationManager locationManager = null;
-        Boolean isGPSEnabled = null;
-        Boolean isNetworkEnabled = null;
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        return super.onCreateOptionsMenu(menu);
+    }
 
-public void initialize_Location_Manager() {
+    LocationManager locationManager = null;
+    Boolean isGPSEnabled = null;
+    Boolean isNetworkEnabled = null;
+
+    public void initialize_Location_Manager() {
         if (locationManager == null) {
         locationManager = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
         }
@@ -84,22 +88,24 @@ public void initialize_Location_Manager() {
         isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
         Log.d(TAG, "isGPSEnabled=" + isGPSEnabled);
         Log.d(TAG, "isNetworkEnabled=" + isNetworkEnabled);
+
         LocationListener locationListener = new LocationListener() {
-public void onLocationChanged(Location location) {
-        double lat = location.getLatitude();
-        double lng = location.getLongitude();
-//                Log.e(TAG,"New Loc " + lat + " " + lng);
-//                //Toast.makeText(StartRunning2Activity.this, lat + " " + lng, Toast.LENGTH_SHORT).show();
-        }
+            public void onLocationChanged(Location location) {
+                double lat = location.getLatitude();
+                double lng = location.getLongitude();
+                //Log.e(TAG,"New Loc " + lat + " " + lng);
+                //Toast.makeText(StartRunning2Activity.this, lat + " " + lng, Toast.LENGTH_SHORT).show();
+            }
 
-public void onStatusChanged(String provider, int status, Bundle extras) {
-        }
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+            }
 
-public void onProviderEnabled(String provider) {
-        }
+            public void onProviderEnabled(String provider) {
+            }
 
-public void onProviderDisabled(String provider) {
-        }
+            public void onProviderDisabled(String provider) {
+            }
+
         };
 
         if ((ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) ||
@@ -108,12 +114,12 @@ public void onProviderDisabled(String provider) {
         (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) ||
         (ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED)) {
         ActivityCompat.requestPermissions(MainActivity.this, new String[]{
-        Manifest.permission.ACCESS_FINE_LOCATION,
-        Manifest.permission.ACCESS_COARSE_LOCATION,
-        Manifest.permission.WRITE_EXTERNAL_STORAGE,
-        Manifest.permission.READ_EXTERNAL_STORAGE,
-        Manifest.permission.CAMERA
-        }, 50);
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.CAMERA
+            }, 50);
         }
 
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
@@ -121,36 +127,36 @@ public void onProviderDisabled(String provider) {
 
         }
 
-public Location getLocation() {
-        // 수동으로 위치 구하기
-        String locationProvider = LocationManager.GPS_PROVIDER;
-        try {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-        Log.e(TAG, "no Permission"); // but never occur!
-        return null;
+        public Location getLocation() {
+            // 수동으로 위치 구하기
+            String locationProvider = LocationManager.GPS_PROVIDER;
+            try {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Log.e(TAG, "no Permission"); // but never occur!
+            return null;
         }
 
         Location lastKnownLocation = locationManager.getLastKnownLocation(locationProvider);
         if (lastKnownLocation != null) {
-        double lng = lastKnownLocation.getLatitude();
-        double lat = lastKnownLocation.getLatitude();
-        Log.d(TAG, "GPS,  longtitude=" + lng + ", latitude=" + lat);
-        return lastKnownLocation;
+            double lng = lastKnownLocation.getLatitude();
+            double lat = lastKnownLocation.getLatitude();
+            Log.d(TAG, "GPS,  longtitude=" + lng + ", latitude=" + lat);
+            return lastKnownLocation;
         }
         }catch(Exception e) {
-        e.printStackTrace();
-        Log.e(TAG, e.toString());
+             e.printStackTrace();
+             Log.e(TAG, e.toString());
         }
-        return null;
+            return null;
         }
 
-public void doTimerPause() {
+    public void doTimerPause() {
         isStarted = !isStarted;
         Log.e(TAG, "isStarted: " + isStarted);
-        Toast.makeText(MainActivity.this, "isStarted = " + isStarted, Toast.LENGTH_LONG).show();
-        }
+        //Toast.makeText(MainActivity.this, "isStarted = " + isStarted, Toast.LENGTH_LONG).show();
+    }
 
-public void doMyTimeTask() {
+    public void doMyTimeTask() {
         mTask =new MainActivity.MyTimerTask();
         mTimer = new Timer();
         mTimer.schedule(mTask, 1000, 1000);  // 10초
@@ -160,66 +166,63 @@ public void doMyTimeTask() {
         mList = new ArrayList<Location>();
         start_loc = getLocation();
         if(start_loc != null) mList.add(start_loc);
-}
+    }
 
-public void alertDialogChoice() {
+    public void alertDialogChoice() {
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this);
-        alertDialog.setTitle("Activity Mode:");
+        alertDialog.setTitle("Activity Mode");
         alertDialog.setMessage("Choose Activity Mode:");
 
         String n_text = null;
-        if(isStarted) n_text = "Pause"; else n_text ="Continue";
+        if(isStarted) n_text = "PAUSE"; else n_text ="CONTINUE";
 
         alertDialog.setNeutralButton(n_text, new DialogInterface.OnClickListener() {
+         @Override
+         public void onClick(DialogInterface dialogInterface, int i) {
+                doTimerPause();
+                }
+                });
+
+        alertDialog.setPositiveButton("QUIT", new DialogInterface.OnClickListener() {
 @Override
 public void onClick(DialogInterface dialogInterface, int i) {
-        doTimerPause();
+            isStarted = false;
+            ArrayList<MyActivity> mylist = ActivityUtil.Loc2Activity(mList);
+            String fname = ActivityUtil.serializeWithCurrentTime(mylist);
+            Toast.makeText(MainActivity.this, "" + fname + " created ...", Toast.LENGTH_LONG).show();
+            mTask.cancel();
+            finish();
         }
         });
 
-        alertDialog.setPositiveButton("Start New", new DialogInterface.OnClickListener() {
+        alertDialog.setNegativeButton("NEW", new DialogInterface.OnClickListener() {
 @Override
 public void onClick(DialogInterface dialogInterface, int i) {
-
-
-        ArrayList<MyActivity> mylist = ActivityUtil.Loc2Activity(mList);
-        String fname = ActivityUtil.serializeWithCurrentTime(mylist);
-        Toast.makeText(MainActivity.this, "" + fname + " created and started new activity...", Toast.LENGTH_LONG).show();
-
-        doMyTimeTask();
-        }
-        });
-
-        alertDialog.setNegativeButton("Stop", new DialogInterface.OnClickListener() {
-@Override
-public void onClick(DialogInterface dialogInterface, int i) {
-        isStarted = false;
-        ArrayList<MyActivity> mylist = ActivityUtil.Loc2Activity(mList);
-        String fname = ActivityUtil.serializeWithCurrentTime(mylist);
-        Toast.makeText(MainActivity.this, "" + fname + " created ...", Toast.LENGTH_LONG).show();
-        mTask.cancel();
-        finish();
+            ArrayList<MyActivity> mylist = ActivityUtil.Loc2Activity(mList);
+            String fname = ActivityUtil.serializeWithCurrentTime(mylist);
+            Toast.makeText(MainActivity.this, "" + fname + " created and started new activity...", Toast.LENGTH_LONG).show();
+            doMyTimeTask();
         }
         });
 
         AlertDialog alert = alertDialog.create();
         alert.show();
-        }
+    }
 
-@Override
-public void onClick(View view) {
+    @Override
+    public void onClick(View view) {
         switch(view.getId()) {
-        case R.id.imb_stop_timer:
-        alertDialogChoice();
-        break;
+            case R.id.imb_stop_timer:
+                alertDialogChoice();
+            break;
         }
-        }
+    }
 
-public class MyTimerTask extends java.util.TimerTask{
-    public void run() {
-        if(!isStarted) return;
-        long start = System.currentTimeMillis();
-        MainActivity.this.runOnUiThread(new Runnable() {
+    public class MyTimerTask extends java.util.TimerTask{
+       public void run() {
+            if(!isStarted) return;
+            long start = System.currentTimeMillis();
+            MainActivity.this.runOnUiThread(new Runnable() {
 
             public void run() {
                 end_time = new Date().getTime();
@@ -275,12 +278,15 @@ public class MyTimerTask extends java.util.TimerTask{
 
                 Log.e(TAG,"avg_pace:" + avg_pace);
                 Log.e(TAG,"cur_pace:" + cur_pace);
-            }
-        });
-
+                }
+            });
+       }
     }
 
-}
+
+
+
+
 
 
 }

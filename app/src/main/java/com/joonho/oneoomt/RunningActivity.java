@@ -2271,6 +2271,4 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
         Log.e(TAG, "**** Dup removed from " + mLatLngList.size() + " to " + newList.size() );
         mLatLngList = newList;
     }
-
-
 }

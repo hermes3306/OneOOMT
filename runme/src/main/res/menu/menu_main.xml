@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@+id/files"
-        android:title="files" />
+        android:id="@+id/files_d"
+        android:title="files dialog" />
+    <item
+        android:id="@+id/files_a"
+        android:title="files activity" />
     <item
         android:id="@+id/upgrade"
         android:title="upgrade files(v1->v2)" />

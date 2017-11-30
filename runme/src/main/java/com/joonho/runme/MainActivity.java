@@ -4,6 +4,7 @@ package com.joonho.runme;
 import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.location.Location;
@@ -51,9 +52,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private TimerTask mTask = null;
     private Timer mTimer = null;
 
-    private boolean isStarted = true;
-
+    private boolean isStarted = false;
     private double total_distance = 0;
+    private long start = System.currentTimeMillis();
 
     private double paces[] = new double[1000]; //upto 1000 km
     private long   startime_paces[] = new long[1000]; // upto 1000 start time
@@ -62,22 +63,63 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private ArrayList<Location> mList = new ArrayList<Location>();
 
     @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        Log.e(TAG,"------- onSaveInstanceState() called");
+
+
+        savedInstanceState.putDouble("total_distance", total_distance);
+        savedInstanceState.putBoolean("isStarted", isStarted);
+        savedInstanceState.putLong("start", start);
+        super.onSaveInstanceState(savedInstanceState);
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.e(TAG,"------- onCreate() called");
+
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        initialize_Location_Manager();
+        if(savedInstanceState != null) {
 
-        // start information
-        tv_time_elapsed = (TextView) findViewById(R.id.tv_time_elapsed);
-        tv_total_distance = (TextView) findViewById(R.id.tv_total_distance);
-        tv_avg_pace = (TextView) findViewById(R.id.tv_avg_pace02);
-        tv_cur_pace = (TextView) findViewById(R.id.tv_cur_pace);
-        imb_stop_timer = (ImageButton) findViewById(R.id.imb_stop_timer);
+            Log.e(TAG,"------- savedInstanceState != null ");
 
-        doMyTimeTask();
+            isStarted = savedInstanceState.getBoolean("isStarted");
+            total_distance = savedInstanceState.getDouble("total_distance");
+            start = savedInstanceState.getLong("start");
+        } else {
+
+            Log.e(TAG,"------- savedInstanceState == null ");
+
+
+            initialize_Location_Manager();
+            tv_time_elapsed = (TextView) findViewById(R.id.tv_time_elapsed);
+            tv_total_distance = (TextView) findViewById(R.id.tv_total_distance);
+            tv_avg_pace = (TextView) findViewById(R.id.tv_avg_pace02);
+            tv_cur_pace = (TextView) findViewById(R.id.tv_cur_pace);
+            imb_stop_timer = (ImageButton) findViewById(R.id.imb_stop_timer);
+            doMyTimeTask();
+        }
     }
 
+    @Override
+    public void onBackPressed() {
+       Log.e(TAG,"------- onBackPressed() called");
+       //super.onBackPressed();
+    }
+
+    @Override
+    protected void onStart() {
+        Log.e(TAG,"------- onStart() called");
+        super.onStart();
+    }
+
+    @Override
+    protected void onStop() {
+        Log.e(TAG,"------- onStop() called");
+        super.onStop();
+    }
 
     LocationManager locationManager = null;
     Boolean isGPSEnabled = null;
@@ -186,15 +228,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
                 });
 
-        alertDialog.setPositiveButton("QUIT", new DialogInterface.OnClickListener() {
+        alertDialog.setPositiveButton("SAVE", new DialogInterface.OnClickListener() {
 @Override
 public void onClick(DialogInterface dialogInterface, int i) {
-            isStarted = false;
             ArrayList<MyActivity> mylist = ActivityUtil.Loc2Activity(mList);
             String fname = ActivityUtil.serializeWithCurrentTime(mylist);
-            Toast.makeText(MainActivity.this, "" + fname + " created ...", Toast.LENGTH_LONG).show();
-            mTask.cancel();
-            finish();
+            Toast.makeText(MainActivity.this, "" + fname + " saved ...", Toast.LENGTH_LONG).show();
         }
         });
 
@@ -226,7 +265,7 @@ public void onClick(DialogInterface dialogInterface, int i) {
        int lastmin=0;
        public void run() {
             if(!isStarted) return;
-            long start = System.currentTimeMillis();
+            start = System.currentTimeMillis();
 
             MainActivity.this.runOnUiThread(new Runnable() {
 
@@ -234,8 +273,8 @@ public void onClick(DialogInterface dialogInterface, int i) {
                 end_time = new Date().getTime();
                 long elapsed_time = end_time - start_time;
 
-                Log.e(TAG, "start time:" + start_time);
-                Log.e(TAG, "elapsed time:" + elapsed_time);
+//                Log.e(TAG, "start time:" + start_time);
+//                Log.e(TAG, "elapsed time:" + elapsed_time);
 
                 double cur_dist = 0;
                 long cur_elapsed_time = 0;
@@ -258,8 +297,8 @@ public void onClick(DialogInterface dialogInterface, int i) {
                             //cur_elapsed_time = last_loc.getTime() - cur_loc.getTime();
                             cur_elapsed_time = 1000l; // 1sec
 
-                            Log.e(TAG,"cur_dist:" + cur_dist);
-                            Log.e(TAG,"cur_elapsed_time:" + cur_elapsed_time);
+//                            Log.e(TAG,"cur_dist:" + cur_dist);
+//                            Log.e(TAG,"cur_elapsed_time:" + cur_elapsed_time);
 
                             total_distance = total_distance + cur_dist;
                             mList.add(cur_loc);
@@ -294,9 +333,6 @@ public void onClick(DialogInterface dialogInterface, int i) {
                 double cur_km_per_sec = (double) (cur_elapsed_time_sec / cur_dist_kilo);
                 String cur_pace = String.format("%2d:%02d", (int)(cur_km_per_sec/60), (int)(cur_km_per_sec%60));
                 if(cur_dist_kilo != 0) tv_cur_pace.setText(cur_pace);
-
-                Log.e(TAG,"avg_pace:" + avg_pace);
-                Log.e(TAG,"cur_pace:" + cur_pace);
                 }
             });
        }
@@ -306,7 +342,6 @@ public void onClick(DialogInterface dialogInterface, int i) {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
-        Log.e(TAG, "onCreateOptionsMenu - 최초 메뉴키를 눌렀을 때 호출됨");
         return true;
     }
 
@@ -320,7 +355,7 @@ public void onClick(DialogInterface dialogInterface, int i) {
         int id = item.getItemId();
 
         switch(id) {
-            case R.id.files:
+            case R.id.files_d:
                 ActivityUtil._default_ext = ".ser";
                 File list[] = ActivityUtil.getFiles();
                 if(list == null) {
@@ -354,6 +389,46 @@ public void onClick(DialogInterface dialogInterface, int i) {
                 alert.show();
                 return true;
 
+            case R.id.files_a:
+
+                ActivityUtil._default_ext = ".ser";
+                File list2[] = ActivityUtil.getFiles();
+                if(list2 == null) {
+                    Toast.makeText(getApplicationContext(), "ERR: No Activities to show !", Toast.LENGTH_LONG).show();
+                    return false;
+                }
+
+                int msize2 = list2.length;
+
+                final CharSequence items2[] = new CharSequence[msize2];
+                final String filepath2[] = new String[msize2];
+
+                for(int i=0;i<msize2;i++) {
+                    items2[i] = list2[i].getName();
+                    filepath2[i] = list2[i].getAbsolutePath();
+                }
+                //final CharSequence items[] = {" A "," B "};
+
+                AlertDialog.Builder alertDialog2 = new AlertDialog.Builder(this);
+                //alertDialog.setIcon(R.drawable.window);
+                alertDialog2.setTitle("Select An Activity");
+                alertDialog2.setItems(items2, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int index) {
+                        File afile = new File(filepath2[index]);
+                        Intent intent = new Intent(MainActivity.this, ActFileActivity.class);
+                        intent.putExtra("file", afile.getAbsolutePath());
+                        intent.putExtra("pos", index);
+                        startActivity(intent);
+
+                        ActivityUtil.showActivityAlertDialog(MainActivity.this, afile, index);
+                    }
+                });
+                alertDialog2.setNegativeButton("Back",null);
+                AlertDialog alert2 = alertDialog2.create();
+                alert2.show();
+                return true;
+
             case R.id.upgrade:
                 ActivityUtil._default_ext = ".ser";
                 File uplist[] = ActivityUtil.getFiles();
@@ -373,13 +448,5 @@ public void onClick(DialogInterface dialogInterface, int i) {
         }
         return super.onOptionsItemSelected(item);
     }
-
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-    }
-
-
-
 }
 

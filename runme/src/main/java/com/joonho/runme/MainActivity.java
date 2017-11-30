@@ -221,9 +221,12 @@ public void onClick(DialogInterface dialogInterface, int i) {
     }
 
     public class MyTimerTask extends java.util.TimerTask{
+       int lastkm=0;
+       int lastmin=0;
        public void run() {
             if(!isStarted) return;
             long start = System.currentTimeMillis();
+
             MainActivity.this.runOnUiThread(new Runnable() {
 
             public void run() {
@@ -264,6 +267,13 @@ public void onClick(DialogInterface dialogInterface, int i) {
                 }
 
                 double dist_kilo = total_distance / 1000f;
+                if( (int)dist_kilo > lastkm ) {
+                    lastkm++;
+                    String alertmsg = "" + lastkm + " km를 활동하였습니다.";
+                    MyNotifier.go(MainActivity.this, "100대명산알람",alertmsg);
+                }
+
+
                 String distance_str = String.format("%.2f", dist_kilo);
                 tv_total_distance.setText(distance_str);
 
@@ -271,6 +281,12 @@ public void onClick(DialogInterface dialogInterface, int i) {
                 double km_per_sec = (double) (elapsed_time_sec / dist_kilo);
                 String avg_pace = String.format("%2d:%02d", (int)(km_per_sec/60), (int)(km_per_sec%60));
                 if(dist_kilo != 0) tv_avg_pace.setText(avg_pace);
+
+                if( (int)(elapsed_time_sec / 60)  > lastmin ) {
+                    lastmin++;
+                    String alertmsg = "" + lastmin + " 분을 활동하였습니다.";
+                    MyNotifier.go(MainActivity.this, "100대명산알람",alertmsg);
+                }
 
                 double cur_dist_kilo = cur_dist / 1000f;
                 double cur_elapsed_time_sec = (double) (cur_elapsed_time / 1000l);

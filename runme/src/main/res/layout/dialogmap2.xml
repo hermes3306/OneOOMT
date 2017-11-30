@@ -48,7 +48,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:alpha="0.6"
+                        android:alpha="0.8"
                         android:background="@android:color/transparent"
                         android:contentDescription=""
                         app:srcCompat="@drawable/arrow_left128" />
@@ -58,7 +58,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:alpha="0.6"
+                        android:alpha="0.8"
                         android:background="@android:color/transparent"
                         android:contentDescription="TODO"
                         app:srcCompat="@drawable/arrow_right128" />
@@ -129,32 +129,32 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:textColor="@android:color/darker_gray"
-                        android:textSize="20sp" />
+                        android:textColor="@android:color/black"
+                        android:textSize="18sp" />
 
                     <TextView
                         android:id="@+id/tv_duration"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:textColor="@android:color/darker_gray"
-                        android:textSize="20sp" />
+                        android:textColor="@android:color/black"
+                        android:textSize="18sp" />
 
                     <TextView
                         android:id="@+id/tv_minperkm"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:textColor="@android:color/darker_gray"
-                        android:textSize="20sp" />
+                        android:textColor="@android:color/black"
+                        android:textSize="18sp" />
 
                     <TextView
                         android:id="@+id/tv_carolies"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:textColor="@android:color/darker_gray"
-                        android:textSize="20sp" />
+                        android:textColor="@android:color/black"
+                        android:textSize="18sp" />
 
                 </LinearLayout>
 

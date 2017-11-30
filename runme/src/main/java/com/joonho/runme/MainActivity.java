@@ -12,6 +12,10 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+
+import android.view.Menu;
+import android.view.MenuItem;
+
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -26,6 +30,7 @@ import com.joonho.runme.util.MyActivity;
 import com.joonho.runme.util.CalDistance;
 import com.joonho.runme.util.StringUtil;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Timer;
@@ -71,10 +76,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         doMyTimeTask();
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        return super.onCreateOptionsMenu(menu);
-    }
 
     LocationManager locationManager = null;
     Boolean isGPSEnabled = null;
@@ -284,8 +285,60 @@ public void onClick(DialogInterface dialogInterface, int i) {
     }
 
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        Log.e(TAG, "onCreateOptionsMenu - 최초 메뉴키를 눌렀을 때 호출됨");
+        return true;
+    }
 
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        return super.onPrepareOptionsMenu(menu);
+    }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        switch(id) {
+            case R.id.files:
+                ActivityUtil._default_ext = ".ser";
+                File list[] = ActivityUtil.getFiles();
+                if(list == null) {
+                    Toast.makeText(getApplicationContext(), "ERR: No Activities to show !", Toast.LENGTH_LONG).show();
+                    return false;
+                }
+
+                int msize = list.length;
+
+                final CharSequence items[] = new CharSequence[msize];
+                final String filepath[] = new String[msize];
+
+                for(int i=0;i<msize;i++) {
+                    items[i] = list[i].getName();
+                    filepath[i] = list[i].getAbsolutePath();
+                }
+                //final CharSequence items[] = {" A "," B "};
+
+                AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+                //alertDialog.setIcon(R.drawable.window);
+                alertDialog.setTitle("Select An Activity");
+                alertDialog.setItems(items, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int index) {
+                        File afile = new File(filepath[index]);
+                        //ActivityUtil.showActivityAlertDialog(MainActivity.this, afile, index);
+                    }
+                });
+                alertDialog.setNegativeButton("Back",null);
+                AlertDialog alert = alertDialog.create();
+                alert.show();
+                return true;
+
+        }
+        return super.onOptionsItemSelected(item);
+    }
 
 
 

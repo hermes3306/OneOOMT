@@ -7,7 +7,9 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Display;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -63,7 +65,16 @@ public class ActFileActivity extends AppCompatActivity {
             final File flist[] = ActivityUtil.getFiles();
 
             public void GO(final GoogleMap googleMap, File myfile) {
-                ActivityUtil.deserializeIntoMap(_ctx, myfile, googleMap, false);
+
+                Display display = getWindowManager().getDefaultDisplay();
+                DisplayMetrics metrics = new DisplayMetrics();
+                display.getMetrics( metrics );
+                int width = metrics.widthPixels;
+                int height = metrics.heightPixels;
+
+                ActivityUtil.deserializeIntoMap(_ctx, myfile, googleMap, width, height,false);
+                mActivityList = ActivityUtil.mActivityList;
+
                 ActivityStat activityStat = ActivityUtil.getActivityStat(mActivityList);
 
                 Geocoder geocoder = new Geocoder(_ctx, Locale.getDefault());

@@ -420,8 +420,6 @@ public void onClick(DialogInterface dialogInterface, int i) {
                         intent.putExtra("file", afile.getAbsolutePath());
                         intent.putExtra("pos", index);
                         startActivity(intent);
-
-                        ActivityUtil.showActivityAlertDialog(MainActivity.this, afile, index);
                     }
                 });
                 alertDialog2.setNegativeButton("Back",null);

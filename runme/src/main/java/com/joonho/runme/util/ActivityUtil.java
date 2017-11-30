@@ -10,7 +10,9 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Environment;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Display;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageButton;
@@ -414,7 +416,7 @@ public class ActivityUtil {
         return date_str;
     }
 
-    public static void deserializeIntoMap(Context ctx, File file, GoogleMap gmap, boolean mode_append) {
+    public static void deserializeIntoMap(Context ctx, File file, GoogleMap gmap, int width, int height, boolean mode_append) {
         if(file == null)  {
             Log.e(TAG, "No File to deserialized");
             return;
@@ -478,7 +480,8 @@ public class ActivityUtil {
         //Log.e(TAG, "Before drawMarkers()");
 
         drawTrack(gmap, mActivityList);
-        drawMarkers(ctx, gmap, mActivityList);
+        drawMarkers(gmap, mActivityList);
+        doBoundBuild(gmap, width, height);
 
         //Log.e(TAG, "After drawMarkers()");
     }
@@ -497,7 +500,7 @@ public class ActivityUtil {
     }
 
 
-    public static void drawMarkers(Context ctx, GoogleMap gmap, ArrayList<MyActivity> list) {
+    public static void drawMarkers(GoogleMap gmap, ArrayList<MyActivity> list) {
         double tot_distance = getTotalDistanceDouble(list);
 
         int disunit = 1000;
@@ -551,20 +554,24 @@ public class ActivityUtil {
                 }
             }
         }
+    }
 
+    public static void doBoundBuild(GoogleMap gmap, int width, int height) {
         LatLngBounds.Builder builder= new LatLngBounds.Builder();
         for (Marker marker : markers) {
             builder.include(marker.getPosition());
         }
         LatLngBounds bounds = builder.build();
-
-        int width = ctx.getResources().getDisplayMetrics().widthPixels;
-        int height = ctx.getResources().getDisplayMetrics().heightPixels;
         int padding = (int) (width * 0.20); // offset from edges of the map 10% of screen
 
-        CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
-        gmap.moveCamera(cu);
+        try {
+            CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
+            gmap.moveCamera(cu);
+        }catch(Exception e) {
+            Log.e(TAG,"ERR] BoundBuild:" + e.toString());
+        }
     }
+
 
     public static ActivityStat getActivityStat(ArrayList <MyActivity> list) {
         if(list == null) return null;
@@ -644,7 +651,10 @@ public class ActivityUtil {
             final File flist[] = getFiles();
 
             public void GO(final GoogleMap googleMap, File myfile) {
-                deserializeIntoMap(_ctx, myfile, googleMap, false);
+                int width = _ctx.getResources().getDisplayMetrics().widthPixels;
+                int height = _ctx.getResources().getDisplayMetrics().heightPixels;
+
+                deserializeIntoMap(_ctx, myfile, googleMap, width, height, false);
                 ActivityStat activityStat = getActivityStat(mActivityList);
 
                 Geocoder geocoder = new Geocoder(_ctx, Locale.getDefault());

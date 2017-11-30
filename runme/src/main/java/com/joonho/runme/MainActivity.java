@@ -28,6 +28,7 @@ import android.widget.Toast;
 import com.joonho.runme.util.ActivityUtil;
 import com.joonho.runme.util.MyActivity;
 import com.joonho.runme.util.CalDistance;
+import com.joonho.runme.util.MyNotifier;
 import com.joonho.runme.util.StringUtil;
 
 import java.io.File;
@@ -346,6 +347,10 @@ public void onClick(DialogInterface dialogInterface, int i) {
 
                 int upsize = uplist.length;
                 for(int i=0;i<upsize;i++) ActivityUtil.upgrade(uplist[i]);
+                return true;
+
+            case R.id.notify:
+                MyNotifier.go(MainActivity.this, "Hello", "World");
                 return true;
 
         }

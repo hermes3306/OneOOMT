@@ -6,4 +6,8 @@
     <item
         android:id="@+id/upgrade"
         android:title="upgrade files(v1->v2)" />
+    <item
+        android:id="@+id/notify"
+        android:title="notify..." />
+
 </menu>

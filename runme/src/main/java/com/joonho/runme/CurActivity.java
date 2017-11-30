@@ -1,18 +1,18 @@
 package com.joonho.runme;
 
-import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Address;
 import android.location.Geocoder;
-import android.support.v7.app.AppCompatActivity;
+import android.location.Location;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -31,23 +31,30 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class ActFileActivity extends AppCompatActivity {
-    public static String TAG = "ActFileActivity";
-    public static int position = 0;
-    public static ArrayList<MyActivity> mActivityList = new ArrayList<MyActivity>();
+public class CurActivity extends AppCompatActivity {
+    public static String TAG = "CurActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_act_file2);
+        //setContentView(R.layout.activity_cur);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+            }
+        });
 
         Intent intent = getIntent();
-        String fname = intent.getExtras().getString("file");
-        position = intent.getExtras().getInt("pos");
+        final ArrayList<MyActivity> mActivityList = (ArrayList<MyActivity>)intent.getSerializableExtra("locations");
 
         final Context _ctx = this;
-        final File _file = new File(fname);
-
         final MapView mMapView = (MapView) findViewById(R.id.mapView);
         MapsInitializer.initialize(this);
 
@@ -65,18 +72,13 @@ public class ActFileActivity extends AppCompatActivity {
             final TextView tv_carolies = (TextView) findViewById(R.id.tv_carolies);
             final TextView tv_address = (TextView) findViewById(R.id.tv_address);
 
-            final File flist[] = ActivityUtil.getFiles();
-
-            public void GO(final GoogleMap googleMap, File myfile) {
+            public void GO(final GoogleMap googleMap) {
 
                 Display display = getWindowManager().getDefaultDisplay();
                 DisplayMetrics metrics = new DisplayMetrics();
                 display.getMetrics( metrics );
                 int width = metrics.widthPixels;
                 int height = metrics.heightPixels;
-
-                ActivityUtil.deserializeIntoMap(_ctx, myfile, googleMap, width, height,false);
-                mActivityList = ActivityUtil.mActivityList;
 
                 ActivityStat activityStat = ActivityUtil.getActivityStat(mActivityList);
 
@@ -96,7 +98,7 @@ public class ActFileActivity extends AppCompatActivity {
                     addinfo = addresses.get(0).getAddressLine(0).toString();
                 }
 
-                String inx_str = "" + (position+1)  + "/" + flist.length + "\n";
+                String inx_str = "Total " + mActivityList.size() + " locations";
                 tv_cursor.setText(inx_str);
 
                 String date_str = ActivityUtil.getStartTime(mActivityList);
@@ -126,59 +128,20 @@ public class ActFileActivity extends AppCompatActivity {
 
             @Override
             public void onMapReady(final GoogleMap googleMap) {
-                GO(googleMap, _file);
+                GO(googleMap);
 
                 imbt_prev.setOnClickListener(new View.OnClickListener(){
                     public void onClick (View view) {
-                        if (position > 0 && position < flist.length) {
-                            position--;
-                            GO(googleMap, flist[position]);
-                        }
                     }
                 });
 
                 imbt_next.setOnClickListener(new View.OnClickListener(){
                     public void onClick (View view) {
-                        File flist[] = ActivityUtil.getFiles();
-                        if (position >= 0 && position < flist.length-1) {
-                            position++;
-                            GO(googleMap, flist[position]);
-                        }
                     }
                 });
             } /* on  MapReady */
         });
-    } /* onCreate */
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_act_file, menu);
-        return true;
     }
 
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        return super.onPrepareOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-
-        switch (id) {
-            case R.id.delete:
-                File flist[] = ActivityUtil.getFiles();
-                flist[position].delete();
-                Toast.makeText(getApplicationContext(),"" + flist[position] + " deleted!!!", Toast.LENGTH_LONG).show();
-                finish();
-                return true;
-            case R.id.share:
-                return true;
-            default:
-                return true;
-        }
-    }
 }
-
-
-

@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
+        android:id="@+id/map"
+        android:title="current map" />
+    <item
         android:id="@+id/files_d"
         android:title="files dialog" />
     <item

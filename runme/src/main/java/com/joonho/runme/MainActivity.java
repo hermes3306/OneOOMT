@@ -355,6 +355,15 @@ public void onClick(DialogInterface dialogInterface, int i) {
         int id = item.getItemId();
 
         switch(id) {
+            case R.id.map:
+                Intent intent = new Intent(MainActivity.this, CurActivity.class);
+
+                ArrayList<MyActivity> myalist = ActivityUtil.Loc2Activity(mList);
+                intent.putExtra("locations",myalist);
+
+                startActivity(intent);
+                return true;
+
             case R.id.files_d:
                 ActivityUtil._default_ext = ".ser";
                 File list[] = ActivityUtil.getFiles();

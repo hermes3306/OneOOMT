@@ -328,7 +328,7 @@ public void onClick(DialogInterface dialogInterface, int i) {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int index) {
                         File afile = new File(filepath[index]);
-                        //ActivityUtil.showActivityAlertDialog(MainActivity.this, afile, index);
+                        ActivityUtil.showActivityAlertDialog(MainActivity.this, afile, index);
                     }
                 });
                 alertDialog.setNegativeButton("Back",null);

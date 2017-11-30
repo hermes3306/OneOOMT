@@ -3,7 +3,7 @@ package com.joonho.runme.util;
 import java.io.Serializable;
 
 
-public class MyActivity {
+public class MyActivity  implements Serializable {
 
     public double latitude;
     public double longitude;

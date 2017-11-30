@@ -425,6 +425,7 @@ public class ActivityUtil {
         ObjectInputStream in = null;
 
         ArrayList list = null;
+
         try {
             fis = new FileInputStream(file);
             bis = new BufferedInputStream(fis);

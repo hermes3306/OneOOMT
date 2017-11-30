@@ -3,4 +3,7 @@
     <item
         android:id="@+id/files"
         android:title="files" />
+    <item
+        android:id="@+id/upgrade"
+        android:title="upgrade files(v1->v2)" />
 </menu>

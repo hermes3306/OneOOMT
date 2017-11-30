@@ -719,6 +719,17 @@ public class ActivityUtil {
     }
 
 
+    public static void upgrade(File f) {
+        //f.delete();
+
+        ArrayList<MyActivity> list = deserializeFile(f);
+        if(list == null) { // old version check required.
+            Log.e(TAG,"" + f.getName() + " deserialize() failed");
+        }
+        else { // pass
+            Log.e(TAG, "" + f.getName() + " deserialize() success");
+        }
+    }
 
 
 }

@@ -336,6 +336,18 @@ public void onClick(DialogInterface dialogInterface, int i) {
                 alert.show();
                 return true;
 
+            case R.id.upgrade:
+                ActivityUtil._default_ext = ".ser";
+                File uplist[] = ActivityUtil.getFiles();
+                if(uplist == null) {
+                    Toast.makeText(getApplicationContext(), "ERR: No Activities to show !", Toast.LENGTH_LONG).show();
+                    return false;
+                }
+
+                int upsize = uplist.length;
+                for(int i=0;i<upsize;i++) ActivityUtil.upgrade(uplist[i]);
+                return true;
+
         }
         return super.onOptionsItemSelected(item);
     }

@@ -49,20 +49,9 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/tv_address"
+            android:id="@+id/textView40"
             android:layout_width="match_parent"
-            android:text="-"
-            android:textSize="17sp"
-            android:gravity="center"
             android:layout_height="50sp" />
-
-        <TextView
-            android:id="@+id/textView89"
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@android:color/darker_gray"
-            tools:layout_editor_absoluteX="0dp"
-            tools:layout_editor_absoluteY="91dp" />
 
         <TextView
             android:id="@+id/tv_total_distance"
@@ -70,7 +59,7 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:text="0.00"
-            android:textSize="100sp"
+            android:textSize="120sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.943"
             app:layout_constraintStart_toStartOf="parent"
@@ -88,24 +77,12 @@
             tools:layout_editor_absoluteY="221dp" />
 
         <TextView
-            android:id="@+id/textView26"
+            android:id="@+id/textView41"
             android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@android:color/darker_gray"
-            tools:layout_editor_absoluteX="0dp"
-            tools:layout_editor_absoluteY="255dp" />
-
-        <TextView
-            android:id="@+id/tv_lat_lng_altitude"
-            android:layout_width="match_parent"
-            android:textSize="17sp"
-            android:gravity="center"
-            android:text="-"
-            android:textColor="@android:color/holo_green_light"
             android:layout_height="50sp" />
 
         <TextView
-            android:id="@+id/textView269"
+            android:id="@+id/textView26"
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:background="@android:color/darker_gray"

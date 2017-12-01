@@ -486,6 +486,7 @@ public class ActivityUtil {
         //Log.e(TAG, "After drawMarkers()");
     }
 
+
     public static void drawTrack(GoogleMap gmap, ArrayList<MyActivity> list) {
         ArrayList<LatLng> l = new ArrayList<>();
         for(int i=0; i<list.size();i++) {

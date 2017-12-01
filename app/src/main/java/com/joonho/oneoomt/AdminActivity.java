@@ -184,7 +184,6 @@ public class AdminActivity extends AppCompatActivity implements View.OnClickList
             }
         });
 
-
         alertDialog.setNegativeButton("Delete",new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
@@ -232,9 +231,7 @@ public class AdminActivity extends AppCompatActivity implements View.OnClickList
         }catch (Exception e) {
             Log.e(TAG, e.toString());
         }
-
         Log.e(TAG, "My Picture Master File:" + file.toString());
-
         try {
             FileOutputStream fos = new FileOutputStream(file);
             BufferedOutputStream bos = new BufferedOutputStream(fos);
@@ -245,9 +242,7 @@ public class AdminActivity extends AppCompatActivity implements View.OnClickList
                 myPicture mp = myPictureList.get(i);
                 File f2 = new File(mp.filepath);
                 File f2_tar = new File(storageDir, f2.getName());
-
                 if(copy_files) FileUtils.copyFileUsingFileStreams(f2, f2_tar);
-
                 mp.filepath = f2_tar.getAbsolutePath();
                 out.writeObject(mp);
                 Log.e(TAG, "" + i + "th Picture(" + mp.toString() + ") OK!" );
@@ -287,7 +282,6 @@ public class AdminActivity extends AppCompatActivity implements View.OnClickList
 
     public void copyPIC_DIRtoPICS() {
         Toast.makeText(getApplicationContext(),"copyPIC_DIRtoPICs begin", Toast.LENGTH_LONG).show();
-
         File mediaStorageDir = new File(Environment.getExternalStorageDirectory(), "MyCameraApp");
         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         File flist[] = storageDir.listFiles();
@@ -295,25 +289,17 @@ public class AdminActivity extends AppCompatActivity implements View.OnClickList
         for(int i=0;i<flist.length;i++) {
             File targetFile = new File(mediaStorageDir, flist[i].getName());
             try {
-
                 FileUtils.copyFileUsingFileStreams(flist[i], targetFile);
                 String sinfo = "" + targetFile.toString() + "Copy done!";
-
                 Toast.makeText(getApplicationContext(), sinfo, Toast.LENGTH_SHORT).show();
                 Log.e(TAG, sinfo);
             }catch(Exception e) {
                 e.printStackTrace();
                 Log.e(TAG, e.toString());
             }
-
         }
         Toast.makeText(getApplicationContext(),"copyPIC_DIRtoPICs end", Toast.LENGTH_LONG).show();
     }
-
-
-
-
-
 
     public ArrayList<myActivity> deserializeActivities(String filepath) {
         File file = new File(filepath);

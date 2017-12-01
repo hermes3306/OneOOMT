@@ -10,6 +10,7 @@ import android.content.res.Configuration;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
@@ -54,6 +55,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private boolean isStarted = false;
     private double total_distance = 0;
+    private String last_fname = null;
+
     private long start = System.currentTimeMillis();
 
     private double paces[] = new double[1000]; //upto 1000 km
@@ -70,6 +73,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         savedInstanceState.putDouble("total_distance", total_distance);
         savedInstanceState.putBoolean("isStarted", isStarted);
         savedInstanceState.putLong("start", start);
+        savedInstanceState.putString("last_fname", last_fname);
+
         super.onSaveInstanceState(savedInstanceState);
     }
 
@@ -88,6 +93,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             isStarted = savedInstanceState.getBoolean("isStarted");
             total_distance = savedInstanceState.getDouble("total_distance");
             start = savedInstanceState.getLong("start");
+            last_fname = savedInstanceState.getString("last_fname");
+
         } else {
 
             Log.e(TAG,"------- savedInstanceState == null ");
@@ -263,6 +270,8 @@ public void onClick(DialogInterface dialogInterface, int i) {
     public class MyTimerTask extends java.util.TimerTask{
        int lastkm=0;
        int lastmin=0;
+       int lasthour=0;
+
        public void run() {
             if(!isStarted) return;
             start = System.currentTimeMillis();
@@ -300,16 +309,30 @@ public void onClick(DialogInterface dialogInterface, int i) {
 //                            Log.e(TAG,"cur_dist:" + cur_dist);
 //                            Log.e(TAG,"cur_elapsed_time:" + cur_elapsed_time);
 
-                            total_distance = total_distance + cur_dist;
-                            mList.add(cur_loc);
+
+                            if(cur_dist < 1f) {
+                                // skip location information of 1meter
+                            }else {
+                                total_distance = total_distance + cur_dist;
+                                mList.add(cur_loc);
+                            }
+
                         }
                     }
                 }
 
                 double dist_kilo = total_distance / 1000f;
                 if( (int)dist_kilo > lastkm ) {
+
+                    ArrayList<MyActivity> mylist = ActivityUtil.Loc2Activity(mList);
+                    if(last_fname != null ) {
+                        last_fname = ActivityUtil.serializeWithCurrentTime(mylist);
+                    }else {
+                        ActivityUtil.serializeActivityIntoFile(mylist,last_fname);
+                    }
+
                     lastkm++;
-                    String alertmsg = "" + lastkm + " km를 활동하였습니다.";
+                    String alertmsg = "" + lastkm + " km를 활동하였습니다. \n " + last_fname + " 업데이트되었습니다.";
                     MyNotifier.go(MainActivity.this, "100대명산알람",alertmsg);
                 }
 
@@ -326,6 +349,20 @@ public void onClick(DialogInterface dialogInterface, int i) {
                     lastmin++;
                     String alertmsg = "" + lastmin + " 분을 활동하였습니다.";
                     MyNotifier.go(MainActivity.this, "100대명산알람",alertmsg);
+                }
+
+
+                if( (int)(elapsed_time_sec / 3600)  > lasthour ) {
+                    ArrayList<MyActivity> mylist = ActivityUtil.Loc2Activity(mList);
+                    if(last_fname != null ) {
+                        last_fname = ActivityUtil.serializeWithCurrentTime(mylist);
+                    }else {
+                        ActivityUtil.serializeActivityIntoFile(mylist,last_fname);
+                    }
+
+                    lasthour++;
+                    String alertmsg = "" + lasthour + " 시간을 활동하였습니다.\n " + last_fname + " 업데이트되었습니다.";
+                    MyNotifier.go(MainActivity.this, "100대명산알람", alertmsg);
                 }
 
                 double cur_dist_kilo = cur_dist / 1000f;
@@ -355,6 +392,11 @@ public void onClick(DialogInterface dialogInterface, int i) {
         int id = item.getItemId();
 
         switch(id) {
+            case R.id.web:
+                Intent wintent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://180.69.217.73:8080"));
+                startActivity(wintent);
+                return true;
+
             case R.id.map:
                 Intent intent = new Intent(MainActivity.this, CurActivity.class);
 

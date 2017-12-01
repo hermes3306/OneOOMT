@@ -63,7 +63,6 @@ public class CurActivity extends AppCompatActivity {
             final TextView tv_carolies = (TextView) findViewById(R.id.tv_carolies);
             final TextView tv_address = (TextView) findViewById(R.id.tv_address);
 
-
             public void GO(final GoogleMap googleMap) {
                 imbt_prev.setVisibility(View.INVISIBLE);
                 imbt_next.setVisibility(View.INVISIBLE);

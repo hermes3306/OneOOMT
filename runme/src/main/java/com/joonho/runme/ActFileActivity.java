@@ -96,7 +96,7 @@ public class ActFileActivity extends AppCompatActivity {
                     addinfo = addresses.get(0).getAddressLine(0).toString();
                 }
 
-                String inx_str = "" + (position+1)  + "/" + flist.length + "\n";
+                String inx_str = "\n" + (position+1)  + "/" + flist.length + "\n" + "Total " + mActivityList.size() + " locations";
                 tv_cursor.setText(inx_str);
 
                 String date_str = ActivityUtil.getStartTime(mActivityList);

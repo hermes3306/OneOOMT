@@ -26,7 +26,10 @@ import com.joonho.runme.util.ActivityStat;
 import com.joonho.runme.util.ActivityUtil;
 import com.joonho.runme.util.MyActivity;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -37,19 +40,7 @@ public class CurActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_act_file2);
-        //setContentView(R.layout.activity_cur);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+        setContentView(R.layout.activity_cur);
 
         Intent intent = getIntent();
         final ArrayList<MyActivity> mActivityList = (ArrayList<MyActivity>)intent.getSerializableExtra("locations");
@@ -72,7 +63,10 @@ public class CurActivity extends AppCompatActivity {
             final TextView tv_carolies = (TextView) findViewById(R.id.tv_carolies);
             final TextView tv_address = (TextView) findViewById(R.id.tv_address);
 
+
             public void GO(final GoogleMap googleMap) {
+                imbt_prev.setVisibility(View.INVISIBLE);
+                imbt_next.setVisibility(View.INVISIBLE);
 
                 Display display = getWindowManager().getDefaultDisplay();
                 DisplayMetrics metrics = new DisplayMetrics();
@@ -80,6 +74,7 @@ public class CurActivity extends AppCompatActivity {
                 int width = metrics.widthPixels;
                 int height = metrics.heightPixels;
 
+                drawGoogleMap(mActivityList, googleMap,width,height,false);
                 ActivityStat activityStat = ActivityUtil.getActivityStat(mActivityList);
 
                 Geocoder geocoder = new Geocoder(_ctx, Locale.getDefault());
@@ -142,6 +137,12 @@ public class CurActivity extends AppCompatActivity {
             } /* on  MapReady */
         });
 
+    }
+
+    public static void drawGoogleMap(ArrayList<MyActivity> mList, GoogleMap gmap, int width, int height, boolean mode_append) {
+        ActivityUtil.drawTrack(gmap, mList);
+        ActivityUtil.drawMarkers(gmap, mList);
+        ActivityUtil.doBoundBuild(gmap, width, height);
     }
 
 }

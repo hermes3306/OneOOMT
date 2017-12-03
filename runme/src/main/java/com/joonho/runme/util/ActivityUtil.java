@@ -255,7 +255,7 @@ public class ActivityUtil {
 
     public static String serializeWithCurrentTime(ArrayList<MyActivity> list) {
 
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy년MM월dd일_HH시mm분ss초", Locale.KOREA);
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss", Locale.KOREA);
         Date now = new Date();
         String fileName = formatter.format(now);
         serializeActivityIntoFile(list,fileName + ".ser");

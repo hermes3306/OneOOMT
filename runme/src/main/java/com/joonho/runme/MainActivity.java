@@ -15,6 +15,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
@@ -41,13 +42,18 @@ import com.joonho.runme.util.CalDistance;
 import com.joonho.runme.util.MyNotifier;
 import com.joonho.runme.util.StringUtil;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -57,6 +63,9 @@ import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private String TAG = "MainActivity";
+    private File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "OneOOMT");
+    String backupdir = StringUtil.DateToString1(new Date(), "yyyyMMdd");
+
 
     private long start_time, end_time;
     private TextView tv_time_elapsed = null;
@@ -371,9 +380,9 @@ public void onClick(DialogInterface dialogInterface, int i) {
 
                                 if (cur_dist < 1f) {
                                     // skip location information of 1m
-                                    String provider = cur_loc.getProvider();
-                                    String msg = String.format("%s로부터 추가된 위치는 거리가 %3.1fM로 제외...", provider, cur_dist);
-                                    tv_message.setText(msg);
+//                                    String provider = cur_loc.getProvider();
+//                                    String msg = String.format("%s로부터 추가된 위치는 거리가 %3.1fM로 제외...", provider, cur_dist);
+//                                    tv_message.setText(msg);
                                 } else {
                                     total_distance = total_distance + cur_dist;
                                     mList.add(cur_loc);
@@ -391,15 +400,13 @@ public void onClick(DialogInterface dialogInterface, int i) {
 
                         double dist_kilo = total_distance / 1000f;
                         if ((int) dist_kilo > lastkm) {
-
                             ArrayList<MyActivity> mylist = ActivityUtil.Loc2Activity(mList);
-                            if (last_fname == null) {
-                                last_fname = ActivityUtil.serializeWithCurrentTime(mylist);
-                            } else {
-                                ActivityUtil.serializeActivityIntoFile(mylist, last_fname);
-                            }
+                            String fname = ActivityUtil.serializeWithCurrentTime(mylist);
+
+                            doHttpFileUpload3(MainActivity.this, fname);
 
                             lastkm++;
+
                             String alertmsg = "" + lastkm + " km를 활동하였습니다. \n " + last_fname + " 업데이트되었습니다.";
                             MyNotifier.go(MainActivity.this, "100대명산거리알람", alertmsg);
                         }
@@ -417,17 +424,30 @@ public void onClick(DialogInterface dialogInterface, int i) {
                             // 웹서버 업로드 하는것으로 향후 구현하기로 함
                             lasthour++;
                             ArrayList<MyActivity> mylist = ActivityUtil.Loc2Activity(mList);
-                            last_fname = ActivityUtil.serializeWithCurrentTime(mylist);
+                            String fname = ActivityUtil.serializeWithCurrentTime(mylist);
+
+                            doHttpFileUpload3(MainActivity.this, fname);
 
                             String alertmsg = "" + lasthour + " 시간을 활동하였습니다.\n " + last_fname + " 업로드하였습니다.";
                             MyNotifier.go(MainActivity.this, "100대명산시간알람", alertmsg);
 
                         } else if ((int) (elapsed_time_sec / 600) > lastmin) { //10분 알람
                             ArrayList<MyActivity> mylist = ActivityUtil.Loc2Activity(mList);
+
                             if (last_fname == null) {
                                 last_fname = ActivityUtil.serializeWithCurrentTime(mylist);
+
+                                doHttpFileUpload3(MainActivity.this, last_fname);
+
+
                             } else {
-                                ActivityUtil.serializeActivityIntoFile(mylist, last_fname);
+                                File file = new File(mediaStorageDir, last_fname);
+                                file.delete();
+
+                                last_fname = ActivityUtil.serializeWithCurrentTime(mylist);
+
+                                doHttpFileUpload3(MainActivity.this, last_fname);
+
                             }
 
                             lastmin = lastmin + 10;
@@ -469,20 +489,16 @@ public void onClick(DialogInterface dialogInterface, int i) {
                 return true;
 
             case R.id.webupload:
-                //doHttpFileUpload(MainActivity.this);
-                try {
-                    HttpFileUpload2.go();
-                }catch(Exception e) {
-                    Log.e(TAG, e.toString());
-                }
-
+                ArrayList<MyActivity> myalist = ActivityUtil.Loc2Activity(mList);
+                String fname = ActivityUtil.serializeWithCurrentTime(myalist);
+                doHttpFileUpload3(MainActivity.this, fname);
                 return true;
 
             case R.id.map:
                 Intent intent = new Intent(MainActivity.this, CurActivity.class);
 
-                ArrayList<MyActivity> myalist = ActivityUtil.Loc2Activity(mList);
-                intent.putExtra("locations",myalist);
+                ArrayList<MyActivity> myalist2 = ActivityUtil.Loc2Activity(mList);
+                intent.putExtra("locations",myalist2);
 
                 startActivity(intent);
                 return true;
@@ -582,13 +598,17 @@ public void onClick(DialogInterface dialogInterface, int i) {
     private void doHttpFileUpload(final Context context) {
         new AsyncTask<Void,Void,Void>() {
             ProgressDialog asyncDialog = new ProgressDialog(context);
+            final String _serverUrl = "http://180.69.217.73:8080/OneOOMT/upload";
+            final File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "OneOOMT");
+            final String fname = "";
+            HttpURLConnection urlConnection = null;
+
 
             @Override
             protected Void doInBackground(Void... voids) {
                 try {
-                    URL serverUrl =
-                            new URL("http://180.69.217.73:8080/OneOOMT/upload");
-                    HttpURLConnection urlConnection = (HttpURLConnection) serverUrl.openConnection();
+                    URL serverUrl =new URL(_serverUrl);
+                    urlConnection = (HttpURLConnection) serverUrl.openConnection();
 
                     String boundaryString = "----SomeRandomText";
 
@@ -607,11 +627,10 @@ public void onClick(DialogInterface dialogInterface, int i) {
                     BufferedWriter httpRequestBodyWriter =
                             new BufferedWriter(new OutputStreamWriter(outputStreamToRequestBody));
 
-                    // Include value from the myFileDescription text area in the post data
-                    //httpRequestBodyWriter.write("\n\n--" + boundaryString + "\n");
-                    //httpRequestBodyWriter.write("Content-Disposition: form-data; name=\"myFileDescription\"");
-                    //httpRequestBodyWriter.write("\n\n");
-                    //httpRequestBodyWriter.write("Log file for 20150208");
+                    httpRequestBodyWriter.write("\n\n--" + boundaryString + "\n");
+                    httpRequestBodyWriter.write("Content-Disposition: form-data; name=\"myFileDescription\"");
+                    httpRequestBodyWriter.write("\n\n");
+                    httpRequestBodyWriter.write("Log file for 20150208");
 
                     Log.e(TAG, "--- Before BodyWriter.write()");
 
@@ -650,6 +669,21 @@ public void onClick(DialogInterface dialogInterface, int i) {
                     Log.e("HttpFileUpload", e.toString());
                 }
 
+                //==============받기===============
+                try {
+                    InputStream is = urlConnection.getInputStream();
+                    BufferedReader br = new BufferedReader(new InputStreamReader(is));
+                    StringBuffer sbResult = new StringBuffer();
+                    String str = "";
+                    while ((str = br.readLine()) != null) {
+                        Log.e(TAG, "RESPONSE:" + str);
+                        sbResult.append(str);
+                    }
+                }catch(Exception e) {
+                    e.printStackTrace();
+                    Log.e("HttpFileUpload", e.toString());
+                }
+
                 return null;
             }
 
@@ -668,8 +702,185 @@ public void onClick(DialogInterface dialogInterface, int i) {
                 Toast.makeText(context, "Uploading success", Toast.LENGTH_LONG).show();
             }
         }.execute();
-
     }
+
+
+    private void doHttpFileUpload2(final Context context) {
+
+        new AsyncTask<Void,Void,Void>() {
+            ProgressDialog asyncDialog = new ProgressDialog(context);
+            final String serverUrl = "http://180.69.217.73:8080/OneOOMT/upload";
+            final File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "OneOOMT");
+            final String fname = "";
+
+            public void go() throws Exception {
+
+                //==============환경===============
+                File file = mediaStorageDir.listFiles()[3];
+                Log.e(TAG, "filename to uplad: " + file.getAbsolutePath());
+
+
+                URL url = new URL(serverUrl);
+                URLConnection httpConn = url.openConnection();
+                httpConn.setDoOutput(true);
+                httpConn.setUseCaches(false);
+                httpConn.setRequestProperty("Content-type", "application/octet-stream");
+                httpConn.setRequestProperty("Content-Length", String.valueOf(file.length()));
+
+
+                //==============보내기===============
+                OutputStream out = httpConn.getOutputStream();
+                FileInputStream fis = new FileInputStream(file);
+                byte[] buffer = new byte[1024];
+                int readcount = 0;
+                while ((readcount = fis.read(buffer)) != -1) {
+                    Log.e(TAG, "readcount:" + readcount);
+                    out.write(buffer, 0, readcount);
+                }
+                out.flush();
+
+                Log.e(TAG,"end of write to web server");
+
+                //==============받기===============
+                InputStream is = httpConn.getInputStream();
+                BufferedReader br = new BufferedReader(new InputStreamReader(is));
+                StringBuffer sbResult = new StringBuffer();
+                String str = "";
+                while ((str = br.readLine()) != null) {
+                    Log.e(TAG, "RESPONSE:" + str);
+                    sbResult.append(str);
+                }
+            }
+
+
+            @Override
+            protected Void doInBackground(Void... voids) {
+               try {
+                   go();
+               }catch(Exception e ){
+                    Log.e(TAG, e.toString());
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPreExecute() {
+                asyncDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                asyncDialog.setMessage("Uploading...");
+                asyncDialog.show();
+                super.onPreExecute();
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                asyncDialog.dismiss();
+                super.onPostExecute(aVoid);
+                Toast.makeText(context, "Uploading success", Toast.LENGTH_LONG).show();
+            }
+        }.execute();
+    }
+
+
+    private void doHttpFileUpload3(final Context context, final String fname) {
+
+        new AsyncTask<Void,Void,Void>() {
+            ProgressDialog asyncDialog = new ProgressDialog(context);
+            final String serverUrl = "http://180.69.217.73:8080/OneOOMT/upload";
+            final File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "OneOOMT");
+            // 기타 필요한 내용
+            String attachmentName = fname;
+            String attachmentFileName = fname;
+            String crlf = "\r\n";
+            String twoHyphens = "--";
+            String boundary =  "*****";
+
+            public void go() throws Exception {
+
+                //==============환경===============
+                File file = new File(mediaStorageDir, fname);
+                Log.e(TAG, "filename to uplad: " + file.getAbsolutePath());
+
+                // request 준비
+                HttpURLConnection httpUrlConnection = null;
+                URL url = new URL(serverUrl);
+                httpUrlConnection = (HttpURLConnection) url.openConnection();
+                httpUrlConnection.setUseCaches(false);
+                httpUrlConnection.setDoOutput(true);
+
+                httpUrlConnection.setRequestMethod("POST");
+                httpUrlConnection.setRequestProperty("Connection", "Keep-Alive");
+                httpUrlConnection.setRequestProperty("Cache-Control", "no-cache");
+                httpUrlConnection.setRequestProperty(
+                        "Content-Type", "multipart/form-data;boundary=" + this.boundary);
+
+                // content wrapper시작
+                DataOutputStream request = new DataOutputStream(
+                        httpUrlConnection.getOutputStream());
+
+                request.writeBytes(this.twoHyphens + this.boundary + this.crlf);
+                request.writeBytes("Content-Disposition: form-data; name=\"" +
+                        this.attachmentName + "\";filename=\"" +
+                        this.attachmentFileName + "\"" + this.crlf);
+                request.writeBytes(this.crlf);
+
+                OutputStream out = httpUrlConnection.getOutputStream();
+                FileInputStream fis = new FileInputStream(file);
+                byte[] buffer = new byte[1024];
+                int readcount = 0;
+                while ((readcount = fis.read(buffer)) != -1) {
+                    Log.e(TAG, "readcount:" + readcount);
+                    out.write(buffer, 0, readcount);
+                }
+                out.flush();
+
+                request.writeBytes(this.crlf);
+                request.writeBytes(this.twoHyphens + this.boundary +
+                        this.twoHyphens + this.crlf);
+
+                request.flush();
+                request.close();
+
+                Log.e(TAG,"end of write to web server");
+
+                //==============받기===============
+                InputStream is = httpUrlConnection.getInputStream();
+                BufferedReader br = new BufferedReader(new InputStreamReader(is));
+                StringBuffer sbResult = new StringBuffer();
+                String str = "";
+                while ((str = br.readLine()) != null) {
+                    Log.e(TAG, "RESPONSE:" + str);
+                    sbResult.append(str);
+                }
+            }
+
+
+            @Override
+            protected Void doInBackground(Void... voids) {
+                try {
+                    go();
+                }catch(Exception e ){
+                    Log.e(TAG, e.toString());
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPreExecute() {
+                asyncDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                asyncDialog.setMessage("Uploading...");
+                asyncDialog.show();
+                super.onPreExecute();
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                asyncDialog.dismiss();
+                super.onPostExecute(aVoid);
+                Toast.makeText(context, "Activity("+fname+") Uploaded successfully...", Toast.LENGTH_LONG).show();
+            }
+        }.execute();
+    }
+
 
 
 

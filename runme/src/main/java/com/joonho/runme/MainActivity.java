@@ -2,6 +2,7 @@ package com.joonho.runme;
 
 
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -13,6 +14,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
@@ -31,12 +33,21 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.joonho.runme.util.ActivityUtil;
+import com.joonho.runme.util.FileUtil;
+import com.joonho.runme.util.HttpFileUpload;
+import com.joonho.runme.util.HttpFileUpload2;
 import com.joonho.runme.util.MyActivity;
 import com.joonho.runme.util.CalDistance;
 import com.joonho.runme.util.MyNotifier;
 import com.joonho.runme.util.StringUtil;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -54,6 +65,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private TextView tv_cur_pace = null;
     private TextView tv_address = null;
     private TextView tv_lat_lng_altitude = null;
+    private TextView tv_message = null;
 
     private ImageButton imb_stop_timer = null;
 
@@ -114,7 +126,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             tv_cur_pace = (TextView) findViewById(R.id.tv_cur_pace);
             tv_address = (TextView) findViewById(R.id.tv_address);
             tv_lat_lng_altitude = (TextView) findViewById(R.id.tv_lat_lng_altitude);
-
+            tv_message = (TextView) findViewById(R.id.tv_message);
 
             imb_stop_timer = (ImageButton) findViewById(R.id.imb_stop_timer);
             doMyTimeTask();
@@ -158,10 +170,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return addinfo;
     }
 
-
     LocationManager locationManager = null;
     Boolean isGPSEnabled = null;
     Boolean isNetworkEnabled = null;
+    Boolean noGPS = false;
 
     public void initialize_Location_Manager() {
         if (locationManager == null) {
@@ -169,23 +181,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         isGPSEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
         isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-        Log.d(TAG, "isGPSEnabled=" + isGPSEnabled);
-        Log.d(TAG, "isNetworkEnabled=" + isNetworkEnabled);
+        Log.e(TAG, "isGPSEnabled=" + isGPSEnabled);
+        Log.e(TAG, "isNetworkEnabled=" + isNetworkEnabled);
 
         LocationListener locationListener = new LocationListener() {
             public void onLocationChanged(Location location) {
                 double lat = location.getLatitude();
                 double lng = location.getLongitude();
-                //Log.e(TAG,"New Loc " + lat + " " + lng);
-                //Toast.makeText(StartRunning2Activity.this, lat + " " + lng, Toast.LENGTH_SHORT).show();
+                String provider = location.getProvider();
+                String msg = String.format("위치가 %s로부터 추가되어 경로의수는 %d입니다", provider, mList.size());
+                tv_message.setText(msg);
             }
 
             public void onStatusChanged(String provider, int status, Bundle extras) {
             }
-
             public void onProviderEnabled(String provider) {
             }
-
             public void onProviderDisabled(String provider) {
             }
 
@@ -205,33 +216,38 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }, 50);
         }
 
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
-
+        try {
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+            noGPS = false;
+        }catch(Exception e) {
+            Toast.makeText(getApplicationContext(),"No GPS Provider... ", Toast.LENGTH_LONG).show();
+        }
+        //locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
         }
 
-        public Location getLocation() {
-            // 수동으로 위치 구하기
-            String locationProvider = LocationManager.GPS_PROVIDER;
-            try {
+    public Location getLocation() {
+        String locationProvider = null;
+        // locationProvider = LocationManager.NETWORK_PROVIDER;
+        if(!noGPS) locationProvider = LocationManager.GPS_PROVIDER;
+
+        try {
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             Log.e(TAG, "no Permission"); // but never occur!
             return null;
-        }
+            }
 
-        Location lastKnownLocation = locationManager.getLastKnownLocation(locationProvider);
-        if (lastKnownLocation != null) {
-            double lng = lastKnownLocation.getLatitude();
-            double lat = lastKnownLocation.getLatitude();
-            Log.d(TAG, "GPS,  longtitude=" + lng + ", latitude=" + lat);
-            return lastKnownLocation;
-        }
+            Location lastKnownLocation = locationManager.getLastKnownLocation(locationProvider);
+            if (lastKnownLocation != null) {
+                double lng = lastKnownLocation.getLatitude();
+                double lat = lastKnownLocation.getLatitude();
+                return lastKnownLocation;
+            }
         }catch(Exception e) {
              e.printStackTrace();
              Log.e(TAG, e.toString());
         }
-            return null;
-        }
+        return null;
+    }
 
     public void doTimerPause() {
         isStarted = !isStarted;
@@ -252,8 +268,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             mList.add(start_loc);
             String caddr = getCurAddress(getApplicationContext(),start_loc);
             tv_address.setText(caddr);
-            String lla = String.format("위도:%3.1f, 경도:%3.1f, 고도:%3.0f", start_loc.getLatitude(), start_loc.getLongitude(), start_loc.getAltitude());
+            String lla = String.format("위도:%3.3f, 경도:%3.3f, 고도:%3.1f", start_loc.getLatitude(), start_loc.getLongitude(), start_loc.getAltitude());
             tv_lat_lng_altitude.setText(lla);
+            String provider = start_loc.getProvider();
+            String msg = String.format("위치가 %s로부터 추가되어 경로의수는 %d입니다", provider, mList.size());
+            tv_message.setText(msg);
+
         }
 
 
@@ -300,6 +320,7 @@ public void onClick(DialogInterface dialogInterface, int i) {
     @Override
     public void onClick(View view) {
         switch(view.getId()) {
+            case R.id.tv_message:
             case R.id.imb_stop_timer:
                 alertDialogChoice();
             break;
@@ -339,25 +360,31 @@ public void onClick(DialogInterface dialogInterface, int i) {
                             String cur_addr = getCurAddress(MainActivity.this, cur_loc);
                             tv_address.setText(cur_addr);
                             total_distance = 0;
-                            String lla = String.format("위도:%3.1f, 경도:%3.1f, 고도:%3.0f", cur_loc.getLatitude(), cur_loc.getLongitude(), cur_loc.getAltitude());
+                            String lla = String.format("위도:%3.3f, 경도:%3.3f, 고도:%3.1f", cur_loc.getLatitude(), cur_loc.getLongitude(), cur_loc.getAltitude());
                             tv_lat_lng_altitude.setText(lla);
                         } else {
                             Location last_loc = mList.get(mList.size() - 1);
                             CalDistance cd = new CalDistance(last_loc.getLatitude(), last_loc.getLongitude(), cur_loc.getLatitude(), cur_loc.getLongitude());
                             if (!Double.isNaN(cd.getDistance())) {
                                 cur_dist = cd.getDistance();
-                                //cur_elapsed_time = last_loc.getTime() - cur_loc.getTime();
-                                cur_elapsed_time = 1000l; // 1sec
+                                cur_elapsed_time = cur_loc.getTime() - last_loc.getTime();
 
                                 if (cur_dist < 1f) {
-                                    // skip location information of 1meter
+                                    // skip location information of 1m
+                                    String provider = cur_loc.getProvider();
+                                    String msg = String.format("%s로부터 추가된 위치는 거리가 %3.1fM로 제외...", provider, cur_dist);
+                                    tv_message.setText(msg);
                                 } else {
                                     total_distance = total_distance + cur_dist;
                                     mList.add(cur_loc);
                                     String cur_addr = getCurAddress(MainActivity.this, cur_loc);
                                     tv_address.setText(cur_addr);
-                                    String lla = String.format("위도:%3.1f, 경도:%3.1f, 고도:%3.0f", cur_loc.getLatitude(), cur_loc.getLongitude(), cur_loc.getAltitude());
+                                    String lla = String.format("위도:%3.1f, 경도:%3.1f, 고도:%3.1f", cur_loc.getLatitude(), cur_loc.getLongitude(), cur_loc.getAltitude());
                                     tv_lat_lng_altitude.setText(lla);
+
+                                    String provider = cur_loc.getProvider();
+                                    String msg = String.format("위치가 %s로부터 추가되어 경로의수는 %d입니다", provider, mList.size());
+                                    tv_message.setText(msg);
                                 }
                             }
                         }
@@ -366,7 +393,7 @@ public void onClick(DialogInterface dialogInterface, int i) {
                         if ((int) dist_kilo > lastkm) {
 
                             ArrayList<MyActivity> mylist = ActivityUtil.Loc2Activity(mList);
-                            if (last_fname != null) {
+                            if (last_fname == null) {
                                 last_fname = ActivityUtil.serializeWithCurrentTime(mylist);
                             } else {
                                 ActivityUtil.serializeActivityIntoFile(mylist, last_fname);
@@ -374,7 +401,7 @@ public void onClick(DialogInterface dialogInterface, int i) {
 
                             lastkm++;
                             String alertmsg = "" + lastkm + " km를 활동하였습니다. \n " + last_fname + " 업데이트되었습니다.";
-                            MyNotifier.go(MainActivity.this, "100대명산알람", alertmsg);
+                            MyNotifier.go(MainActivity.this, "100대명산거리알람", alertmsg);
                         }
 
 
@@ -386,24 +413,26 @@ public void onClick(DialogInterface dialogInterface, int i) {
                         String avg_pace = String.format("%2d:%02d", (int) (km_per_sec / 60), (int) (km_per_sec % 60));
                         if (dist_kilo != 0) tv_avg_pace.setText(avg_pace);
 
-                        if ((int) (elapsed_time_sec / 60) > lastmin) {
-                            lastmin++;
-                            String alertmsg = "" + lastmin + " 분을 활동하였습니다.";
-                            MyNotifier.go(MainActivity.this, "100대명산알람", alertmsg);
-                        }
-
-
-                        if ((int) (elapsed_time_sec / 3600) > lasthour) {
+                        if ((int) (elapsed_time_sec / 3600) > lasthour) { //1시간 업데이트
+                            // 웹서버 업로드 하는것으로 향후 구현하기로 함
+                            lasthour++;
                             ArrayList<MyActivity> mylist = ActivityUtil.Loc2Activity(mList);
-                            if (last_fname != null) {
+                            last_fname = ActivityUtil.serializeWithCurrentTime(mylist);
+
+                            String alertmsg = "" + lasthour + " 시간을 활동하였습니다.\n " + last_fname + " 업로드하였습니다.";
+                            MyNotifier.go(MainActivity.this, "100대명산시간알람", alertmsg);
+
+                        } else if ((int) (elapsed_time_sec / 600) > lastmin) { //10분 알람
+                            ArrayList<MyActivity> mylist = ActivityUtil.Loc2Activity(mList);
+                            if (last_fname == null) {
                                 last_fname = ActivityUtil.serializeWithCurrentTime(mylist);
                             } else {
                                 ActivityUtil.serializeActivityIntoFile(mylist, last_fname);
                             }
 
-                            lasthour++;
-                            String alertmsg = "" + lasthour + " 시간을 활동하였습니다.\n " + last_fname + " 업데이트되었습니다.";
-                            MyNotifier.go(MainActivity.this, "100대명산알람", alertmsg);
+                            lastmin = lastmin + 10;
+                            String alertmsg = "" + lastmin + " 분을 활동하였습니다. " + last_fname + " 업데이트하였습니다.";
+                            MyNotifier.go(MainActivity.this, "100대명산10분알람", alertmsg);
                         }
 
                         double cur_dist_kilo = cur_dist / 1000f;
@@ -435,8 +464,18 @@ public void onClick(DialogInterface dialogInterface, int i) {
 
         switch(id) {
             case R.id.web:
-                Intent wintent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://180.69.217.73:8080"));
+                Intent wintent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://180.69.217.73:8080/OneOOMT"));
                 startActivity(wintent);
+                return true;
+
+            case R.id.webupload:
+                //doHttpFileUpload(MainActivity.this);
+                try {
+                    HttpFileUpload2.go();
+                }catch(Exception e) {
+                    Log.e(TAG, e.toString());
+                }
+
                 return true;
 
             case R.id.map:
@@ -539,5 +578,102 @@ public void onClick(DialogInterface dialogInterface, int i) {
         }
         return super.onOptionsItemSelected(item);
     }
+
+    private void doHttpFileUpload(final Context context) {
+        new AsyncTask<Void,Void,Void>() {
+            ProgressDialog asyncDialog = new ProgressDialog(context);
+
+            @Override
+            protected Void doInBackground(Void... voids) {
+                try {
+                    URL serverUrl =
+                            new URL("http://180.69.217.73:8080/OneOOMT/upload");
+                    HttpURLConnection urlConnection = (HttpURLConnection) serverUrl.openConnection();
+
+                    String boundaryString = "----SomeRandomText";
+
+                    // Activity File 첫번째 값
+                    File list[] = ActivityUtil.getFiles();
+                    File logFileToUpload = list[0];
+
+                    Log.e(TAG, "--- uploadFile: " + list[0].getName());
+
+                    urlConnection.setDoOutput(true);
+                    urlConnection.setRequestMethod("POST");
+                    urlConnection.addRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundaryString);
+
+                    urlConnection.setDoOutput(true);
+                    OutputStream outputStreamToRequestBody = urlConnection.getOutputStream();
+                    BufferedWriter httpRequestBodyWriter =
+                            new BufferedWriter(new OutputStreamWriter(outputStreamToRequestBody));
+
+                    // Include value from the myFileDescription text area in the post data
+                    //httpRequestBodyWriter.write("\n\n--" + boundaryString + "\n");
+                    //httpRequestBodyWriter.write("Content-Disposition: form-data; name=\"myFileDescription\"");
+                    //httpRequestBodyWriter.write("\n\n");
+                    //httpRequestBodyWriter.write("Log file for 20150208");
+
+                    Log.e(TAG, "--- Before BodyWriter.write()");
+
+                    // Include the section to describe the file
+                    httpRequestBodyWriter.write("\n--" + boundaryString + "\n");
+                    httpRequestBodyWriter.write("Content-Disposition: form-data;"
+                            + "name=\"file\";"
+                            + "filename=\""+ logFileToUpload.getName() +"\""
+                            + "\nContent-Type: text/plain\n\n");
+                    httpRequestBodyWriter.flush();
+
+                    Log.e(TAG, "--- uploadFile: Before FileInputStream ");
+
+                    // Write the actual file contents
+                    FileInputStream inputStreamToLogFile = new FileInputStream(logFileToUpload);
+
+                    int bytesRead;
+                    byte[] dataBuffer = new byte[1024];
+
+                    while((bytesRead = inputStreamToLogFile.read(dataBuffer)) != -1) {
+                        Log.e(TAG, "--- bytesRead = " + bytesRead);
+
+                        outputStreamToRequestBody.write(dataBuffer, 0, bytesRead);
+                    }
+                    outputStreamToRequestBody.flush();
+
+                    // Mark the end of the multipart http request
+                    httpRequestBodyWriter.write("\n--" + boundaryString + "--\n");
+                    httpRequestBodyWriter.flush();
+
+                    // Close the streams
+                    outputStreamToRequestBody.close();
+                    httpRequestBodyWriter.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Log.e("HttpFileUpload", e.toString());
+                }
+
+                return null;
+            }
+
+            @Override
+            protected void onPreExecute() {
+                asyncDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                asyncDialog.setMessage("Uploading...");
+                asyncDialog.show();
+                super.onPreExecute();
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                asyncDialog.dismiss();
+                super.onPostExecute(aVoid);
+                Toast.makeText(context, "Uploading success", Toast.LENGTH_LONG).show();
+            }
+        }.execute();
+
+    }
+
+
+
+
+
 }
 

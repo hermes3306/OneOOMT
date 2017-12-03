@@ -4,6 +4,10 @@
         android:id="@+id/web"
         android:title="my web" />
     <item
+        android:id="@+id/webupload"
+        android:title="cloud upload" />
+
+    <item
         android:id="@+id/map"
         android:title="current map" />
     <item

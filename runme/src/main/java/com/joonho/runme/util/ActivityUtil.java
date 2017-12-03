@@ -288,6 +288,7 @@ public class ActivityUtil {
         };
 
         File[] flist  = mediaStorageDir.listFiles(fnf);
+        if (flist == null) return null;
         Arrays.sort(flist);
         return flist;
     }
@@ -558,6 +559,8 @@ public class ActivityUtil {
     }
 
     public static void doBoundBuild(GoogleMap gmap, int width, int height) {
+        if(markers.size()==0) return;
+
         LatLngBounds.Builder builder= new LatLngBounds.Builder();
         for (Marker marker : markers) {
             builder.include(marker.getPosition());
@@ -576,7 +579,7 @@ public class ActivityUtil {
 
     public static ActivityStat getActivityStat(ArrayList <MyActivity> list) {
         if(list == null) return null;
-        if(list.size() ==2) return null;
+        if(list.size() < 2) return null;
 
         MyActivity start, stop;
         start = list.get(0);

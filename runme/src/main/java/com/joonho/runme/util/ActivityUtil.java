@@ -259,7 +259,7 @@ public class ActivityUtil {
         Date now = new Date();
         String fileName = formatter.format(now);
         serializeActivityIntoFile(list,fileName + ".ser");
-        return fileName;
+        return fileName + ".ser";
     }
 
 

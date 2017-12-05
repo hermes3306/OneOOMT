@@ -601,10 +601,17 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
     private void doHttpFileUploadAll(final Context context) {
         final String _serverUrl = "http://180.69.217.73:9090/OneOOMT/upload";
 
+        // Pop Up a Dialog
+
         new AsyncTask<Void,Void,Void>() {
             ProgressDialog asyncDialog = new ProgressDialog(context);
             final File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "OneOOMT");
             HttpURLConnection urlConnection = null;
+            String attachmentName = null;
+            String attachmentFileName = null;
+            String crlf = "\r\n";
+            String twoHyphens = "--";
+            String boundary =  "*****";
 
             @Override
             protected Void doInBackground(Void... voids) {
@@ -614,72 +621,57 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
 
                 for (int i = 0; i < flist.length; i++) {
 
+                    File file = flist[i];
+                    attachmentName = attachmentFileName = flist[i].getName();
+
                     try {
                         URL serverUrl = new URL(_serverUrl);
                         urlConnection = (HttpURLConnection) serverUrl.openConnection();
 
-                        String boundaryString = "----SomeRandomText";
-                        File logFileToUpload = flist[i];
+                        // request 준비
+                        HttpURLConnection httpUrlConnection = null;
+                        URL url = new URL(_serverUrl);
+                        httpUrlConnection = (HttpURLConnection) url.openConnection();
+                        httpUrlConnection.setUseCaches(false);
+                        httpUrlConnection.setDoOutput(true);
 
-                        Log.e(TAG, "--- uploadFile: " + flist[i].getName());
+                        httpUrlConnection.setRequestMethod("POST");
+                        httpUrlConnection.setRequestProperty("Connection", "Keep-Alive");
+                        httpUrlConnection.setRequestProperty("Cache-Control", "no-cache");
+                        httpUrlConnection.setRequestProperty(
+                                "Content-Type", "multipart/form-data;boundary=" + this.boundary);
 
-                        urlConnection.setDoOutput(true);
-                        urlConnection.setRequestMethod("POST");
-                        urlConnection.addRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundaryString);
+                        // content wrapper시작
+                        DataOutputStream request = new DataOutputStream(
+                                httpUrlConnection.getOutputStream());
 
-                        urlConnection.setDoOutput(true);
-                        OutputStream outputStreamToRequestBody = urlConnection.getOutputStream();
-                        BufferedWriter httpRequestBodyWriter =
-                                new BufferedWriter(new OutputStreamWriter(outputStreamToRequestBody));
+                        request.writeBytes(this.twoHyphens + this.boundary + this.crlf);
+                        request.writeBytes("Content-Disposition: form-data; name=\"" +
+                                this.attachmentName + "\";filename=\"" +
+                                this.attachmentFileName + "\"" + this.crlf);
+                        request.writeBytes(this.crlf);
 
-                        httpRequestBodyWriter.write("\n\n--" + boundaryString + "\n");
-                        httpRequestBodyWriter.write("Content-Disposition: form-data; name=\"myFileDescription\"");
-                        httpRequestBodyWriter.write("\n\n");
-                        httpRequestBodyWriter.write("Log file for 20150208");
-
-                        Log.e(TAG, "--- Before BodyWriter.write()");
-
-                        // Include the section to describe the file
-                        httpRequestBodyWriter.write("\n--" + boundaryString + "\n");
-                        httpRequestBodyWriter.write("Content-Disposition: form-data;"
-                                + "name=\"file\";"
-                                + "filename=\"" + logFileToUpload.getName() + "\""
-                                + "\nContent-Type: text/plain\n\n");
-                        httpRequestBodyWriter.flush();
-
-                        Log.e(TAG, "--- uploadFile: Before FileInputStream ");
-
-                        // Write the actual file contents
-                        FileInputStream inputStreamToLogFile = new FileInputStream(logFileToUpload);
-
-                        int bytesRead;
-                        byte[] dataBuffer = new byte[1024];
-
-                        while ((bytesRead = inputStreamToLogFile.read(dataBuffer)) != -1) {
-                            Log.e(TAG, "--- bytesRead = " + bytesRead);
-
-                            outputStreamToRequestBody.write(dataBuffer, 0, bytesRead);
+                        OutputStream out = httpUrlConnection.getOutputStream();
+                        FileInputStream fis = new FileInputStream(file);
+                        byte[] buffer = new byte[1024];
+                        int readcount = 0;
+                        while ((readcount = fis.read(buffer)) != -1) {
+                            Log.e(TAG, "readcount:" + readcount);
+                            out.write(buffer, 0, readcount);
                         }
-                        outputStreamToRequestBody.flush();
+                        out.flush();
 
-                        // Mark the end of the multipart http request
-                        httpRequestBodyWriter.write("\n--" + boundaryString + "--\n");
-                        httpRequestBodyWriter.flush();
+                        request.writeBytes(this.crlf);
+                        request.writeBytes(this.twoHyphens + this.boundary +
+                                this.twoHyphens + this.crlf);
 
-                        // Close the streams
-                        outputStreamToRequestBody.close();
-                        httpRequestBodyWriter.close();
+                        request.flush();
+                        request.close();
 
-                        asyncDialog.setProgress(i);
+                        Log.e(TAG,"end of write to web server");
 
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        Log.e("HttpFileUpload", e.toString());
-                    }
-
-                    //==============받기===============
-                    try {
-                        InputStream is = urlConnection.getInputStream();
+                        //==============받기===============
+                        InputStream is = httpUrlConnection.getInputStream();
                         BufferedReader br = new BufferedReader(new InputStreamReader(is));
                         StringBuffer sbResult = new StringBuffer();
                         String str = "";
@@ -687,10 +679,14 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
                             Log.e(TAG, "RESPONSE:" + str);
                             sbResult.append(str);
                         }
+
+                        asyncDialog.setProgress(i);
+
                     } catch (Exception e) {
                         e.printStackTrace();
-                        Log.e("HttpFileUpload", e.toString());
+                        Log.e(TAG, e.toString());
                     }
+
                 }
                 return null;
             }
@@ -713,198 +709,12 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
         }.execute();
 
     }
-
-
-    private void doHttpFileUpload(final Context context) {
-        new AsyncTask<Void,Void,Void>() {
-            ProgressDialog asyncDialog = new ProgressDialog(context);
-            final String _serverUrl = "http://180.69.217.73:8080/OneOOMT/upload";
-            final File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "OneOOMT");
-            final String fname = "";
-            HttpURLConnection urlConnection = null;
-
-
-            @Override
-            protected Void doInBackground(Void... voids) {
-                try {
-                    URL serverUrl =new URL(_serverUrl);
-                    urlConnection = (HttpURLConnection) serverUrl.openConnection();
-
-                    String boundaryString = "----SomeRandomText";
-
-                    // Activity File 첫번째 값
-                    File list[] = ActivityUtil.getFiles();
-                    File logFileToUpload = list[0];
-
-                    Log.e(TAG, "--- uploadFile: " + list[0].getName());
-
-                    urlConnection.setDoOutput(true);
-                    urlConnection.setRequestMethod("POST");
-                    urlConnection.addRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundaryString);
-
-                    urlConnection.setDoOutput(true);
-                    OutputStream outputStreamToRequestBody = urlConnection.getOutputStream();
-                    BufferedWriter httpRequestBodyWriter =
-                            new BufferedWriter(new OutputStreamWriter(outputStreamToRequestBody));
-
-                    httpRequestBodyWriter.write("\n\n--" + boundaryString + "\n");
-                    httpRequestBodyWriter.write("Content-Disposition: form-data; name=\"myFileDescription\"");
-                    httpRequestBodyWriter.write("\n\n");
-                    httpRequestBodyWriter.write("Log file for 20150208");
-
-                    Log.e(TAG, "--- Before BodyWriter.write()");
-
-                    // Include the section to describe the file
-                    httpRequestBodyWriter.write("\n--" + boundaryString + "\n");
-                    httpRequestBodyWriter.write("Content-Disposition: form-data;"
-                            + "name=\"file\";"
-                            + "filename=\""+ logFileToUpload.getName() +"\""
-                            + "\nContent-Type: text/plain\n\n");
-                    httpRequestBodyWriter.flush();
-
-                    Log.e(TAG, "--- uploadFile: Before FileInputStream ");
-
-                    // Write the actual file contents
-                    FileInputStream inputStreamToLogFile = new FileInputStream(logFileToUpload);
-
-                    int bytesRead;
-                    byte[] dataBuffer = new byte[1024];
-
-                    while((bytesRead = inputStreamToLogFile.read(dataBuffer)) != -1) {
-                        Log.e(TAG, "--- bytesRead = " + bytesRead);
-
-                        outputStreamToRequestBody.write(dataBuffer, 0, bytesRead);
-                    }
-                    outputStreamToRequestBody.flush();
-
-                    // Mark the end of the multipart http request
-                    httpRequestBodyWriter.write("\n--" + boundaryString + "--\n");
-                    httpRequestBodyWriter.flush();
-
-                    // Close the streams
-                    outputStreamToRequestBody.close();
-                    httpRequestBodyWriter.close();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    Log.e("HttpFileUpload", e.toString());
-                }
-
-                //==============받기===============
-                try {
-                    InputStream is = urlConnection.getInputStream();
-                    BufferedReader br = new BufferedReader(new InputStreamReader(is));
-                    StringBuffer sbResult = new StringBuffer();
-                    String str = "";
-                    while ((str = br.readLine()) != null) {
-                        Log.e(TAG, "RESPONSE:" + str);
-                        sbResult.append(str);
-                    }
-                }catch(Exception e) {
-                    e.printStackTrace();
-                    Log.e("HttpFileUpload", e.toString());
-                }
-
-                return null;
-            }
-
-            @Override
-            protected void onPreExecute() {
-                asyncDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-                asyncDialog.setMessage("Uploading...");
-                asyncDialog.show();
-                super.onPreExecute();
-            }
-
-            @Override
-            protected void onPostExecute(Void aVoid) {
-                asyncDialog.dismiss();
-                super.onPostExecute(aVoid);
-                Toast.makeText(context, "Uploading success", Toast.LENGTH_LONG).show();
-            }
-        }.execute();
-    }
-
-
-    private void doHttpFileUpload2(final Context context) {
-
-        new AsyncTask<Void,Void,Void>() {
-            ProgressDialog asyncDialog = new ProgressDialog(context);
-            final String serverUrl = "http://180.69.217.73:8080/OneOOMT/upload";
-            final File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "OneOOMT");
-            final String fname = "";
-
-            public void go() throws Exception {
-
-                //==============환경===============
-                File file = mediaStorageDir.listFiles()[3];
-                Log.e(TAG, "filename to uplad: " + file.getAbsolutePath());
-
-
-                URL url = new URL(serverUrl);
-                URLConnection httpConn = url.openConnection();
-                httpConn.setDoOutput(true);
-                httpConn.setUseCaches(false);
-                httpConn.setRequestProperty("Content-type", "application/octet-stream");
-                httpConn.setRequestProperty("Content-Length", String.valueOf(file.length()));
-
-
-                //==============보내기===============
-                OutputStream out = httpConn.getOutputStream();
-                FileInputStream fis = new FileInputStream(file);
-                byte[] buffer = new byte[1024];
-                int readcount = 0;
-                while ((readcount = fis.read(buffer)) != -1) {
-                    Log.e(TAG, "readcount:" + readcount);
-                    out.write(buffer, 0, readcount);
-                }
-                out.flush();
-
-                Log.e(TAG,"end of write to web server");
-
-                //==============받기===============
-                InputStream is = httpConn.getInputStream();
-                BufferedReader br = new BufferedReader(new InputStreamReader(is));
-                StringBuffer sbResult = new StringBuffer();
-                String str = "";
-                while ((str = br.readLine()) != null) {
-                    Log.e(TAG, "RESPONSE:" + str);
-                    sbResult.append(str);
-                }
-            }
-
-
-            @Override
-            protected Void doInBackground(Void... voids) {
-                try {
-                    go();
-                }catch(Exception e ){
-                    Log.e(TAG, e.toString());
-                }
-                return null;
-            }
-
-            @Override
-            protected void onPreExecute() {
-                asyncDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-                asyncDialog.setMessage("Uploading...");
-                asyncDialog.show();
-                super.onPreExecute();
-            }
-
-            @Override
-            protected void onPostExecute(Void aVoid) {
-                asyncDialog.dismiss();
-                super.onPostExecute(aVoid);
-                Toast.makeText(context, "Uploading success", Toast.LENGTH_LONG).show();
-            }
-        }.execute();
-    }
-
 
     private void doHttpFileUpload3(final Context context, final String fname) {
 
         new AsyncTask<Void,Void,Void>() {
             ProgressDialog asyncDialog = new ProgressDialog(context);
+
             final String serverUrl = "http://180.69.217.73:8080/OneOOMT/upload";
             final File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "OneOOMT");
             // 기타 필요한 내용
@@ -919,6 +729,7 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
                 //==============환경===============
                 File file = new File(mediaStorageDir, fname);
                 Log.e(TAG, "filename to uplad: " + file.getAbsolutePath());
+
 
                 // request 준비
                 HttpURLConnection httpUrlConnection = null;
@@ -947,6 +758,8 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
                 FileInputStream fis = new FileInputStream(file);
                 byte[] buffer = new byte[1024];
                 int readcount = 0;
+
+
                 while ((readcount = fis.read(buffer)) != -1) {
                     Log.e(TAG, "readcount:" + readcount);
                     out.write(buffer, 0, readcount);

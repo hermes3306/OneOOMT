@@ -5,6 +5,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
@@ -52,11 +53,13 @@ import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class Main3Activity extends AppCompatActivity implements View.OnClickListener {
-    private String TAG = "Main3Activity";
+public class Main2Activity extends AppCompatActivity implements View.OnClickListener {
+    private String TAG = "Main2Activity";
     private File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "OneOOMT");
     String backupdir = StringUtil.DateToString1(new Date(), "yyyyMMdd");
 
+    public static SharedPreferences mPref = null;
+    public static SharedPreferences.Editor mEditor = null;
 
     private long start_time, end_time;
     private TextView tv_time_elapsed = null;
@@ -82,7 +85,7 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
     private long   startime_paces[] = new long[1000]; // upto 1000 start time
 
     private Location start_loc;
-    private ArrayList<Location> mList = new ArrayList<Location>();
+    private ArrayList<MyActivity> mList = new ArrayList<MyActivity>();
 
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
@@ -103,7 +106,7 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
 
 
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_main2);
 
         if(savedInstanceState != null) {
 
@@ -142,12 +145,49 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
     @Override
     protected void onStart() {
         Log.e(TAG,"------- onStart() called");
+
+        mPref = getSharedPreferences("setup", MODE_PRIVATE);
+        isStarted = mPref.getBoolean("isStarted", true);
+        total_distance = mPref.getFloat("total_distance", 0f);
+        start = mPref.getLong("start", new Date().getTime());
+        last_fname = mPref.getString("last_fname", null);
+
+        Log.e(TAG,"isStarted:" + isStarted);
+        Log.e(TAG, "total_distance:" + total_distance);
+        Log.e(TAG,"start:"+ new Date(start));
+        Log.e(TAG,"last_fname:" + last_fname);
+
+        if(mList == null) {
+            if(last_fname != null) {
+                File lastFile = new File(mediaStorageDir, last_fname);
+                mList = ActivityUtil.deserializeFile(lastFile);
+                Log.e(TAG, "mList null -- Activities reloaded..... ");
+            }
+        } else {
+            if(mList.size()==0) {
+                if(last_fname != null) {
+                    File lastFile = new File(mediaStorageDir, last_fname);
+                    mList = ActivityUtil.deserializeFile(lastFile);
+                    Log.e(TAG, "mList size 0 -- Activities reloaded..... ");
+                }
+            }
+        }
         super.onStart();
     }
 
     @Override
     protected void onStop() {
         Log.e(TAG,"------- onStop() called");
+
+        mPref = getSharedPreferences("setup", MODE_PRIVATE);
+        mEditor = mPref.edit();
+
+        mEditor.putFloat("total_distance", (float)total_distance);
+        mEditor.putBoolean("isStarted", isStarted);
+        mEditor.putLong("start", start);
+        mEditor.putString("last_fname", last_fname);
+        mEditor.commit();
+
         super.onStop();
     }
 
@@ -202,12 +242,12 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
 
         };
 
-        if ((ContextCompat.checkSelfPermission(Main3Activity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) ||
-                (ContextCompat.checkSelfPermission(Main3Activity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) ||
-                (ContextCompat.checkSelfPermission(Main3Activity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) ||
-                (ContextCompat.checkSelfPermission(Main3Activity.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) ||
-                (ContextCompat.checkSelfPermission(Main3Activity.this, android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED)) {
-            ActivityCompat.requestPermissions(Main3Activity.this, new String[]{
+        if ((ContextCompat.checkSelfPermission(Main2Activity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) ||
+                (ContextCompat.checkSelfPermission(Main2Activity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) ||
+                (ContextCompat.checkSelfPermission(Main2Activity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) ||
+                (ContextCompat.checkSelfPermission(Main2Activity.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) ||
+                (ContextCompat.checkSelfPermission(Main2Activity.this, android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED)) {
+            ActivityCompat.requestPermissions(Main2Activity.this, new String[]{
                     Manifest.permission.ACCESS_FINE_LOCATION,
                     Manifest.permission.ACCESS_COARSE_LOCATION,
                     Manifest.permission.WRITE_EXTERNAL_STORAGE,
@@ -252,20 +292,32 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
     public void doTimerPause() {
         isStarted = !isStarted;
         Log.e(TAG, "isStarted: " + isStarted);
-        //Toast.makeText(Main3Activity.this, "isStarted = " + isStarted, Toast.LENGTH_LONG).show();
+        //Toast.makeText(Main2Activity.this, "isStarted = " + isStarted, Toast.LENGTH_LONG).show();
+    }
+
+    public String LocTimeStr(Location loc) {
+        String added_on = StringUtil.DateToString1(new Date(loc.getTime()), "yyyy년MM월dd일_HH시mm분ss초" );
+        return added_on;
+    }
+
+    public long Str2LocTime(String str) {
+        Date date = StringUtil.StringToDate(str,"yyyy년MM월dd일_HH시mm분ss초");
+        return date.getTime();
     }
 
     public void doMyTimeTask() {
-        mTask =new Main3Activity.MyTimerTask();
+        mTask =new Main2Activity.MyTimerTask();
         mTimer = new Timer();
         mTimer.schedule(mTask, 1000, 1000);  // 10초
         total_distance = 0;
         isStarted = true;
         start_time = new Date().getTime();
-        mList = new ArrayList<Location>();
+        mList = new ArrayList<MyActivity>();
         start_loc = getLocation();
         if(start_loc != null) {
-            mList.add(start_loc);
+
+            mList.add(new MyActivity(start_loc.getLatitude(), start_loc.getLongitude(), start_loc.getAltitude(), LocTimeStr(start_loc) ));
+
             String caddr = getCurAddress(getApplicationContext(),start_loc);
             tv_address.setText(caddr);
             String lla = String.format("위도:%3.3f, 경도:%3.3f, 고도:%3.1f", start_loc.getLatitude(), start_loc.getLongitude(), start_loc.getAltitude());
@@ -280,7 +332,7 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
     }
 
     public void alertDialogChoice() {
-        AlertDialog.Builder alertDialog = new AlertDialog.Builder(Main3Activity.this);
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(Main2Activity.this);
         alertDialog.setTitle("Activity Mode");
         alertDialog.setMessage("Choose Activity Mode:");
 
@@ -297,18 +349,16 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
         alertDialog.setPositiveButton("SAVE", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                ArrayList<MyActivity> mylist = ActivityUtil.Loc2Activity(mList);
-                String fname = ActivityUtil.serializeWithCurrentTime(mylist);
-                Toast.makeText(Main3Activity.this, "" + fname + " saved ...", Toast.LENGTH_LONG).show();
+                String fname = ActivityUtil.serializeWithCurrentTime(mList);
+                Toast.makeText(Main2Activity.this, "" + fname + " saved ...", Toast.LENGTH_LONG).show();
             }
         });
 
         alertDialog.setNegativeButton("NEW", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                ArrayList<MyActivity> mylist = ActivityUtil.Loc2Activity(mList);
-                String fname = ActivityUtil.serializeWithCurrentTime(mylist);
-                Toast.makeText(Main3Activity.this, "" + fname + " created and started new activity...", Toast.LENGTH_LONG).show();
+                String fname = ActivityUtil.serializeWithCurrentTime(mList);
+                Toast.makeText(Main2Activity.this, "" + fname + " created and started new activity...", Toast.LENGTH_LONG).show();
                 doMyTimeTask();
             }
         });
@@ -336,7 +386,7 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
             if(!isStarted) return;
             start = System.currentTimeMillis();
 
-            Main3Activity.this.runOnUiThread(new Runnable() {
+            Main2Activity.this.runOnUiThread(new Runnable() {
 
                 public void run() {
                     end_time = new Date().getTime();
@@ -356,18 +406,20 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
 
                     } else {
                         if (mList.size() == 0) {
-                            mList.add(cur_loc);
-                            String cur_addr = getCurAddress(Main3Activity.this, cur_loc);
+                            MyActivity ma = new MyActivity(cur_loc.getLatitude(), cur_loc.getLongitude(), cur_loc.getAltitude(), LocTimeStr(cur_loc));
+                            mList.add(ma);
+
+                            String cur_addr = getCurAddress(Main2Activity.this, cur_loc);
                             tv_address.setText(cur_addr);
                             total_distance = 0;
                             String lla = String.format("위도:%3.3f, 경도:%3.3f, 고도:%3.1f", cur_loc.getLatitude(), cur_loc.getLongitude(), cur_loc.getAltitude());
                             tv_lat_lng_altitude.setText(lla);
                         } else {
-                            Location last_loc = mList.get(mList.size() - 1);
-                            CalDistance cd = new CalDistance(last_loc.getLatitude(), last_loc.getLongitude(), cur_loc.getLatitude(), cur_loc.getLongitude());
+                            MyActivity last_loc = mList.get(mList.size() - 1);
+                            CalDistance cd = new CalDistance(last_loc.latitude, last_loc.longitude, cur_loc.getLatitude(), cur_loc.getLongitude());
                             if (!Double.isNaN(cd.getDistance())) {
                                 cur_dist = cd.getDistance();
-                                cur_elapsed_time = cur_loc.getTime() - last_loc.getTime();
+                                cur_elapsed_time = cur_loc.getTime() - Str2LocTime(last_loc.added_on);
 
                                 if (cur_dist < 1f) {
                                     // skip location information of 1m
@@ -376,8 +428,10 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
 //                                    tv_message.setText(msg);
                                 } else {
                                     total_distance = total_distance + cur_dist;
-                                    mList.add(cur_loc);
-                                    String cur_addr = getCurAddress(Main3Activity.this, cur_loc);
+                                    MyActivity ma = new MyActivity(cur_loc.getLatitude(), cur_loc.getLongitude(), cur_loc.getAltitude(), LocTimeStr(cur_loc));
+                                    mList.add(ma);
+
+                                    String cur_addr = getCurAddress(Main2Activity.this, cur_loc);
                                     tv_address.setText(cur_addr);
                                     String lla = String.format("위도:%3.1f, 경도:%3.1f, 고도:%3.1f", cur_loc.getLatitude(), cur_loc.getLongitude(), cur_loc.getAltitude());
                                     tv_lat_lng_altitude.setText(lla);
@@ -391,15 +445,12 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
 
                         double dist_kilo = total_distance / 1000f;
                         if ((int) dist_kilo > lastkm) {
-                            ArrayList<MyActivity> mylist = ActivityUtil.Loc2Activity(mList);
-                            String fname = ActivityUtil.serializeWithCurrentTime(mylist);
-
-                            doHttpFileUpload3(Main3Activity.this, fname);
-
+                            last_fname = ActivityUtil.serializeWithCurrentTime(mList);
+                            doHttpFileUpload3(Main2Activity.this, last_fname);
                             lastkm++;
 
                             String alertmsg = "" + lastkm + " km를 활동하였습니다. \n " + last_fname + " 업데이트되었습니다.";
-                            MyNotifier.go(Main3Activity.this, "100대명산거리알람", alertmsg);
+                            MyNotifier.go(Main2Activity.this, "100대명산거리알람", alertmsg);
                         }
 
 
@@ -414,36 +465,18 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
                         if ((int) (elapsed_time_sec / 3600) > lasthour) { //1시간 업데이트
                             // 웹서버 업로드 하는것으로 향후 구현하기로 함
                             lasthour++;
-                            ArrayList<MyActivity> mylist = ActivityUtil.Loc2Activity(mList);
-                            String fname = ActivityUtil.serializeWithCurrentTime(mylist);
-
-                            doHttpFileUpload3(Main3Activity.this, fname);
+                            last_fname = ActivityUtil.serializeWithCurrentTime(mList);
+                            doHttpFileUpload3(Main2Activity.this, last_fname);
 
                             String alertmsg = "" + lasthour + " 시간을 활동하였습니다.\n " + last_fname + " 업로드하였습니다.";
-                            MyNotifier.go(Main3Activity.this, "100대명산시간알람", alertmsg);
+                            MyNotifier.go(Main2Activity.this, "100대명산시간알람", alertmsg);
 
                         } else if ((int) (elapsed_time_sec / 600) > lastmin) { //10분 알람
-                            ArrayList<MyActivity> mylist = ActivityUtil.Loc2Activity(mList);
-
-                            if (last_fname == null) {
-                                last_fname = ActivityUtil.serializeWithCurrentTime(mylist);
-
-                                doHttpFileUpload3(Main3Activity.this, last_fname);
-
-
-                            } else {
-                                File file = new File(mediaStorageDir, last_fname);
-                                file.delete();
-
-                                last_fname = ActivityUtil.serializeWithCurrentTime(mylist);
-
-                                doHttpFileUpload3(Main3Activity.this, last_fname);
-
-                            }
-
+                            last_fname = ActivityUtil.serializeWithCurrentTime(mList);
+                            doHttpFileUpload3(Main2Activity.this, last_fname);
                             lastmin = lastmin + 10;
                             String alertmsg = "" + lastmin + " 분을 활동하였습니다. " + last_fname + " 업데이트하였습니다.";
-                            MyNotifier.go(Main3Activity.this, "100대명산10분알람", alertmsg);
+                            MyNotifier.go(Main2Activity.this, "100대명산10분알람", alertmsg);
                         }
 
                         double cur_dist_kilo = cur_dist / 1000f;
@@ -458,7 +491,7 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
     }
 
     public void alertUploadServerChoice() {
-        AlertDialog.Builder alertDialog = new AlertDialog.Builder(Main3Activity.this);
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(Main2Activity.this);
         alertDialog.setTitle("Choose Upload Servlet");
 
         final EditText ed = new EditText(alertDialog.getContext());
@@ -469,7 +502,7 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 final String url = ed.getText().toString();
-                doHttpFileUploadAll(Main3Activity.this, url);
+                doHttpFileUploadAll(Main2Activity.this, url);
             }
         });
 
@@ -507,9 +540,8 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
                 return true;
 
             case R.id.webupload:
-                ArrayList<MyActivity> myalist = ActivityUtil.Loc2Activity(mList);
-                String fname = ActivityUtil.serializeWithCurrentTime(myalist);
-                doHttpFileUpload3(Main3Activity.this, fname);
+                last_fname = ActivityUtil.serializeWithCurrentTime(mList);
+                doHttpFileUpload3(Main2Activity.this, last_fname);
                 return true;
 
             case R.id.uploadall2:
@@ -517,14 +549,12 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
                 return true;
 
             case R.id.uploadall:
-                doHttpFileUploadAll(Main3Activity.this, null);
+                doHttpFileUploadAll(Main2Activity.this, null);
                 return true;
 
             case R.id.map:
-                Intent intent = new Intent(Main3Activity.this, CurActivity.class);
-
-                ArrayList<MyActivity> myalist2 = ActivityUtil.Loc2Activity(mList);
-                intent.putExtra("locations",myalist2);
+                Intent intent = new Intent(Main2Activity.this, CurActivity.class);
+                intent.putExtra("locations",mList);
 
                 startActivity(intent);
                 return true;
@@ -555,7 +585,7 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
                     @Override
                     public void onClick(DialogInterface dialogInterface, int index) {
                         File afile = new File(filepath[index]);
-                        ActivityUtil.showActivityAlertDialog(Main3Activity.this, afile, index);
+                        ActivityUtil.showActivityAlertDialog(Main2Activity.this, afile, index);
                     }
                 });
                 alertDialog.setNegativeButton("Back",null);
@@ -590,7 +620,7 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
                     @Override
                     public void onClick(DialogInterface dialogInterface, int index) {
                         File afile = new File(filepath2[index]);
-                        Intent intent = new Intent(Main3Activity.this, ActFileActivity.class);
+                        Intent intent = new Intent(Main2Activity.this, ActFileActivity.class);
                         intent.putExtra("file", afile.getAbsolutePath());
                         intent.putExtra("pos", index);
                         startActivity(intent);
@@ -614,7 +644,7 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
                 return true;
 
             case R.id.notify:
-                MyNotifier.go(Main3Activity.this, "Hello", "World");
+                MyNotifier.go(Main2Activity.this, "Hello", "World");
                 return true;
 
         }

@@ -1,5 +1,7 @@
 package com.joonho.runme.util;
 
+import android.location.Location;
+
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -99,6 +101,16 @@ public class StringUtil {
         dur_str = dur_str + dur_sec_Int;
 
         return(dur_str);
+    }
+
+    public String LocTimeStr(Location loc) {
+        String added_on = StringUtil.DateToString1(new Date(loc.getTime()), "yyyy년MM월dd일_HH시mm분ss초" );
+        return added_on;
+    }
+
+    public long StrTimeLoc(String str) {
+        Date date = StringUtil.StringToDate(str,"yyyy년MM월dd일_HH시mm분ss초");
+        return date.getTime();
     }
 
 

@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -26,18 +25,12 @@ import android.view.MenuItem;
 
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.joonho.runme.util.ActivityUtil;
-import com.joonho.runme.util.FileUtil;
-import com.joonho.runme.util.HttpFileUpload;
-import com.joonho.runme.util.HttpFileUpload2;
-import com.joonho.runme.util.MyActivity;
 import com.joonho.runme.util.CalDistance;
 import com.joonho.runme.util.MyNotifier;
 import com.joonho.runme.util.StringUtil;

@@ -2,8 +2,11 @@ package com.joonho.runme.util;
 
 import java.io.Serializable;
 
+/**
+ * Created by joonhopark on 2017. 12. 5..
+ */
 
-public class MyActivity  implements Serializable {
+public class MyActivity implements Serializable {
 
     public double latitude;
     public double longitude;
@@ -18,8 +21,8 @@ public class MyActivity  implements Serializable {
     }
 
     public String toString() {
-        return "("+ latitude+ "," + longitude+ "," + altitude + "," + added_on + ")";
+        return "("+ latitude + "," + longitude + "," + altitude + "," + added_on + ")";
     }
 
-}
 
+}

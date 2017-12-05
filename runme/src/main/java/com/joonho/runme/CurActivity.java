@@ -20,6 +20,7 @@ import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.joonho.runme.util.ActivityStat;
 import com.joonho.runme.util.ActivityUtil;
+import com.joonho.runme.util.MyActivity;
 
 import java.util.ArrayList;
 import java.util.List;

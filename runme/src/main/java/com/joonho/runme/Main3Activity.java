@@ -31,6 +31,7 @@ import android.widget.Toast;
 
 import com.joonho.runme.util.ActivityUtil;
 import com.joonho.runme.util.CalDistance;
+import com.joonho.runme.util.MyActivity;
 import com.joonho.runme.util.MyNotifier;
 import com.joonho.runme.util.StringUtil;
 

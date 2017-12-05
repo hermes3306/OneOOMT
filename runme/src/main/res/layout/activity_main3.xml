@@ -19,14 +19,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="--:--"
-            android:textSize="30sp" />
+            android:textColor="@android:color/holo_blue_bright"
+            android:text="00:00"
+            android:textSize="40sp" />
 
         <TextView
             android:id="@+id/textView28"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
+            android:textColor="@android:color/holo_blue_bright"
             android:text="TIME"
             android:textSize="15sp"
             app:layout_constraintEnd_toEndOf="parent"
@@ -37,7 +39,7 @@
         <TextView
             android:id="@+id/textView23"
             android:layout_width="match_parent"
-            android:layout_height="1dp"
+            android:layout_height="0.1dp"
             android:background="@android:color/darker_gray"
             tools:layout_editor_absoluteX="0dp"
             tools:layout_editor_absoluteY="91dp" />
@@ -49,17 +51,30 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/textView40"
+            android:id="@+id/tv_address"
             android:layout_width="match_parent"
+            android:text="대한민국 서울 특별시 가락동 51"
+            android:textColor="@android:color/darker_gray"
+            android:textSize="15sp"
+            android:gravity="center"
             android:layout_height="50sp" />
+
+        <TextView
+            android:id="@+id/textView89"
+            android:layout_width="match_parent"
+            android:layout_height="0.1dp"
+            android:background="@android:color/darker_gray"
+            tools:layout_editor_absoluteX="0dp"
+            tools:layout_editor_absoluteY="91dp" />
 
         <TextView
             android:id="@+id/tv_total_distance"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center"
+            android:gravity="center_horizontal"
+            android:textColor="@color/colorAccent"
             android:text="0.00"
-            android:textSize="120sp"
+            android:textSize="80sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.943"
             app:layout_constraintStart_toStartOf="parent"
@@ -70,21 +85,34 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="KILOMETERS"
+            android:text="KILOMETERS \n"
+            android:textColor="@color/colorAccent"
             android:textSize="15sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             tools:layout_editor_absoluteY="221dp" />
 
         <TextView
-            android:id="@+id/textView41"
+            android:id="@+id/textView26"
             android:layout_width="match_parent"
+            android:layout_height="0.1dp"
+            android:background="@android:color/darker_gray"
+            tools:layout_editor_absoluteX="0dp"
+            tools:layout_editor_absoluteY="255dp" />
+
+        <TextView
+            android:id="@+id/tv_lat_lng_altitude"
+            android:layout_width="match_parent"
+            android:textSize="17sp"
+            android:gravity="center"
+            android:text="위도:0.0, 경도0.0, 고도:0"
+            android:textColor="@android:color/darker_gray"
             android:layout_height="50sp" />
 
         <TextView
-            android:id="@+id/textView26"
+            android:id="@+id/textView269"
             android:layout_width="match_parent"
-            android:layout_height="1dp"
+            android:layout_height="0.1dp"
             android:background="@android:color/darker_gray"
             tools:layout_editor_absoluteX="0dp"
             tools:layout_editor_absoluteY="255dp" />
@@ -108,6 +136,7 @@
                 android:layout_gravity="center"
                 android:text="N/A"
                 android:textSize="30sp"
+                android:textColor="@android:color/darker_gray"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textView23" />
@@ -117,7 +146,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:text="CURRENT PACE"
+                android:text="CURRENT"
+                android:textColor="@android:color/darker_gray"
                 android:textSize="15sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.066"
@@ -138,6 +168,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:text="N/A"
+                android:textColor="@android:color/darker_gray"
                 android:textSize="30sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.055"
@@ -151,6 +182,7 @@
                 android:layout_gravity="center"
                 android:text="AVG PACE"
                 android:textSize="15sp"
+                android:textColor="@android:color/darker_gray"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.944"
                 app:layout_constraintStart_toStartOf="parent"
@@ -160,29 +192,45 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="85sp"
+        android:layout_height="wrap_content"
         android:orientation="vertical">
 
         <TextView
             android:id="@+id/textView"
             android:layout_width="match_parent"
-            android:layout_height="1dp"
+            android:layout_height="0.1dp"
             android:layout_weight="1"
             android:background="@android:color/darker_gray"
             tools:layout_editor_absoluteX="0dp"
             tools:layout_editor_absoluteY="255dp" />
 
+        <TextView
+            android:id="@+id/tv_oo"
+            android:layout_width="match_parent"
+            android:textSize="17sp"
+            android:gravity="center"
+            android:text=""
+            android:textColor="@android:color/holo_green_dark"
+            android:layout_height="50sp" />
+
         <ImageButton
             android:id="@+id/imb_stop_timer"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="75dp"
             android:layout_gravity="bottom|center_horizontal|center"
             android:layout_weight="1"
             android:background="@android:color/transparent"
             android:onClick="onClick"
-            app:srcCompat="@drawable/pause_64" />
+            app:srcCompat="@drawable/pause3_64" />
 
+        <TextView
+            android:id="@+id/tv_message"
+            android:layout_width="match_parent"
+            android:textSize="14sp"
+            android:gravity="center"
+            android:text="활동이 시작되었습니다..."
+            android:textColor="@android:color/darker_gray"
+            android:onClick="onClick"
+            android:layout_height="30sp" />
     </LinearLayout>
-
-
 </LinearLayout>

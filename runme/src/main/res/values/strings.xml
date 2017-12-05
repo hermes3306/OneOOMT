@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">runme</string>
     <string name="title_activity_cur">CurActivity</string>
+    <string name="title_activity_main3">RunMeV3</string>
 </resources>

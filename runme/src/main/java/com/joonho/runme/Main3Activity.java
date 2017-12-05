@@ -723,11 +723,15 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
             String crlf = "\r\n";
             String twoHyphens = "--";
             String boundary =  "*****";
+            long filelength = 0;
 
             public void go() throws Exception {
 
                 //==============환경===============
                 File file = new File(mediaStorageDir, fname);
+                filelength = file.length();
+                asyncDialog.setMax(100);
+
                 Log.e(TAG, "filename to uplad: " + file.getAbsolutePath());
 
 
@@ -754,15 +758,21 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
                         this.attachmentFileName + "\"" + this.crlf);
                 request.writeBytes(this.crlf);
 
+                asyncDialog.setMax((int)(file.length() / 1000));
+
                 OutputStream out = httpUrlConnection.getOutputStream();
                 FileInputStream fis = new FileInputStream(file);
                 byte[] buffer = new byte[1024];
                 int readcount = 0;
 
-
+                long readtot = 0;
                 while ((readcount = fis.read(buffer)) != -1) {
-                    Log.e(TAG, "readcount:" + readcount);
+
+                    //Log.e(TAG, "readcount:" + readcount);
                     out.write(buffer, 0, readcount);
+                    readtot = readtot + readcount;
+                    int percentage = (int)((float)(readtot / filelength) * 100f);
+                    asyncDialog.setProgress(percentage);
                 }
                 out.flush();
 

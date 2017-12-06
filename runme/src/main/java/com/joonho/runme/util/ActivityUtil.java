@@ -566,14 +566,20 @@ public class ActivityUtil {
             builder.include(marker.getPosition());
         }
         LatLngBounds bounds = builder.build();
-        int padding = (int) (width * 0.20); // offset from edges of the map 10% of screen
+        int padding = (int) (width * 0.10); // offset from edges of the map 10% of screen
 
+        boolean berr = false;
         try {
+            Log.e(TAG, "newLatLngBounds(bounds):" + bounds);
+            Log.e(TAG, "newLatLngBounds(padding):" + padding);
+
             CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
             gmap.moveCamera(cu);
         }catch(Exception e) {
+            berr = true;
             Log.e(TAG,"ERR] BoundBuild:" + e.toString());
         }
+
     }
 
 
@@ -589,8 +595,8 @@ public class ActivityUtil {
         start_date = StringUtil.StringToDate(start.added_on,"yyyy년MM월dd일_HH시mm분ss초"); // <-
         stop_date = StringUtil.StringToDate(stop.added_on,"yyyy년MM월dd일_HH시mm분ss초");  // <-
 
-        Log.e(TAG, start.toString());
-        Log.e(TAG, stop.toString());
+        Log.e(TAG, "출발:" + start.toString());
+        Log.e(TAG, "종료:" + stop.toString());
 
         String duration = StringUtil.Duration(start_date, stop_date); // <-
         Log.e(TAG, duration);

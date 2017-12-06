@@ -37,6 +37,7 @@ public class ActFileActivity extends AppCompatActivity {
     public static ArrayList<MyActivity> mActivityList = new ArrayList<MyActivity>();
     public static String add1 = null;
     public static String add2 = null;
+    public static boolean tog_add = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -142,12 +143,17 @@ public class ActFileActivity extends AppCompatActivity {
 
                 tv_address.setOnClickListener(new View.OnClickListener(){
                     public void onClick(View view) {
-                        if(tv_address.getText().toString().equalsIgnoreCase(add1)) {
-                            tv_address.setText("From:" +  add2);
+                        Log.e(TAG, "address clocked !!");
+                        if(tog_add) {
+                            tv_address.setText("To:" +  add2);
                             tv_address.setTextColor(Color.RED);
+                            Log.e(TAG, "To: " + add2);
+                            tog_add = false;
                         } else {
                             tv_address.setText("From:" +  add1);
                             tv_address.setTextColor(Color.GREEN);
+                            Log.e(TAG, "From: " + add1);
+                            tog_add = true;
                         }
                     }
                 });

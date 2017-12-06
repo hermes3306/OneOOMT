@@ -2,6 +2,7 @@ package com.joonho.runme;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.support.v7.app.AppCompatActivity;
@@ -22,6 +23,7 @@ import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.joonho.runme.util.ActivityStat;
 import com.joonho.runme.util.ActivityUtil;
+import com.joonho.runme.util.MapUtil;
 import com.joonho.runme.util.MyActivity;
 
 import java.io.File;
@@ -33,6 +35,8 @@ public class ActFileActivity extends AppCompatActivity {
     public static String TAG = "ActFileActivity";
     public static int position = 0;
     public static ArrayList<MyActivity> mActivityList = new ArrayList<MyActivity>();
+    public static String add1 = null;
+    public static String add2 = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,20 +82,9 @@ public class ActFileActivity extends AppCompatActivity {
 
                 ActivityStat activityStat = ActivityUtil.getActivityStat(mActivityList);
 
-                Geocoder geocoder = new Geocoder(_ctx, Locale.getDefault());
-                List<Address> addresses = null;
-                try {
-                    addresses = geocoder.getFromLocation(mActivityList.get(0).latitude, mActivityList.get(0).longitude,1);
-                }catch(Exception e) {
-                    e.printStackTrace();
-                    Log.e(TAG, e.toString());
-                }
-
-                String addinfo = null;
-                if(addresses == null || addresses.size() ==0) {
-                    Log.e(TAG, "No Addresses found !!");
-                }else {
-                    addinfo = addresses.get(0).getAddressLine(0).toString();
+                if(mActivityList.size()>1) {
+                    add1 = MapUtil.getAddress(_ctx, mActivityList.get(0));
+                    add2 = MapUtil.getAddress(_ctx, mActivityList.get(mActivityList.size()-1));
                 }
 
                 String inx_str = "\n" + (position+1)  + "/" + flist.length + "\n" + "Total " + mActivityList.size() + " locations";
@@ -105,7 +98,9 @@ public class ActFileActivity extends AppCompatActivity {
                     String sinfo = "\n " + date_str;
 
                     tv_heading.setText(sinfo);
-                    tv_address.setText(addinfo);
+                    tv_address.setText("From:" +  add1);
+                    tv_address.setTextColor(Color.GREEN);
+
                     tv_distance.setText(_minDist);
                     tv_duration.setText(activityStat.duration);
                     tv_minperkm.setText(String.format("  %.2f",activityStat.minperKm));
@@ -141,6 +136,18 @@ public class ActFileActivity extends AppCompatActivity {
                         if (position >= 0 && position < flist.length-1) {
                             position++;
                             GO(googleMap, flist[position]);
+                        }
+                    }
+                });
+
+                tv_address.setOnClickListener(new View.OnClickListener(){
+                    public void onClick(View view) {
+                        if(tv_address.getText().toString().equalsIgnoreCase(add1)) {
+                            tv_address.setText("From:" +  add2);
+                            tv_address.setTextColor(Color.RED);
+                        } else {
+                            tv_address.setText("From:" +  add1);
+                            tv_address.setTextColor(Color.GREEN);
                         }
                     }
                 });

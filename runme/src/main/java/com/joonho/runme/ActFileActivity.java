@@ -183,6 +183,10 @@ public class ActFileActivity extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(),"" + flist[position] + " deleted!!!", Toast.LENGTH_LONG).show();
                 finish();
                 return true;
+            case R.id.reload:
+
+                finish();
+                return true;
             case R.id.share:
                 return true;
             default:

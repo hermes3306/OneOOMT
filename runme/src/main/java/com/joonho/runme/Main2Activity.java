@@ -332,8 +332,11 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
         mTimer = new Timer();
         mTimer.schedule(mTask, 1000, 1000);  // 10초
 
-        if( isStarted  && (mList != null)) {
-                start_loc = mList.get(0);
+        int msize = 0;
+        if(mList != null) msize = mList.size();
+        if( isStarted  && (mList != null) && msize > 0) {
+            start_loc = mList.get(0);
+            start_time = start;
         } else {
             total_distance = 0;
             isStarted = true;
@@ -384,6 +387,21 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
             public void onClick(DialogInterface dialogInterface, int i) {
                 String fname = ActivityUtil.serializeWithCurrentTime(mList);
                 Toast.makeText(Main2Activity.this, "" + fname + " created and started new activity...", Toast.LENGTH_LONG).show();
+
+                mPref = getSharedPreferences("setup", MODE_PRIVATE);
+                mEditor = mPref.edit();
+
+                total_distance = 0;
+                isStarted = false;
+                start = new Date().getTime();
+                last_fname = null;
+                mList = null;
+
+                mEditor.putFloat("total_distance", (float)total_distance);
+                mEditor.putBoolean("isStarted", isStarted);
+                mEditor.putLong("start",start);
+                mEditor.putString("last_fname", last_fname);
+                mEditor.commit();
                 doMyTimeTask();
             }
         });

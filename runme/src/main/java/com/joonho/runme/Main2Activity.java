@@ -149,7 +149,7 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
                     File lastFile = new File(mediaStorageDir, last_fname);
                     mList = ActivityUtil.deserializeFile(lastFile);
                     Log.e(TAG, "mList size 0 -- Activities reloaded..... ");
-
+                    if(mList==null) mList = new ArrayList<MyActivity>();
                     String msg = String.format(last_fname + "로부터 " + mList.size() + " 경로(약"+lastkm+"km)가 복윈되었습니다.");
                     tv_message.setText(msg);
                 }
@@ -223,7 +223,7 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
                 File lastFile = new File(mediaStorageDir, last_fname);
                 mList = ActivityUtil.deserializeFile(lastFile);
                 Log.e(TAG, "mList null -- Activities reloaded..... ");
-
+                if(mList==null) mList = new ArrayList<MyActivity>();
                 String msg = String.format(last_fname + "로부터 " + mList.size() + " 경로(약"+lastkm+"km)가 복윈되었습니다.");
                 tv_message.setText(msg);
             }

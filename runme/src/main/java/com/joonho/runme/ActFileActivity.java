@@ -25,9 +25,11 @@ import com.joonho.runme.util.ActivityStat;
 import com.joonho.runme.util.ActivityUtil;
 import com.joonho.runme.util.MapUtil;
 import com.joonho.runme.util.MyActivity;
+import com.joonho.runme.util.StringUtil;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -38,6 +40,7 @@ public class ActFileActivity extends AppCompatActivity {
     public static String add1 = null;
     public static String add2 = null;
     public static boolean tog_add = true;
+    public static String fname = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,7 +48,7 @@ public class ActFileActivity extends AppCompatActivity {
         setContentView(R.layout.activity_act_file2);
 
         Intent intent = getIntent();
-        String fname = intent.getExtras().getString("file");
+        fname = intent.getExtras().getString("file");
         position = intent.getExtras().getInt("pos");
 
         final Context _ctx = this;
@@ -185,8 +188,13 @@ public class ActFileActivity extends AppCompatActivity {
                 return true;
             case R.id.reload:
 
+                Intent resultIntent = new Intent();
+                resultIntent.putExtra("locations",mActivityList);
+                resultIntent.putExtra("fname", fname);
+                setResult(Main2Activity.REQUEST_ACTIVITY_FILE_LIST,resultIntent );
                 finish();
                 return true;
+
             case R.id.share:
                 return true;
             default:

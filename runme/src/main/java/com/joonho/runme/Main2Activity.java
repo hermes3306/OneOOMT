@@ -31,6 +31,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.joonho.runme.util.ActivityStat;
 import com.joonho.runme.util.ActivityUtil;
 import com.joonho.runme.util.CalDistance;
 import com.joonho.runme.util.MyActivity;
@@ -58,8 +59,8 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
     private File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "OneOOMT");
     String backupdir = StringUtil.DateToString1(new Date(), "yyyyMMdd");
 
-    public static SharedPreferences mPref = null;
-    public static SharedPreferences.Editor mEditor = null;
+    public  SharedPreferences mPref = null;
+    public  SharedPreferences.Editor mEditor = null;
 
     private long start_time, end_time;
     private TextView tv_time_elapsed = null;
@@ -75,11 +76,14 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
     private TimerTask mTask = null;
     private Timer mTimer = null;
 
-    private boolean isStarted = false;
-    private double total_distance = 0;
-    private String last_fname = null;
+    private  boolean isStarted = false;
+    private  double total_distance = 0;
+    private  String last_fname = null;
+    private  long start = System.currentTimeMillis();
+    private  int lastkm=0;
+    private  int lastmin=0;
+    private  int lasthour=0;
 
-    private long start = System.currentTimeMillis();
 
     private double paces[] = new double[1000]; //upto 1000 km
     private long   startime_paces[] = new long[1000]; // upto 1000 start time
@@ -87,16 +91,69 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
     private MyActivity start_loc;
     private ArrayList<MyActivity> mList = new ArrayList<MyActivity>();
 
+    public void initSharedPreferences(ArrayList<MyActivity> _malist,
+                           double _total_distance,
+                           boolean _isStarted,
+                           long _start,
+                           String _last_fname,
+                           int _lastkm,
+                           int _lastmin,
+                           int _lasthour) {
+
+        mList = _malist;
+        total_distance = _total_distance;
+        isStarted = _isStarted;
+        start = _start;
+        last_fname = _last_fname;
+        lastkm = _lastkm;
+        lastmin = _lastmin;
+        lasthour = _lasthour;
+        saveSharedPreferences();
+    }
+
+    public  void saveSharedPreferences(){
+        mPref = getSharedPreferences("setup", MODE_PRIVATE);
+        mEditor = mPref.edit();
+        mEditor.putFloat("total_distance", (float)total_distance);
+        mEditor.putBoolean("isStarted", isStarted);
+        mEditor.putLong("start", start);
+        mEditor.putString("last_fname", last_fname);
+        mEditor.putInt("lastkm", lastkm);
+        mEditor.putInt("lastmin", lastmin);
+        mEditor.putInt("lasthour", lasthour);
+        mEditor.commit();
+    }
+
+    public void loadSharedPreferences() {
+        mPref = getSharedPreferences("setup", MODE_PRIVATE);
+        isStarted = mPref.getBoolean("isStarted", true);
+        total_distance = mPref.getFloat("total_distance", 0f);
+        start = mPref.getLong("start", new Date().getTime());
+        last_fname = mPref.getString("last_fname", null);
+        lastkm = mPref.getInt("lastkm", 0);
+        lastmin = mPref.getInt("lastmin", 0);
+        lasthour = mPref.getInt("lasthour", 0);
+
+        Log.e(TAG,"isStarted:" + isStarted);
+        Log.e(TAG, "total_distance:" + total_distance);
+        Log.e(TAG,"start:"+ new Date(start));
+        Log.e(TAG,"last_fname:" + last_fname);
+        Log.e(TAG,"lastkm:" + lastkm);
+        Log.e(TAG,"lastmin:" + lastmin);
+        Log.e(TAG,"lasthour:" + lasthour);
+    }
+
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         Log.e(TAG,"------- onSaveInstanceState() called");
-
 
         savedInstanceState.putDouble("total_distance", total_distance);
         savedInstanceState.putBoolean("isStarted", isStarted);
         savedInstanceState.putLong("start", start);
         savedInstanceState.putString("last_fname", last_fname);
-
+        savedInstanceState.putInt("lastkm", lastkm);
+        savedInstanceState.putInt("lastmin", lastmin);
+        savedInstanceState.putInt("lasthour", lasthour);
         super.onSaveInstanceState(savedInstanceState);
     }
 
@@ -116,6 +173,9 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
             total_distance = savedInstanceState.getDouble("total_distance");
             start = savedInstanceState.getLong("start");
             last_fname = savedInstanceState.getString("last_fname");
+            lastkm = savedInstanceState.getInt("lastkm", lastkm);
+            lastmin = savedInstanceState.getInt("lastmin", lastmin);
+            lasthour = savedInstanceState.getInt("lasthour", lasthour);
 
         } else {
 
@@ -134,18 +194,14 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
             imb_stop_timer = (ImageButton) findViewById(R.id.imb_stop_timer);
             //doMyTimeTask(); 신규 활동이 아닌 과거 활동을 복원함.
 
-            mPref = getSharedPreferences("setup", MODE_PRIVATE);
-            isStarted = mPref.getBoolean("isStarted", true);
-            total_distance = mPref.getFloat("total_distance", 0f);
-            start = mPref.getLong("start", new Date().getTime());
-            last_fname = mPref.getString("last_fname", null);
+            loadSharedPreferences();
 
             if(last_fname != null) {
                 File lastFile = new File(mediaStorageDir, last_fname);
                 mList = ActivityUtil.deserializeFile(lastFile);
                 Log.e(TAG, "mList null -- Activities reloaded..... ");
 
-                String msg = String.format(last_fname + "로부터 " + mList.size() + " 경로가 복윈되었습니다.");
+                String msg = String.format(last_fname + "로부터 " + mList.size() + " 경로(약"+lastkm+"km)가 복윈되었습니다.");
                 tv_message.setText(msg);
             }
             doMyTimeTask();
@@ -162,16 +218,7 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
     protected void onStart() {
         Log.e(TAG,"------- onStart() called");
 
-        mPref = getSharedPreferences("setup", MODE_PRIVATE);
-        isStarted = mPref.getBoolean("isStarted", true);
-        total_distance = mPref.getFloat("total_distance", 0f);
-        start = mPref.getLong("start", new Date().getTime());
-        last_fname = mPref.getString("last_fname", null);
-
-        Log.e(TAG,"isStarted:" + isStarted);
-        Log.e(TAG, "total_distance:" + total_distance);
-        Log.e(TAG,"start:"+ new Date(start));
-        Log.e(TAG,"last_fname:" + last_fname);
+        loadSharedPreferences();
 
         if(mList == null) {
             if(last_fname != null) {
@@ -179,7 +226,7 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
                 mList = ActivityUtil.deserializeFile(lastFile);
                 Log.e(TAG, "mList null -- Activities reloaded..... ");
 
-                String msg = String.format(last_fname + "로부터 " + mList.size() + " 경로가 복윈되었습니다.");
+                String msg = String.format(last_fname + "로부터 " + mList.size() + " 경로(약"+lastkm+"km)가 복윈되었습니다.");
                 tv_message.setText(msg);
             }
         } else {
@@ -189,7 +236,7 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
                     mList = ActivityUtil.deserializeFile(lastFile);
                     Log.e(TAG, "mList size 0 -- Activities reloaded..... ");
 
-                    String msg = String.format(last_fname + "로부터 " + mList.size() + " 경로가 복윈되었습니다.");
+                    String msg = String.format(last_fname + "로부터 " + mList.size() + " 경로(약"+lastkm+"km)가 복윈되었습니다.");
                     tv_message.setText(msg);
                 }
             }
@@ -200,16 +247,7 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
     @Override
     protected void onStop() {
         Log.e(TAG,"------- onStop() called");
-
-        mPref = getSharedPreferences("setup", MODE_PRIVATE);
-        mEditor = mPref.edit();
-
-        mEditor.putFloat("total_distance", (float)total_distance);
-        mEditor.putBoolean("isStarted", isStarted);
-        mEditor.putLong("start", start);
-        mEditor.putString("last_fname", last_fname);
-        mEditor.commit();
-
+        saveSharedPreferences();
         super.onStop();
     }
 
@@ -261,7 +299,6 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
             }
             public void onProviderDisabled(String provider) {
             }
-
         };
 
         if ((ContextCompat.checkSelfPermission(Main2Activity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) ||
@@ -374,6 +411,7 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
             }
         });
 
+
         alertDialog.setPositiveButton("SAVE", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
@@ -388,20 +426,16 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
                 String fname = ActivityUtil.serializeWithCurrentTime(mList);
                 Toast.makeText(Main2Activity.this, "" + fname + " created and started new activity...", Toast.LENGTH_LONG).show();
 
-                mPref = getSharedPreferences("setup", MODE_PRIVATE);
-                mEditor = mPref.edit();
+                initSharedPreferences(null,
+                        0,
+                        false,
+                        new Date().getTime(),
+                        null,
+                        0,
+                        0,
+                        0
+                );
 
-                total_distance = 0;
-                isStarted = false;
-                start = new Date().getTime();
-                last_fname = null;
-                mList = null;
-
-                mEditor.putFloat("total_distance", (float)total_distance);
-                mEditor.putBoolean("isStarted", isStarted);
-                mEditor.putLong("start",start);
-                mEditor.putString("last_fname", last_fname);
-                mEditor.commit();
                 doMyTimeTask();
             }
         });
@@ -421,10 +455,6 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
     }
 
     public class MyTimerTask extends java.util.TimerTask{
-//        int lastkm=0;
-//        int lastmin=0;
-//        int lasthour=0;
-
         public void run() {
             if(!isStarted) return;
             //start = System.currentTimeMillis(); 시작시간은 onCreate or App실행시 초기화됨.
@@ -561,6 +591,7 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
         alert.show();
     }
 
+    public static final int REQUEST_ACTIVITY_FILE_LIST = 0x0001;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -667,7 +698,8 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
                         Intent intent = new Intent(Main2Activity.this, ActFileActivity.class);
                         intent.putExtra("file", afile.getAbsolutePath());
                         intent.putExtra("pos", index);
-                        startActivity(intent);
+                        startActivityForResult(intent, REQUEST_ACTIVITY_FILE_LIST);
+
                     }
                 });
                 alertDialog2.setNegativeButton("Back",null);
@@ -695,6 +727,35 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
         return super.onOptionsItemSelected(item);
     }
 
+
+
+    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        super.onActivityResult(requestCode,resultCode,intent);
+        switch(requestCode) {
+            case REQUEST_ACTIVITY_FILE_LIST:
+                String tmpFname = (String)intent.getStringExtra("fname");
+                if(tmpFname==null) return;
+
+                ArrayList<MyActivity> tmpActList =(ArrayList<MyActivity>)intent.getSerializableExtra("locations");
+                ActivityStat as = ActivityUtil.getActivityStat(tmpActList);
+
+                long elapsed = new Date().getTime() - as.start.getTime();
+                double elpased_min = (double)(elapsed / 60f);
+                int elapsed_hour = (int)(elpased_min/3600f);
+                int elapsed_min = (int)((elpased_min - elapsed_hour*3600f) /60f);
+
+                initSharedPreferences(tmpActList,
+                        as.distanceM,
+                        true,
+                        as.start.getTime(),
+                        tmpFname,
+                        (int)as.distanceKm,
+                        elapsed_hour,
+                        elapsed_min
+                );
+                Toast.makeText(Main2Activity.this,"Activity Reloaded ..... ", Toast.LENGTH_LONG).show();
+        }
+    }
 
     private void doHttpFileUploadAll(final Context context, String url) {
         if(url==null) url = "http://180.69.217.73:9090/OneOOMT/upload";

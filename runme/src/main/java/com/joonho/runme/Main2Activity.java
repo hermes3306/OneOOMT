@@ -748,6 +748,7 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
         super.onActivityResult(requestCode,resultCode,intent);
         switch(requestCode) {
             case REQUEST_ACTIVITY_FILE_LIST:
+                if(intent == null) return;
                 String tmpFname = (String)intent.getStringExtra("fname");
                 if(tmpFname==null) return;
 

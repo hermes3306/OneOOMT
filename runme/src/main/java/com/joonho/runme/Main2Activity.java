@@ -37,6 +37,7 @@ import com.joonho.runme.util.CalDistance;
 import com.joonho.runme.util.MyActivity;
 import com.joonho.runme.util.MyNotifier;
 import com.joonho.runme.util.StringUtil;
+import com.joonho.runme.util.WeatherAPI;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -724,6 +725,15 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
                 MyNotifier.go(Main2Activity.this, "Hello", "World");
                 return true;
 
+            case R.id.weather:
+
+                if(mList.size()>0) {
+                    int lat = (int) mList.get(mList.size()-1).latitude;
+                    int lon = (int) mList.get(mList.size()-1).longitude;
+                    WeatherAPI weatherAPI = new WeatherAPI();
+                    WeatherAPI.Weather weather = weatherAPI.getWeather(lat,lon);
+                }
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }

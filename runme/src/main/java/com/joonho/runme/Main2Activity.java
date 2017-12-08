@@ -726,12 +726,16 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
                 return true;
 
             case R.id.weather:
-
                 if(mList.size()>0) {
                     int lat = (int) mList.get(mList.size()-1).latitude;
                     int lon = (int) mList.get(mList.size()-1).longitude;
                     WeatherAPI weatherAPI = new WeatherAPI();
                     WeatherAPI.Weather weather = weatherAPI.getWeather(lat,lon);
+
+                    String msg = weather.getCity() + "("+weather.getLat() + ","+ weather.getIon() + ") Temp:"
+                            + weather.getTemprature() + " Cloudy:" + weather.getCloudy() ;
+                    Toast.makeText(Main2Activity.this, msg, Toast.LENGTH_LONG).show();
+
                 }
                 return true;
         }

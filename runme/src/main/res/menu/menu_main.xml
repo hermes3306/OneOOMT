@@ -31,5 +31,10 @@
     <item
         android:id="@+id/notify"
         android:title="notify..." />
+    <item
+        android:id="@+id/weather"
+        android:title="weather" />
+
+
 
 </menu>

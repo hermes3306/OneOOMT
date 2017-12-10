@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -84,6 +85,13 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
     private  int lastkm=0;
     private  int lastmin=0;
     private  int lasthour=0;
+    private  double maxAltitude=0;
+
+    private  boolean mode1 =  true;
+    private  boolean mode2 =  true;
+    private  boolean mode3 =  false;
+    private  boolean mode4 =  true;
+    private  boolean mode_noti = false;
 
 
     private double paces[] = new double[1000]; //upto 1000 km
@@ -104,7 +112,7 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
         mList = _malist;
         total_distance = _total_distance;
         isStarted = _isStarted;
-        start = _start;
+        start = start_time = _start;
         last_fname = _last_fname;
         lastkm = _lastkm;
         lastmin = _lastmin;
@@ -129,7 +137,7 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
         mPref = getSharedPreferences("setup", MODE_PRIVATE);
         isStarted = mPref.getBoolean("isStarted", true);
         total_distance = mPref.getFloat("total_distance", 0f);
-        start = mPref.getLong("start", new Date().getTime());
+        start = start_time = mPref.getLong("start", new Date().getTime());
         last_fname = mPref.getString("last_fname", null);
         lastkm = mPref.getInt("lastkm", 0);
         lastmin = mPref.getInt("lastmin", 0);
@@ -441,7 +449,6 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
                 doMyTimeTask();
             }
         });
-
         AlertDialog alert = alertDialog.create();
         alert.show();
     }
@@ -449,11 +456,29 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
     @Override
     public void onClick(View view) {
         switch(view.getId()) {
+            case R.id.tv_time_elapsed:
+                mode1 = ! mode1;
+                break;
+
+            case R.id.tv_total_distance:
+                mode2 = ! mode2;
+                break;
+
+            case R.id.tv_lat_lng_altitude:
+                mode3 = !mode3;
+                break;
             case R.id.tv_message:
             case R.id.imb_stop_timer:
                 alertDialogChoice();
                 break;
         }
+    }
+
+    public double getSpeed_Km_per_h() {
+        double dist_kilo = total_distance / 1000f;
+        long elapsed_sec = (new Date().getTime() - start_time) / 1000L;
+        double km_per_hour = (double)(dist_kilo / ((elapsed_sec / 60f) / 60f));
+        return km_per_hour;
     }
 
     public class MyTimerTask extends java.util.TimerTask{
@@ -474,7 +499,9 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
                     long cur_elapsed_time = 0;
 
                     String duration = StringUtil.Duration(new Date(start_time), new Date(end_time));
-                    tv_time_elapsed.setText(duration);
+                    String t_str = StringUtil.DateToString1(new Date(start_time), "HH:mm:ss") ;
+                    if(mode1) tv_time_elapsed.setText(duration);
+                    else tv_time_elapsed.setText("From:" + t_str);
 
                     Location cur_loc = getLocation();
                     if (cur_loc == null) {
@@ -486,9 +513,20 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
 
                             String cur_addr = getCurAddress(Main2Activity.this, cur_loc);
                             tv_address.setText(cur_addr);
+
                             total_distance = 0;
+                            if(maxAltitude < cur_loc.getAltitude()) maxAltitude = cur_loc.getAltitude();
+
                             String lla = String.format("위도:%3.3f, 경도:%3.3f, 고도:%3.1f", cur_loc.getLatitude(), cur_loc.getLongitude(), cur_loc.getAltitude());
-                            tv_lat_lng_altitude.setText(lla);
+                            if(mode3) {
+                                tv_lat_lng_altitude.setTextColor(Color.DKGRAY);
+                                tv_lat_lng_altitude.setText(lla);
+                            }
+                            else {
+                                tv_lat_lng_altitude.setText("현재고도("+ String.format("%3.1f",cur_loc.getAltitude())+")/최고고도("+String.format("%.f",maxAltitude)+")");
+                                tv_lat_lng_altitude.setTextColor(Color.LTGRAY);
+                            }
+
                         } else {
                             MyActivity last_loc = mList.get(mList.size() - 1);
                             CalDistance cd = new CalDistance(last_loc.latitude, last_loc.longitude, cur_loc.getLatitude(), cur_loc.getLongitude());
@@ -508,8 +546,18 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
 
                                     String cur_addr = getCurAddress(Main2Activity.this, cur_loc);
                                     tv_address.setText(cur_addr);
+
+                                    if(maxAltitude < cur_loc.getAltitude()) maxAltitude = cur_loc.getAltitude();
                                     String lla = String.format("위도:%3.1f, 경도:%3.1f, 고도:%3.1f", cur_loc.getLatitude(), cur_loc.getLongitude(), cur_loc.getAltitude());
-                                    tv_lat_lng_altitude.setText(lla);
+
+                                    if(mode3) {
+                                        tv_lat_lng_altitude.setTextColor(Color.GRAY);
+                                        tv_lat_lng_altitude.setText(lla);
+                                    }
+                                    else {
+                                        tv_lat_lng_altitude.setText("현재고도("+ String.format("%3.1f",cur_loc.getAltitude())+")/최고고도("+String.format("%.f",maxAltitude)+")");
+                                        tv_lat_lng_altitude.setTextColor(Color.GREEN);
+                                    }
 
                                     String provider = cur_loc.getProvider();
                                     String msg = String.format("위치가 %s로부터 추가되어 경로의수는 %d입니다", provider, mList.size());
@@ -520,46 +568,51 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
 
                         double dist_kilo = total_distance / 1000f;
 
-//                        if ((int) dist_kilo > lastkm) {
-//                            last_fname = ActivityUtil.serializeWithCurrentTime(mList);
-//                            doHttpFileUpload3(Main2Activity.this, last_fname);
-//                            lastkm++;
-//
-//                            String alertmsg = "" + lastkm + " km를 활동하였습니다. \n " + last_fname + " 업데이트되었습니다.";
-//                            MyNotifier.go(Main2Activity.this, "100대명산거리알람", alertmsg);
-//                        }
+                        if ((int) dist_kilo > lastkm) {
+                            last_fname = ActivityUtil.serializeWithCurrentTime(mList);
+                            doHttpFileUpload3(Main2Activity.this, last_fname);
+                            lastkm++;
+
+                            if(mode_noti) {
+                                String alertmsg = "" + lastkm + " km를 활동하였습니다. \n " + last_fname + " 업데이트되었습니다.";
+                                MyNotifier.go(Main2Activity.this, "100대명산거리알람", alertmsg);
+                            }
+                        }
 
 
                         String distance_str = String.format("%.2f", dist_kilo);
-                        tv_total_distance.setText(distance_str);
+                        double km_per_hour = getSpeed_Km_per_h();
+                        if(mode2) tv_total_distance.setText(distance_str);
+                        else  tv_total_distance.setText(String.format("%.0fkm/h", km_per_hour));
 
-                        double elapsed_time_sec = (double) (elapsed_time / 1000l);
-                        double km_per_sec = (double) (elapsed_time_sec / dist_kilo);
-                        String avg_pace = String.format("%2d:%02d", (int) (km_per_sec / 60), (int) (km_per_sec % 60));
-                        if (dist_kilo != 0) tv_avg_pace.setText(avg_pace);
+                        long elapsed_sec = (elapsed_time / 1000L);
+                        double min_per_km = (double)((elapsed_sec / 60f) / dist_kilo);
 
-//                        if ((int) (elapsed_time_sec / 3600) > lasthour) { //1시간 업데이트
-//                            // 웹서버 업로드 하는것으로 향후 구현하기로 함
-//                            lasthour++;
-//                            last_fname = ActivityUtil.serializeWithCurrentTime(mList);
-//                            doHttpFileUpload3(Main2Activity.this, last_fname);
-//
-//                            String alertmsg = "" + lasthour + " 시간을 활동하였습니다.\n " + last_fname + " 업로드하였습니다.";
-//                            MyNotifier.go(Main2Activity.this, "100대명산시간알람", alertmsg);
-//
-//                        } else if ((int) (elapsed_time_sec / 600) > lastmin) { //10분 알람
-//                            last_fname = ActivityUtil.serializeWithCurrentTime(mList);
-//                            doHttpFileUpload3(Main2Activity.this, last_fname);
-//                            lastmin = lastmin + 10;
-//                            String alertmsg = "" + lastmin + " 분을 활동하였습니다. " + last_fname + " 업데이트하였습니다.";
-//                            MyNotifier.go(Main2Activity.this, "100대명산10분알람", alertmsg);
-//                        }
+                        if (dist_kilo != 0) tv_avg_pace.setText(String.format("%.2f",  min_per_km));
+
+                        if ((int) (elapsed_sec / 3600) > lasthour) { //1시간 업데이트
+                            lasthour++;
+                            last_fname = ActivityUtil.serializeWithCurrentTime(mList);
+                            doHttpFileUpload3(Main2Activity.this, last_fname);
+                            if(mode_noti) {
+                                String alertmsg = "" + lasthour + " 시간을 활동하였습니다.\n " + last_fname + " 업로드하였습니다.";
+                                MyNotifier.go(Main2Activity.this, "100대명산시간알람", alertmsg);
+                            }
+                        } else if ((int) (elapsed_sec / 600) > lastmin) { //10분 알람
+                            last_fname = ActivityUtil.serializeWithCurrentTime(mList);
+                            doHttpFileUpload3(Main2Activity.this, last_fname);
+                            lastmin = lastmin + 10;
+                            if(mode_noti) {
+                                String alertmsg = "" + lastmin + " 분을 활동하였습니다. " + last_fname + " 업데이트하였습니다.";
+                                MyNotifier.go(Main2Activity.this, "100대명산10분알람", alertmsg);
+                            }
+                        }
 
                         double cur_dist_kilo = cur_dist / 1000f;
-                        double cur_elapsed_time_sec = (double) (cur_elapsed_time / 1000l);
-                        double cur_km_per_sec = (double) (cur_elapsed_time_sec / cur_dist_kilo);
-                        String cur_pace = String.format("%2d:%02d", (int) (cur_km_per_sec / 60), (int) (cur_km_per_sec % 60));
-                        if (cur_dist_kilo != 0) tv_cur_pace.setText(cur_pace);
+                        double cur_elapsed_time_sec = (double) (cur_elapsed_time / 1000L);
+                        double cur_min_per_km = (double)((cur_elapsed_time_sec /60f) / cur_dist_kilo);
+
+                        if (cur_dist_kilo != 0) tv_cur_pace.setText(String.format("%.2f", cur_min_per_km));
                     }
                 }
             });
@@ -571,6 +624,7 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
         alertDialog.setTitle("Choose Upload Servlet");
 
         final EditText ed = new EditText(alertDialog.getContext());
+        ed.setTextSize(15);
         ed.setText("http://180.69.217.73:8080/OneOOMT/upload");
         alertDialog.setView(ed);
 
@@ -722,19 +776,15 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
                 return true;
 
             case R.id.notify:
-                MyNotifier.go(Main2Activity.this, "Hello", "World");
+                mode_noti = !mode_noti;
+                if(mode_noti) MyNotifier.go(Main2Activity.this, "100대명산알람설정", "알람설정이 켜졌습니다.");
+                else MyNotifier.go(Main2Activity.this, "100대명산알람설정", "알람설정이 껴졌습니다.");
                 return true;
 
             case R.id.weather:
                 if(mList.size()>0) {
-                    int lat = (int) mList.get(mList.size()-1).latitude;
-                    int lon = (int) mList.get(mList.size()-1).longitude;
-                    WeatherAPI weatherAPI = new WeatherAPI();
-                    WeatherAPI.Weather weather = weatherAPI.getWeather(lat,lon);
 
-                    String msg = weather.getCity() + "("+weather.getLat() + ","+ weather.getIon() + ") Temp:"
-                            + weather.getTemprature() + " Cloudy:" + weather.getCloudy() ;
-                    Toast.makeText(Main2Activity.this, msg, Toast.LENGTH_LONG).show();
+                    getWeatherInfro(Main2Activity.this, 39, 127);
 
                 }
                 return true;
@@ -755,10 +805,17 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
                 ArrayList<MyActivity> tmpActList =(ArrayList<MyActivity>)intent.getSerializableExtra("locations");
                 ActivityStat as = ActivityUtil.getActivityStat(tmpActList);
 
-                long elapsed = new Date().getTime() - as.start.getTime();
-                double elpased_min = (double)(elapsed / 60f);
-                int elapsed_hour = (int)(elpased_min/3600f);
-                int elapsed_min = (int)((elpased_min - elapsed_hour*3600f) /60f);
+                long endTime, startTime;
+                startTime = as.start.getTime();
+                endTime = new Date().getTime();
+                long duration = endTime - startTime;
+                long dur_sec = duration / 1000;
+                long duration_r;
+                int dur_hour_Int = (int)(dur_sec/3600);
+                duration_r = dur_sec - (long)(dur_hour_Int) * 60 * 60;
+                int dur_min_Int = (int)(duration_r / 60);
+                duration_r = duration_r  - (long)(dur_min_Int) * 60;
+                int dur_sec_Int = (int)(duration_r);
 
                 initSharedPreferences(tmpActList,
                         as.distanceM,
@@ -766,11 +823,54 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
                         as.start.getTime(),
                         tmpFname,
                         (int)as.distanceKm,
-                        elapsed_hour,
-                        elapsed_min
+                        dur_min_Int,
+                        dur_hour_Int
                 );
                 Toast.makeText(Main2Activity.this,"Activity Reloaded ..... ", Toast.LENGTH_LONG).show();
         }
+    }
+
+    private void getWeatherInfro(final Context context, double lat, double lon) {
+
+        new AsyncTask<Void,Void,Void>() {
+            ProgressDialog asyncDialog = new ProgressDialog(context);
+            @Override
+            protected Void doInBackground(Void... voids) {
+                asyncDialog.setMax(100);
+
+
+                    int lat = (int) mList.get(mList.size()-1).latitude;
+                    int lon = (int) mList.get(mList.size()-1).longitude;
+
+                    WeatherAPI weatherAPI = new WeatherAPI();
+                    WeatherAPI.Weather weather = weatherAPI.getWeather(lat,lon);
+
+                    String msg = weather.getCity() + "("+weather.getLat() + ","+ weather.getIon() + ") Temp:"
+                            + weather.getTemprature() + " Cloudy:" + weather.getCloudy() ;
+                    Toast.makeText(Main2Activity.this, msg, Toast.LENGTH_LONG).show();
+
+
+
+
+                return null;
+            }
+
+            @Override
+            protected void onPreExecute() {
+                asyncDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                asyncDialog.setMessage("Uploading...");
+                asyncDialog.show();
+                super.onPreExecute();
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                asyncDialog.dismiss();
+                super.onPostExecute(aVoid);
+                Toast.makeText(context, "Uploading success", Toast.LENGTH_LONG).show();
+            }
+        }.execute();
+
     }
 
     private void doHttpFileUploadAll(final Context context, String url) {

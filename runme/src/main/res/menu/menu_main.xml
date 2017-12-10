@@ -30,11 +30,8 @@
         android:title="upgrade files(v1->v2)" />
     <item
         android:id="@+id/notify"
-        android:title="notify..." />
+        android:title="Toggle Notification..." />
     <item
         android:id="@+id/weather"
         android:title="weather" />
-
-
-
 </menu>

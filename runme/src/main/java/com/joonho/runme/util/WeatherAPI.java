@@ -39,6 +39,8 @@ public class WeatherAPI {
 
     final static String openWeatherURL = "http://api.openweathermap.org/data/2.5/weather";
     public Weather getWeather(int lat,int lon){
+
+
         Weather w = new Weather();
         String urlString = openWeatherURL + "?lat="+lat+"&lon="+lon +"&APPID=967b32afdae442657e1041e342e75fb5";
 
@@ -66,6 +68,8 @@ public class WeatherAPI {
             return null;
         }
         return w;
+
+
     }
 
     private Weather parseJSON(JSONObject json) throws JSONException {

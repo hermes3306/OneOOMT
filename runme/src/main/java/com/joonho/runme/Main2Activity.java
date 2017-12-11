@@ -68,10 +68,12 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
     private TextView tv_time_elapsed = null;
     private TextView tv_total_distance = null;
     private TextView tv_avg_pace = null;
-    private TextView tv_cur_pace = null;
+    private TextView tv_cur_temp = null;
     private TextView tv_address = null;
     private TextView tv_lat_lng_altitude = null;
     private TextView tv_message = null;
+    private static WeatherAPI.Weather cur_weather = null;
+    private static WeatherAPI.myWeather cur_myweather = null;
 
     private ImageButton imb_stop_timer = null;
 
@@ -218,7 +220,7 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
             tv_time_elapsed = (TextView) findViewById(R.id.tv_time_elapsed);
             tv_total_distance = (TextView) findViewById(R.id.tv_total_distance);
             tv_avg_pace = (TextView) findViewById(R.id.tv_avg_pace02);
-            tv_cur_pace = (TextView) findViewById(R.id.tv_cur_pace);
+            tv_cur_temp = (TextView) findViewById(R.id.tv_cur_temp);
             tv_address = (TextView) findViewById(R.id.tv_address);
             tv_lat_lng_altitude = (TextView) findViewById(R.id.tv_lat_lng_altitude);
             tv_message = (TextView) findViewById(R.id.tv_message);
@@ -503,6 +505,12 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
                     if(mode1) tv_time_elapsed.setText(duration);
                     else tv_time_elapsed.setText("From:" + t_str);
 
+                    if(cur_myweather != null) {
+                        if(cur_myweather.getTemp() != 0.0f) {
+                            tv_cur_temp.setText(String.format("%.1f", cur_myweather.getTemp()));
+                        }
+                    }
+
                     Location cur_loc = getLocation();
                     if (cur_loc == null) {
 
@@ -515,17 +523,12 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
                             tv_address.setText(cur_addr);
 
                             total_distance = 0;
-                            if(maxAltitude < cur_loc.getAltitude()) maxAltitude = cur_loc.getAltitude();
 
-                            String lla = String.format("위도:%3.3f, 경도:%3.3f, 고도:%3.1f", cur_loc.getLatitude(), cur_loc.getLongitude(), cur_loc.getAltitude());
-                            if(mode3) {
-                                tv_lat_lng_altitude.setTextColor(Color.DKGRAY);
-                                tv_lat_lng_altitude.setText(lla);
-                            }
-                            else {
-                                tv_lat_lng_altitude.setText("현재고도("+ String.format("%3.1f",cur_loc.getAltitude())+")/최고고도("+String.format("%.f",maxAltitude)+")");
-                                tv_lat_lng_altitude.setTextColor(Color.LTGRAY);
-                            }
+                            if(maxAltitude < cur_loc.getAltitude()) maxAltitude = cur_loc.getAltitude();
+                            String lla = String.format("LAT %3.1f LON %3.1f ALT %3.1f", cur_loc.getLatitude(), cur_loc.getLongitude(), cur_loc.getAltitude());
+                            if(mode3) tv_lat_lng_altitude.setText(lla);
+                            else tv_lat_lng_altitude.setText("ALT "+ String.format("%3.1f",cur_loc.getAltitude())+"/"+String.format("%3.1f",maxAltitude)+"M");
+
 
                         } else {
                             MyActivity last_loc = mList.get(mList.size() - 1);
@@ -548,16 +551,9 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
                                     tv_address.setText(cur_addr);
 
                                     if(maxAltitude < cur_loc.getAltitude()) maxAltitude = cur_loc.getAltitude();
-                                    String lla = String.format("위도:%3.1f, 경도:%3.1f, 고도:%3.1f", cur_loc.getLatitude(), cur_loc.getLongitude(), cur_loc.getAltitude());
-
-                                    if(mode3) {
-                                        tv_lat_lng_altitude.setTextColor(Color.GRAY);
-                                        tv_lat_lng_altitude.setText(lla);
-                                    }
-                                    else {
-                                        tv_lat_lng_altitude.setText("현재고도("+ String.format("%3.1f",cur_loc.getAltitude())+")/최고고도("+String.format("%.f",maxAltitude)+")");
-                                        tv_lat_lng_altitude.setTextColor(Color.GREEN);
-                                    }
+                                    String lla = String.format("LAT %3.1f LON %3.1f ALT %3.1f", cur_loc.getLatitude(), cur_loc.getLongitude(), cur_loc.getAltitude());
+                                    if(mode3) tv_lat_lng_altitude.setText(lla);
+                                    else tv_lat_lng_altitude.setText("ALT "+ String.format("%3.1f",cur_loc.getAltitude())+"/"+String.format("%3.1f",maxAltitude)+"M");
 
                                     String provider = cur_loc.getProvider();
                                     String msg = String.format("위치가 %s로부터 추가되어 경로의수는 %d입니다", provider, mList.size());
@@ -570,15 +566,13 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
 
                         if ((int) dist_kilo > lastkm) {
                             last_fname = ActivityUtil.serializeWithCurrentTime(mList);
-                            doHttpFileUpload3(Main2Activity.this, last_fname);
                             lastkm++;
-
                             if(mode_noti) {
+                                doHttpFileUpload3(Main2Activity.this, last_fname);
                                 String alertmsg = "" + lastkm + " km를 활동하였습니다. \n " + last_fname + " 업데이트되었습니다.";
                                 MyNotifier.go(Main2Activity.this, "100대명산거리알람", alertmsg);
                             }
                         }
-
 
                         String distance_str = String.format("%.2f", dist_kilo);
                         double km_per_hour = getSpeed_Km_per_h();
@@ -593,16 +587,26 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
                         if ((int) (elapsed_sec / 3600) > lasthour) { //1시간 업데이트
                             lasthour++;
                             last_fname = ActivityUtil.serializeWithCurrentTime(mList);
-                            doHttpFileUpload3(Main2Activity.this, last_fname);
                             if(mode_noti) {
+                                doHttpFileUpload3(Main2Activity.this, last_fname);
                                 String alertmsg = "" + lasthour + " 시간을 활동하였습니다.\n " + last_fname + " 업로드하였습니다.";
                                 MyNotifier.go(Main2Activity.this, "100대명산시간알람", alertmsg);
                             }
                         } else if ((int) (elapsed_sec / 600) > lastmin) { //10분 알람
-                            last_fname = ActivityUtil.serializeWithCurrentTime(mList);
-                            doHttpFileUpload3(Main2Activity.this, last_fname);
                             lastmin = lastmin + 10;
+
+                            // weather check
+                            getMyWeather();
+
+                            if(cur_myweather != null) {
+                                if(cur_myweather.getTemp() != 0.0f) {
+                                    tv_cur_temp.setText(String.format("%.1f", cur_myweather.getTemp()));
+                                }
+                            }
+
+                            last_fname = ActivityUtil.serializeWithCurrentTime(mList);
                             if(mode_noti) {
+                                doHttpFileUpload3(Main2Activity.this, last_fname);
                                 String alertmsg = "" + lastmin + " 분을 활동하였습니다. " + last_fname + " 업데이트하였습니다.";
                                 MyNotifier.go(Main2Activity.this, "100대명산10분알람", alertmsg);
                             }
@@ -612,7 +616,8 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
                         double cur_elapsed_time_sec = (double) (cur_elapsed_time / 1000L);
                         double cur_min_per_km = (double)((cur_elapsed_time_sec /60f) / cur_dist_kilo);
 
-                        if (cur_dist_kilo != 0) tv_cur_pace.setText(String.format("%.2f", cur_min_per_km));
+                        //if (cur_dist_kilo != 0) tv_cur_pace.setText(String.format("%.2f", cur_min_per_km));
+
                     }
                 }
             });
@@ -783,9 +788,9 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
 
             case R.id.weather:
                 if(mList.size()>0) {
-
-                    getWeatherInfro(Main2Activity.this, 39, 127);
-
+                    getMyWeather();
+                    while(cur_myweather == null) {}
+                    Toast.makeText(Main2Activity.this, cur_myweather.toString(), Toast.LENGTH_LONG).show();
                 }
                 return true;
         }
@@ -830,47 +835,72 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
         }
     }
 
-    private void getWeatherInfro(final Context context, double lat, double lon) {
-
+    private void getMyWeather() {
         new AsyncTask<Void,Void,Void>() {
-            ProgressDialog asyncDialog = new ProgressDialog(context);
             @Override
             protected Void doInBackground(Void... voids) {
-                asyncDialog.setMax(100);
+                double lat = (double) mList.get(mList.size() - 1).latitude;
+                double lon = (double) mList.get(mList.size() - 1).longitude;
 
+                WeatherAPI weatherAPI = new WeatherAPI();
+                WeatherAPI.myWeather myweather = weatherAPI.getMyWeather(lat, lon);
 
-                    int lat = (int) mList.get(mList.size()-1).latitude;
-                    int lon = (int) mList.get(mList.size()-1).longitude;
+                if(myweather != null) Log.e(TAG, myweather.toString());
+                else Log.e(TAG, "ERR] cannot get the weather information("+lat+","+lon+")");
 
-                    WeatherAPI weatherAPI = new WeatherAPI();
-                    WeatherAPI.Weather weather = weatherAPI.getWeather(lat,lon);
-
-                    String msg = weather.getCity() + "("+weather.getLat() + ","+ weather.getIon() + ") Temp:"
-                            + weather.getTemprature() + " Cloudy:" + weather.getCloudy() ;
-                    Toast.makeText(Main2Activity.this, msg, Toast.LENGTH_LONG).show();
-
-
-
-
+                cur_myweather = myweather;
                 return null;
             }
 
             @Override
             protected void onPreExecute() {
-                asyncDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-                asyncDialog.setMessage("Uploading...");
-                asyncDialog.show();
                 super.onPreExecute();
             }
 
             @Override
             protected void onPostExecute(Void aVoid) {
-                asyncDialog.dismiss();
                 super.onPostExecute(aVoid);
-                Toast.makeText(context, "Uploading success", Toast.LENGTH_LONG).show();
             }
-        }.execute();
 
+        }.execute();
+    }
+
+
+    private void getWeatherInfo() {
+        if(mList.size()==0) return;
+        int lat = (int) mList.get(mList.size()-1).latitude;
+        int lon = (int) mList.get(mList.size()-1).longitude;
+        WeatherAPI weatherAPI = new WeatherAPI();
+        String msg = null;
+
+        new AsyncTask<Void,Void,Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                double lat = (double) mList.get(mList.size() - 1).latitude;
+                double lon = (double) mList.get(mList.size() - 1).longitude;
+
+                WeatherAPI weatherAPI = new WeatherAPI();
+                WeatherAPI.Weather weather = weatherAPI.getWeather(lat, lon);
+
+                String mymsg = weather.getCity() + "(" + weather.getLat() + "," + weather.getIon() + ") Temp:"
+                        + weather.getTemprature() + " Cloudy:" + weather.getCloudy();
+
+                Log.e(TAG, mymsg);
+                cur_weather = weather;
+                return null;
+            }
+
+            @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                super.onPostExecute(aVoid);
+            }
+
+        }.execute();
     }
 
     private void doHttpFileUploadAll(final Context context, String url) {

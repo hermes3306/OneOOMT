@@ -20,6 +20,7 @@ import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.joonho.runme.util.ActivityStat;
 import com.joonho.runme.util.ActivityUtil;
+import com.joonho.runme.util.MapUtil;
 import com.joonho.runme.util.MyActivity;
 
 import java.util.ArrayList;
@@ -36,6 +37,8 @@ public class CurActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         final ArrayList<MyActivity> mActivityList = (ArrayList<MyActivity>)intent.getSerializableExtra("locations");
+        final String add1 = null;
+        final String add2 = null;
 
         final Context _ctx = this;
         final MapView mMapView = (MapView) findViewById(R.id.mapView);
@@ -54,6 +57,7 @@ public class CurActivity extends AppCompatActivity {
             final TextView tv_minperkm = (TextView) findViewById(R.id.tv_minperkm);
             final TextView tv_carolies = (TextView) findViewById(R.id.tv_carolies);
             final TextView tv_address = (TextView) findViewById(R.id.tv_address);
+
 
             public void GO(final GoogleMap googleMap) {
                 imbt_prev.setVisibility(View.INVISIBLE);

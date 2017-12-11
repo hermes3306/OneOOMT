@@ -54,11 +54,11 @@
         <TextView
             android:id="@+id/tv_address"
             android:layout_width="match_parent"
+            android:layout_height="50sp"
+            android:gravity="center"
             android:text="대한민국 서울 특별시 가락동 51"
             android:textColor="@android:color/darker_gray"
-            android:textSize="15sp"
-            android:gravity="center"
-            android:layout_height="50sp" />
+            android:textSize="15sp" />
 
         <TextView
             android:id="@+id/textView89"
@@ -105,12 +105,12 @@
         <TextView
             android:id="@+id/tv_lat_lng_altitude"
             android:layout_width="match_parent"
-            android:textSize="17sp"
+            android:layout_height="50sp"
             android:gravity="center"
-            android:text="위도:0.0, 경도0.0, 고도:0"
             android:onClick="onClick"
+            android:text="위도:0.0, 경도0.0, 고도:0"
             android:textColor="@android:color/darker_gray"
-            android:layout_height="50sp" />
+            android:textSize="17sp" />
 
         <TextView
             android:id="@+id/textView269"
@@ -133,13 +133,13 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/tv_cur_pace"
+                android:id="@+id/tv_cur_temp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:text="N/A"
-                android:textSize="30sp"
                 android:textColor="@android:color/darker_gray"
+                android:textSize="30sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textView23" />
@@ -149,7 +149,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:text="CURRENT"
+                android:text="TEMPERATURE"
                 android:textColor="@android:color/darker_gray"
                 android:textSize="15sp"
                 app:layout_constraintEnd_toEndOf="parent"

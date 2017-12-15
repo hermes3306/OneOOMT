@@ -94,7 +94,7 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
     private  int mode1 =  0; /* 0: elapsed, 1: start time, 2: end time */
     private  int mode2 =  0; /* 0: Diastance, 1: Speed Total, 2: Speed Current */
     private  boolean mode3 =  false;
-    private  boolean mode4 =  true;
+    private  int mode4 =  0;
     private  boolean mode_noti = false;
 
 
@@ -476,14 +476,14 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
                 getMyWeather();
                 break;
             case R.id.tv_avg_pace02:
-
+                mode4 = mode4+1;
+                if(mode4==2) mode4=0;
                 break;
             case R.id.tv_act_type:
                 Intent intent = new Intent(Main2Activity.this, CurActivity.class);
                 intent.putExtra("locations",mList);
                 startActivity(intent);
                 break;
-
             case R.id.tv_message:
             case R.id.imb_stop_timer:
                 alertDialogChoice();
@@ -496,6 +496,14 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
         long elapsed_sec = (new Date().getTime() - startingtime) / 1000L;
         double km_per_hour = (double)(dist_kilo / ((elapsed_sec / 60f) / 60f));
         return km_per_hour;
+    }
+
+    public double getSpeed_Min_Per_Km(double distancem, long startingtime) {
+        double dist_kilo = distancem / 1000f;
+        long elapsed_sec = (new Date().getTime() - startingtime) / 1000L;
+        double Sec_Per_Km = elapsed_sec / dist_kilo;
+        double Min_Per_Km = Sec_Per_Km / 60f;
+        return Min_Per_Km;
     }
 
     public class MyTimerTask extends java.util.TimerTask{
@@ -629,6 +637,16 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
                                 break;
                         case 2: tv_total_distance.setText(String.format("%.1fkm/h", getSpeed_Km_per_h(section_distance, section_start_time)));
                     }
+
+                    switch(mode4) {
+                        case 0: /* AVG PACE */
+                            tv_avg_pace.setText(String.format("%.1f", getSpeed_Min_Per_Km(total_distance, start_time)));
+                            break;
+                        case 1: /* CUR PACE */
+                            tv_avg_pace.setText(String.format("%.1f", getSpeed_Min_Per_Km(section_distance, section_start_time)));
+                            break;
+                    }
+
 
                     /* activity type setting based on current speed */
                     double current_speed = getSpeed_Km_per_h(section_distance, section_start_time);

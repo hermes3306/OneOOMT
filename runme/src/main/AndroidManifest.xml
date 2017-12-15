@@ -23,26 +23,11 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
-        <activity
-            android:name=".MainActivity"
-            android:screenOrientation="portrait">
-
-            <!-- <intent-filter> -->
-            <!-- <action android:name="android.intent.action.MAIN" /> -->
-
-
-            <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
-            <!-- </intent-filter> -->
-        </activity>
         <activity android:name=".ActFileActivity" />
         <activity
             android:name=".CurActivity"
             android:label="@string/title_activity_cur"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".Main3Activity"
-            android:screenOrientation="portrait">
-        </activity>
 
 
         <activity android:name=".Main2Activity" android:screenOrientation="portrait">

@@ -74,6 +74,10 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
     private TextView tv_address = null;
     private TextView tv_lat_lng_altitude = null;
     private TextView tv_message = null;
+    private TextView tv_km = null;
+    private TextView tv_pace = null;
+    private TextView tv_time = null;
+
     private static WeatherAPI.Weather cur_weather = null;
     private static WeatherAPI.myWeather cur_myweather = null;
 
@@ -152,9 +156,8 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
                 File lastFile = new File(mediaStorageDir, last_fname);
                 mList = ActivityUtil.deserializeFile(lastFile);
                 Log.e(TAG, "mList null -- Activities reloaded..... ");
-
-                String msg = String.format(last_fname + "로부터 " + mList.size() + " 경로(약"+lastkm+"km)가 복윈되었습니다.");
-                tv_message.setText(msg);
+//                String msg = String.format(last_fname + "로부터 " + mList.size() + " 경로(약"+lastkm+"km)가 복원되었습니다.");
+//                tv_message.setText(msg);
             }
         } else {
             if(mList.size()==0) {
@@ -163,8 +166,8 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
                     mList = ActivityUtil.deserializeFile(lastFile);
                     Log.e(TAG, "mList size 0 -- Activities reloaded..... ");
                     if(mList==null) mList = new ArrayList<MyActivity>();
-                    String msg = String.format(last_fname + "로부터 " + mList.size() + " 경로(약"+lastkm+"km)가 복윈되었습니다.");
-                    tv_message.setText(msg);
+//                    String msg = String.format(last_fname + "로부터 " + mList.size() + " 경로(약"+lastkm+"km)가 복윈되었습니다.");
+//                    tv_message.setText(msg);
                 }
             }
         }
@@ -227,6 +230,9 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
             tv_address = (TextView) findViewById(R.id.tv_address);
             tv_lat_lng_altitude = (TextView) findViewById(R.id.tv_lat_lng_altitude);
             tv_message = (TextView) findViewById(R.id.tv_message);
+            tv_km = (TextView) findViewById(R.id.tv_km);
+            tv_pace = (TextView) findViewById(R.id.tv_pace);
+            tv_time = (TextView) findViewById(R.id.tv_time);
 
             imb_stop_timer = (ImageButton) findViewById(R.id.imb_stop_timer);
             //doMyTimeTask(); 신규 활동이 아닌 과거 활동을 복원함.
@@ -238,8 +244,8 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
                 mList = ActivityUtil.deserializeFile(lastFile);
                 Log.e(TAG, "mList null -- Activities reloaded..... ");
                 if(mList==null) mList = new ArrayList<MyActivity>();
-                String msg = String.format(last_fname + "로부터 " + mList.size() + " 경로(약"+lastkm+"km)가 복윈되었습니다.");
-                tv_message.setText(msg);
+//                String msg = String.format(last_fname + "로부터 " + mList.size() + " 경로(약"+lastkm+"km)가 복윈되었습니다.");
+//                tv_message.setText(msg);
             }
             doMyTimeTask();
         }
@@ -399,6 +405,7 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
             if(sl != null) {
                 start_loc = new MyActivity(sl.getLatitude(), sl.getLongitude(), sl.getAltitude(), LocTimeStr(sl));
                 mList.add(start_loc);
+                getMyWeather();
 
                 String caddr = getCurAddress(getApplicationContext(),sl);
                 tv_address.setText(caddr);
@@ -464,10 +471,20 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
             case R.id.tv_time_elapsed:
                 mode1 = mode1+1;
                 if(mode1==3) mode1=0;
+                switch(mode1) {
+                    case 0: tv_time.setText("TIME"); break;
+                    case 1: tv_time.setText("START AT"); break;
+                    case 2: tv_time.setText("END AT"); break;
+                }
                 break;
             case R.id.tv_total_distance:
                 mode2 = mode2+1;
                 if(mode2==3) mode2 = 0;
+                switch(mode2) {
+                    case 0: tv_km.setText("KILOMETERS"); break;
+                    case 1: tv_km.setText("KM/H (AVG)"); break;
+                    case 2: tv_km.setText("KM/H (CUR)"); break;
+                }
                 break;
             case R.id.tv_lat_lng_altitude:
                 mode3 = !mode3;
@@ -478,11 +495,24 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
             case R.id.tv_avg_pace02:
                 mode4 = mode4+1;
                 if(mode4==2) mode4=0;
+                switch(mode4) {
+                    case 0: tv_pace.setText("AVG PACE"); break;
+                    case 1: tv_pace.setText("CUR PACE"); break;
+                }
                 break;
             case R.id.tv_act_type:
                 Intent intent = new Intent(Main2Activity.this, CurActivity.class);
                 intent.putExtra("locations",mList);
                 startActivity(intent);
+                break;
+            case R.id.tv_address:
+                // 지도 보기 메뉴 실행 필요함
+                double lan = mList.get(mList.size()-1).latitude;
+                double lon = mList.get(mList.size()-1).longitude;
+                Uri gmmIntentUri = Uri.parse("google.streetview:cbll="+lan+","+lon);
+                Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
+                mapIntent.setPackage("com.google.android.apps.maps");
+                startActivity(mapIntent);
                 break;
             case R.id.tv_message:
             case R.id.imb_stop_timer:
@@ -495,6 +525,7 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
         double dist_kilo = distancem / 1000f;
         long elapsed_sec = (new Date().getTime() - startingtime) / 1000L;
         double km_per_hour = (double)(dist_kilo / ((elapsed_sec / 60f) / 60f));
+        if(Double.isInfinite(km_per_hour)) return 0.0f;
         return km_per_hour;
     }
 
@@ -503,6 +534,7 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
         long elapsed_sec = (new Date().getTime() - startingtime) / 1000L;
         double Sec_Per_Km = elapsed_sec / dist_kilo;
         double Min_Per_Km = Sec_Per_Km / 60f;
+        if(Double.isInfinite(Min_Per_Km)) return 0.0f;
         return Min_Per_Km;
     }
 
@@ -528,11 +560,12 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
                     if(mode1==0) tv_time_elapsed.setText(duration);
                     else if(mode1==1) {
                         String t_str = StringUtil.DateToString1(new Date(start_time), "HH:mm:ss") ;
-                        tv_time_elapsed.setText(t_str + "~");
+                        tv_time_elapsed.setText(t_str);
                     } else {
                         String t_str = StringUtil.DateToString1(new Date(end_time), "HH:mm:ss") ;
-                        tv_time_elapsed.setText("~" + t_str);
+                        tv_time_elapsed.setText(t_str);
                     }
+
 
                     /* get Weather every 10 minutes */
                     String[] t_str_array = {"00:00", "10:00", "20:00", "30:00", "40:00", "50:00"};
@@ -633,9 +666,10 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
                     switch(mode2) {
                         case 0: tv_total_distance.setText(String.format("%.2f",total_distance/1000f));
                                 break;
-                        case 1: tv_total_distance.setText(String.format("%.1fkm/h", getSpeed_Km_per_h(total_distance, start_time )));
+                        case 1: tv_total_distance.setText(String.format("%.2f", getSpeed_Km_per_h(total_distance, start_time )));
                                 break;
-                        case 2: tv_total_distance.setText(String.format("%.1fkm/h", getSpeed_Km_per_h(section_distance, section_start_time)));
+                        case 2: tv_total_distance.setText(String.format("%.2f", getSpeed_Km_per_h(section_distance, section_start_time)));
+                                break;
                     }
 
                     switch(mode4) {

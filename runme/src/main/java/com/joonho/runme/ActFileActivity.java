@@ -45,7 +45,7 @@ public class ActFileActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_act_file2);
+        setContentView(R.layout.activity_act_file);
 
         Intent intent = getIntent();
         fname = intent.getExtras().getString("file");

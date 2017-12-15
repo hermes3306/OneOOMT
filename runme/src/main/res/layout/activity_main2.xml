@@ -25,12 +25,12 @@
             android:textSize="40sp" />
 
         <TextView
-            android:id="@+id/textView28"
+            android:id="@+id/tv_time"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:textColor="@android:color/holo_blue_bright"
             android:text="TIME"
+            android:textColor="@android:color/holo_blue_bright"
             android:textSize="15sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.501"
@@ -56,6 +56,7 @@
             android:layout_width="match_parent"
             android:layout_height="50sp"
             android:gravity="center"
+            android:onClick="onClick"
             android:text="대한민국 서울 특별시 가락동 51"
             android:textColor="@android:color/darker_gray"
             android:textSize="15sp" />
@@ -83,7 +84,7 @@
             app:layout_constraintTop_toTopOf="@+id/tv_avg_pace02" />
 
         <TextView
-            android:id="@+id/textView29"
+            android:id="@+id/tv_km"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
@@ -181,13 +182,13 @@
                 tools:layout_editor_absoluteY="255dp" />
 
             <TextView
-                android:id="@+id/textView39"
+                android:id="@+id/tv_pace"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:text="AVG PACE"
-                android:textSize="15sp"
                 android:textColor="@android:color/darker_gray"
+                android:textSize="15sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.944"
                 app:layout_constraintStart_toStartOf="parent"

@@ -69,8 +69,9 @@ public class CurActivity extends AppCompatActivity {
                 int width = metrics.widthPixels;
                 int height = metrics.heightPixels;
 
-                drawGoogleMap(mActivityList, googleMap,width,height,false);
+
                 ActivityStat activityStat = ActivityUtil.getActivityStat(mActivityList);
+
 
                 Geocoder geocoder = new Geocoder(_ctx, Locale.getDefault());
                 List<Address> addresses = null;
@@ -81,12 +82,15 @@ public class CurActivity extends AppCompatActivity {
                     Log.e(TAG, e.toString());
                 }
 
+
                 String addinfo = null;
                 if(addresses == null || addresses.size() ==0) {
                     Log.e(TAG, "No Addresses found !!");
                 }else {
                     addinfo = addresses.get(0).getAddressLine(0).toString();
                 }
+
+                drawGoogleMap(mActivityList, googleMap,width,height,false);
 
                 String inx_str = "Total " + mActivityList.size() + " locations";
                 tv_cursor.setText(inx_str);
@@ -118,6 +122,7 @@ public class CurActivity extends AppCompatActivity {
 
             @Override
             public void onMapReady(final GoogleMap googleMap) {
+
                 GO(googleMap);
 
                 imbt_prev.setOnClickListener(new View.OnClickListener(){
@@ -130,14 +135,22 @@ public class CurActivity extends AppCompatActivity {
                     }
                 });
             } /* on  MapReady */
+
         });
 
     }
 
     public static void drawGoogleMap(ArrayList<MyActivity> mList, GoogleMap gmap, int width, int height, boolean mode_append) {
+
         ActivityUtil.drawTrack(gmap, mList);
+        Log.e(TAG, "ActivityUtil.drawTrack();");
+
         ActivityUtil.drawMarkers(gmap, mList);
+        Log.e(TAG, "ActivityUtil.drawMarkers();");
+
         ActivityUtil.doBoundBuild(gmap, width, height);
+        Log.e(TAG, "ActivityUtil.doBoundBuild();");
+
     }
 
 }

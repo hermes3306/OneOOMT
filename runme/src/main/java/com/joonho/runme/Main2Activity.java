@@ -106,7 +106,7 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
     private long   startime_paces[] = new long[1000]; // upto 1000 start time
 
     private MyActivity start_loc;
-    private ArrayList<MyActivity> mList = new ArrayList<MyActivity>();
+    private ArrayList<MyActivity> mList = null;
 
     public void initSharedPreferences(ArrayList<MyActivity> _malist,
                            double _total_distance,
@@ -141,37 +141,38 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
         mEditor.commit();
     }
 
-    public void loadSharedPreferences() {
-        mPref = getSharedPreferences("setup", MODE_PRIVATE);
-        isStarted = mPref.getBoolean("isStarted", true);
-        total_distance = mPref.getFloat("total_distance", 0f);
-        start = start_time = mPref.getLong("start", new Date().getTime());
-        last_fname = mPref.getString("last_fname", null);
-        lastkm = mPref.getInt("lastkm", 0);
-        lastmin = mPref.getInt("lastmin", 0);
-        lasthour = mPref.getInt("lasthour", 0);
+    public void recalculate_total_distance() {
+        total_distance = 0;
+        for(int i=0;i<mList.size()-1;i++) {
+            CalDistance cd = new CalDistance(mList.get(i).latitude,
+                    mList.get(i).longitude,
+                    mList.get(i+1).latitude,
+                    mList.get(i+1).longitude);
+            total_distance += cd.getDistance();
+        }
+    }
 
-        if(mList == null) {
+    public void loadSharedPreferences() {
+
+        if(mList==null) {
+            mPref = getSharedPreferences("setup", MODE_PRIVATE);
+            isStarted = mPref.getBoolean("isStarted", true);
+            total_distance = mPref.getFloat("total_distance", 0f);
+            start = start_time = mPref.getLong("start", new Date().getTime());
+            last_fname = mPref.getString("last_fname", null);
+            lastkm = mPref.getInt("lastkm", 0);
+            lastmin = mPref.getInt("lastmin", 0);
+            lasthour = mPref.getInt("lasthour", 0);
+
             if(last_fname != null) {
                 File lastFile = new File(mediaStorageDir, last_fname);
                 mList = ActivityUtil.deserializeFile(lastFile);
                 Log.e(TAG, "mList null -- Activities reloaded..... ");
-//                String msg = String.format(last_fname + "로부터 " + mList.size() + " 경로(약"+lastkm+"km)가 복원되었습니다.");
-//                tv_message.setText(msg);
-            }
-        } else {
-            if(mList.size()==0) {
-                if(last_fname != null) {
-                    File lastFile = new File(mediaStorageDir, last_fname);
-                    mList = ActivityUtil.deserializeFile(lastFile);
-                    Log.e(TAG, "mList size 0 -- Activities reloaded..... ");
-                    if(mList==null) mList = new ArrayList<MyActivity>();
-//                    String msg = String.format(last_fname + "로부터 " + mList.size() + " 경로(약"+lastkm+"km)가 복윈되었습니다.");
-//                    tv_message.setText(msg);
-                }
             }
         }
 
+        /* Total Distance - Recalcuration */
+        recalculate_total_distance();
 
         Log.e(TAG,"isStarted:" + isStarted);
         Log.e(TAG, "total_distance:" + total_distance);
@@ -180,6 +181,7 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
         Log.e(TAG,"lastkm:" + lastkm);
         Log.e(TAG,"lastmin:" + lastmin);
         Log.e(TAG,"lasthour:" + lasthour);
+        Log.e(TAG, "#of Act:" + mList.size());
     }
 
     @Override
@@ -260,7 +262,6 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
     @Override
     protected void onStart() {
         Log.e(TAG,"------- onStart() called");
-
         loadSharedPreferences();
         super.onStart();
     }
@@ -423,13 +424,12 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
         alertDialog.setTitle("Activity Mode");
         alertDialog.setMessage("Choose Activity Mode:");
 
-        String n_text = null;
-        if(isStarted) n_text = "PAUSE"; else n_text ="CONTINUE";
-
-        alertDialog.setNeutralButton(n_text, new DialogInterface.OnClickListener() {
+        alertDialog.setNeutralButton("MAP", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                doTimerPause();
+                Intent intent = new Intent(Main2Activity.this, MapsActivity.class);
+                intent.putExtra("locations", mList);
+                startActivity(intent);
             }
         });
 
@@ -457,7 +457,6 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
                         0,
                         0
                 );
-
                 doMyTimeTask();
             }
         });
@@ -621,20 +620,23 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
                     long section_start_time =0; /* 10초 단위 시작 시간 */
                     double section_distance = 0;
                     if(mList.size() > 10) {
-                        int _t_pos = mList.size()-9;
+                        int _t_pos = mList.size()-11;
                         do {
                             section_start_time = Str2LocTime(mList.get(_t_pos).added_on);
                             _t_pos++;
                         } while( _t_pos < mList.size() && (end_time - section_start_time) > 1000*10);
 
-                        if(_t_pos >= mList.size()) section_start_time = end_time - 1000*10;
+                        if(_t_pos >= mList.size()) {
+                            section_start_time = end_time;
+                            section_distance = 0;
+                        }
                         else {
-                            for (int i = 0; i < mList.size() - 10; i++) {
+                            for (int i= _t_pos-1; i < mList.size()-1; i++) {
                                 CalDistance _cd_ = new CalDistance(
-                                        mList.get(mList.size() - 9).latitude,
-                                        mList.get(mList.size() - 9).longitude,
-                                        cur_loc.getLatitude(),
-                                        cur_loc.getLongitude()
+                                        mList.get(i).latitude,
+                                        mList.get(i).longitude,
+                                        mList.get(i+1).latitude,
+                                        mList.get(i+1).longitude
                                 );
                                 if (!Double.isNaN(_cd_.getDistance()))
                                     section_distance = section_distance + _cd_.getDistance();
@@ -647,20 +649,22 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
                             _t_pos++;
                         } while( _t_pos < mList.size() && (end_time - section_start_time) > 1000*10);
 
-                        if(_t_pos >= mList.size()) section_start_time = end_time - 1000*10;
+                        if(_t_pos >= mList.size()) {
+                            section_start_time = end_time;
+                            section_distance=0;
+                        }
                         else {
-                            for (int i = 0; i < mList.size(); i++) {
+                            for (int i = _t_pos-1; i < mList.size()-1; i++) {
                                 CalDistance _cd_ = new CalDistance(
-                                        mList.get(0).latitude,
-                                        mList.get(0).longitude,
-                                        cur_loc.getLatitude(),
-                                        cur_loc.getLongitude()
+                                        mList.get(i).latitude,
+                                        mList.get(i).longitude,
+                                        mList.get(i+1).latitude,
+                                        mList.get(i+1).longitude
                                 );
                                 if (!Double.isNaN(_cd_.getDistance()))
                                     section_distance = section_distance + _cd_.getDistance();
                             }
                         }
-
                     }
 
                     switch(mode2) {
@@ -693,7 +697,7 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
                     else if(current_speed > 10f) current_act_type = "DRIVING (+10km/h)";
                     else if(current_speed > 9f)  current_act_type = "RUNNING (+9km/h)";
                     else if(current_speed > 7f)  current_act_type = "RUNNING (+7km/h)";
-                    else if(current_speed > 5f)  current_act_type = "RUNNIUN (+5km/h)";
+                    else if(current_speed > 5f)  current_act_type = "RUNNING (+5km/h)";
                     else if(current_speed > 4f)  current_act_type = "WALKING (+4km/h)";
                     else if(current_speed > 3f)  current_act_type = "WALKING (+3km/h)";
                     else if(current_speed > 2f)  current_act_type = "HIKING. (+2km/h)";

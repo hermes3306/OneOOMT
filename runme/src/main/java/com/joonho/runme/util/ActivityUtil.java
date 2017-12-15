@@ -579,7 +579,6 @@ public class ActivityUtil {
             berr = true;
             Log.e(TAG,"ERR] BoundBuild:" + e.toString());
         }
-
     }
 
 

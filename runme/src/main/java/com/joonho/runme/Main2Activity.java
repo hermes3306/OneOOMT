@@ -50,6 +50,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -67,6 +68,7 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
     private long start_time, end_time;
     private TextView tv_time_elapsed = null;
     private TextView tv_total_distance = null;
+    private TextView tv_act_type = null;
     private TextView tv_avg_pace = null;
     private TextView tv_cur_temp = null;
     private TextView tv_address = null;
@@ -89,8 +91,8 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
     private  int lasthour=0;
     private  double maxAltitude=0;
 
-    private  boolean mode1 =  true;
-    private  boolean mode2 =  true;
+    private  int mode1 =  0; /* 0: elapsed, 1: start time, 2: end time */
+    private  int mode2 =  0; /* 0: Diastance, 1: Speed Total, 2: Speed Current */
     private  boolean mode3 =  false;
     private  boolean mode4 =  true;
     private  boolean mode_noti = false;
@@ -219,6 +221,7 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
             initialize_Location_Manager();
             tv_time_elapsed = (TextView) findViewById(R.id.tv_time_elapsed);
             tv_total_distance = (TextView) findViewById(R.id.tv_total_distance);
+            tv_act_type = (TextView) findViewById(R.id.tv_act_type);
             tv_avg_pace = (TextView) findViewById(R.id.tv_avg_pace02);
             tv_cur_temp = (TextView) findViewById(R.id.tv_cur_temp);
             tv_address = (TextView) findViewById(R.id.tv_address);
@@ -301,8 +304,8 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
                 double lat = location.getLatitude();
                 double lng = location.getLongitude();
                 String provider = location.getProvider();
-                String msg = String.format("위치가 %s로부터 추가되어 경로의수는 %d입니다", provider, mList.size());
-                tv_message.setText(msg);
+//                String msg = String.format("위치가 %s로부터 추가되어 경로의수는 %d입니다", provider, mList.size());
+//                tv_message.setText(msg);
             }
 
             public void onStatusChanged(String provider, int status, Bundle extras) {
@@ -402,8 +405,8 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
                 String lla = String.format("위도:%3.3f, 경도:%3.3f, 고도:%3.1f", sl.getLatitude(), sl.getLongitude(), sl.getAltitude());
                 tv_lat_lng_altitude.setText(lla);
                 String provider = sl.getProvider();
-                String msg = String.format("위치가 %s로부터 추가되어 경로의수는 %d입니다", provider, mList.size());
-                tv_message.setText(msg);
+                //String msg = String.format("위치가 %s로부터 추가되어 경로의수는 %d입니다", provider, mList.size());
+                //tv_message.setText(msg);
             }
         }
     }
@@ -459,16 +462,28 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
     public void onClick(View view) {
         switch(view.getId()) {
             case R.id.tv_time_elapsed:
-                mode1 = ! mode1;
+                mode1 = mode1+1;
+                if(mode1==3) mode1=0;
                 break;
-
             case R.id.tv_total_distance:
-                mode2 = ! mode2;
+                mode2 = mode2+1;
+                if(mode2==3) mode2 = 0;
                 break;
-
             case R.id.tv_lat_lng_altitude:
                 mode3 = !mode3;
                 break;
+            case R.id.tv_cur_temp:
+                getMyWeather();
+                break;
+            case R.id.tv_avg_pace02:
+
+                break;
+            case R.id.tv_act_type:
+                Intent intent = new Intent(Main2Activity.this, CurActivity.class);
+                intent.putExtra("locations",mList);
+                startActivity(intent);
+                break;
+
             case R.id.tv_message:
             case R.id.imb_stop_timer:
                 alertDialogChoice();
@@ -476,9 +491,9 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
         }
     }
 
-    public double getSpeed_Km_per_h() {
-        double dist_kilo = total_distance / 1000f;
-        long elapsed_sec = (new Date().getTime() - start_time) / 1000L;
+    public double getSpeed_Km_per_h(double distancem, long startingtime) {
+        double dist_kilo = distancem / 1000f;
+        long elapsed_sec = (new Date().getTime() - startingtime) / 1000L;
         double km_per_hour = (double)(dist_kilo / ((elapsed_sec / 60f) / 60f));
         return km_per_hour;
     }
@@ -494,17 +509,29 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
                     end_time = new Date().getTime();
                     long elapsed_time = end_time - start_time;
 
-//                Log.e(TAG, "start time:" + start_time);
-//                Log.e(TAG, "elapsed time:" + elapsed_time);
-
                     double cur_dist = 0;
+                    double cur_dist_in_10_sec = 0;
+
                     long cur_elapsed_time = 0;
+                    long cur_elapsed_time_in_10_sec = 0;
 
                     String duration = StringUtil.Duration(new Date(start_time), new Date(end_time));
-                    String t_str = StringUtil.DateToString1(new Date(start_time), "HH:mm:ss") ;
-                    if(mode1) tv_time_elapsed.setText(duration);
-                    else tv_time_elapsed.setText("From:" + t_str);
 
+                    if(mode1==0) tv_time_elapsed.setText(duration);
+                    else if(mode1==1) {
+                        String t_str = StringUtil.DateToString1(new Date(start_time), "HH:mm:ss") ;
+                        tv_time_elapsed.setText(t_str + "~");
+                    } else {
+                        String t_str = StringUtil.DateToString1(new Date(end_time), "HH:mm:ss") ;
+                        tv_time_elapsed.setText("~" + t_str);
+                    }
+
+                    /* get Weather every 10 minutes */
+                    String[] t_str_array = {"00:00", "10:00", "20:00", "30:00", "40:00", "50:00"};
+                    if(Arrays.asList(t_str_array).contains(StringUtil.DateToString1(new Date(end_time), "mm:ss"))) {
+                        getMyWeather();
+                        Log.e(TAG, "getMyWeather() called ... ");
+                    }
                     if(cur_myweather != null) {
                         if(cur_myweather.getTemp() != 0.0f) {
                             tv_cur_temp.setText(String.format("%.1f", cur_myweather.getTemp()));
@@ -512,114 +539,129 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
                     }
 
                     Location cur_loc = getLocation();
-                    if (cur_loc == null) {
+                    if (cur_loc == null) return;
 
-                    } else {
-                        if (mList.size() == 0) {
-                            MyActivity ma = new MyActivity(cur_loc.getLatitude(), cur_loc.getLongitude(), cur_loc.getAltitude(), LocTimeStr(cur_loc));
-                            mList.add(ma);
+                    /* real address */
+                    String cur_addr = getCurAddress(Main2Activity.this, cur_loc);
+                    tv_address.setText(cur_addr);
 
-                            String cur_addr = getCurAddress(Main2Activity.this, cur_loc);
-                            tv_address.setText(cur_addr);
+                    /* lat, lon, alt*/
+                    if(maxAltitude < cur_loc.getAltitude()) maxAltitude = cur_loc.getAltitude();
+                    String lla = String.format("%dth: LAT %3.1f LON %3.1f ALT %3.1f", mList.size(), cur_loc.getLatitude(), cur_loc.getLongitude(), cur_loc.getAltitude());
+                    if(mode3) tv_lat_lng_altitude.setText(lla);
+                    else tv_lat_lng_altitude.setText(String.format("%dth: ALT %3.1f/%3.1fM",mList.size(),cur_loc.getAltitude(),maxAltitude));
 
-                            total_distance = 0;
+                    /* distance calcuration */
+                    if (mList == null) {
+                        mList = new ArrayList<MyActivity>();
+                        mList.add(new MyActivity(cur_loc.getLatitude(), cur_loc.getLongitude(), cur_loc.getAltitude(),LocTimeStr(cur_loc)));
+                        total_distance = 0;
+                        return;
+                    }
+                    if(mList.size()==0) {
+                        mList.add(new MyActivity(cur_loc.getLatitude(), cur_loc.getLongitude(), cur_loc.getAltitude(),LocTimeStr(cur_loc)));
+                        total_distance = 0;
+                        return;
+                    }
 
-                            if(maxAltitude < cur_loc.getAltitude()) maxAltitude = cur_loc.getAltitude();
-                            String lla = String.format("LAT %3.1f LON %3.1f ALT %3.1f", cur_loc.getLatitude(), cur_loc.getLongitude(), cur_loc.getAltitude());
-                            if(mode3) tv_lat_lng_altitude.setText(lla);
-                            else tv_lat_lng_altitude.setText("ALT "+ String.format("%3.1f",cur_loc.getAltitude())+"/"+String.format("%3.1f",maxAltitude)+"M");
+                    /* calculate from last_location to cur_location */
+                    MyActivity last_loc = mList.get(mList.size()-1);
+                    CalDistance cd = new CalDistance(last_loc.latitude, last_loc.longitude, cur_loc.getLatitude(), cur_loc.getLongitude());
+                    if (Double.isNaN(cd.getDistance())) return;
 
+                    /* display distance or speed (current or total */
+                    cur_dist = cd.getDistance();
+                    total_distance = total_distance + cur_dist;
+                    if(cur_dist > 0.001f) {
+                        mList.add(new MyActivity(cur_loc.getLatitude(), cur_loc.getLongitude(), cur_loc.getAltitude(), LocTimeStr(cur_loc)));
+                    }
 
-                        } else {
-                            MyActivity last_loc = mList.get(mList.size() - 1);
-                            CalDistance cd = new CalDistance(last_loc.latitude, last_loc.longitude, cur_loc.getLatitude(), cur_loc.getLongitude());
-                            if (!Double.isNaN(cd.getDistance())) {
-                                cur_dist = cd.getDistance();
-                                cur_elapsed_time = cur_loc.getTime() - Str2LocTime(last_loc.added_on);
+                    /* 10초단위로 시간 측정 및 거리 측정 */
+                    long section_start_time =0; /* 10초 단위 시작 시간 */
+                    double section_distance = 0;
+                    if(mList.size() > 10) {
+                        int _t_pos = mList.size()-9;
+                        do {
+                            section_start_time = Str2LocTime(mList.get(_t_pos).added_on);
+                            _t_pos++;
+                        } while( _t_pos < mList.size() && (end_time - section_start_time) > 1000*10);
 
-                                if (cur_dist < 1f) {
-                                    // skip location information of 1m
-//                                    String provider = cur_loc.getProvider();
-//                                    String msg = String.format("%s로부터 추가된 위치는 거리가 %3.1fM로 제외...", provider, cur_dist);
-//                                    tv_message.setText(msg);
-                                } else {
-                                    total_distance = total_distance + cur_dist;
-                                    MyActivity ma = new MyActivity(cur_loc.getLatitude(), cur_loc.getLongitude(), cur_loc.getAltitude(), LocTimeStr(cur_loc));
-                                    mList.add(ma);
-
-                                    String cur_addr = getCurAddress(Main2Activity.this, cur_loc);
-                                    tv_address.setText(cur_addr);
-
-                                    if(maxAltitude < cur_loc.getAltitude()) maxAltitude = cur_loc.getAltitude();
-                                    String lla = String.format("LAT %3.1f LON %3.1f ALT %3.1f", cur_loc.getLatitude(), cur_loc.getLongitude(), cur_loc.getAltitude());
-                                    if(mode3) tv_lat_lng_altitude.setText(lla);
-                                    else tv_lat_lng_altitude.setText("ALT "+ String.format("%3.1f",cur_loc.getAltitude())+"/"+String.format("%3.1f",maxAltitude)+"M");
-
-                                    String provider = cur_loc.getProvider();
-                                    String msg = String.format("위치가 %s로부터 추가되어 경로의수는 %d입니다", provider, mList.size());
-                                    tv_message.setText(msg);
-                                }
+                        if(_t_pos >= mList.size()) section_start_time = end_time - 1000*10;
+                        else {
+                            for (int i = 0; i < mList.size() - 10; i++) {
+                                CalDistance _cd_ = new CalDistance(
+                                        mList.get(mList.size() - 9).latitude,
+                                        mList.get(mList.size() - 9).longitude,
+                                        cur_loc.getLatitude(),
+                                        cur_loc.getLongitude()
+                                );
+                                if (!Double.isNaN(_cd_.getDistance()))
+                                    section_distance = section_distance + _cd_.getDistance();
                             }
                         }
+                    }else {
+                        int _t_pos = 0;
+                        do {
+                            section_start_time = Str2LocTime(mList.get(_t_pos).added_on);
+                            _t_pos++;
+                        } while( _t_pos < mList.size() && (end_time - section_start_time) > 1000*10);
 
-                        double dist_kilo = total_distance / 1000f;
-
-                        if ((int) dist_kilo > lastkm) {
-                            last_fname = ActivityUtil.serializeWithCurrentTime(mList);
-                            lastkm++;
-                            if(mode_noti) {
-                                doHttpFileUpload3(Main2Activity.this, last_fname);
-                                String alertmsg = "" + lastkm + " km를 활동하였습니다. \n " + last_fname + " 업데이트되었습니다.";
-                                MyNotifier.go(Main2Activity.this, "100대명산거리알람", alertmsg);
+                        if(_t_pos >= mList.size()) section_start_time = end_time - 1000*10;
+                        else {
+                            for (int i = 0; i < mList.size(); i++) {
+                                CalDistance _cd_ = new CalDistance(
+                                        mList.get(0).latitude,
+                                        mList.get(0).longitude,
+                                        cur_loc.getLatitude(),
+                                        cur_loc.getLongitude()
+                                );
+                                if (!Double.isNaN(_cd_.getDistance()))
+                                    section_distance = section_distance + _cd_.getDistance();
                             }
                         }
-
-                        String distance_str = String.format("%.2f", dist_kilo);
-                        double km_per_hour = getSpeed_Km_per_h();
-                        if(mode2) tv_total_distance.setText(distance_str);
-                        else  tv_total_distance.setText(String.format("%.0fkm/h", km_per_hour));
-
-                        long elapsed_sec = (elapsed_time / 1000L);
-                        double min_per_km = (double)((elapsed_sec / 60f) / dist_kilo);
-
-                        if (dist_kilo != 0) tv_avg_pace.setText(String.format("%.2f",  min_per_km));
-
-                        if ((int) (elapsed_sec / 3600) > lasthour) { //1시간 업데이트
-                            lasthour++;
-                            last_fname = ActivityUtil.serializeWithCurrentTime(mList);
-                            if(mode_noti) {
-                                doHttpFileUpload3(Main2Activity.this, last_fname);
-                                String alertmsg = "" + lasthour + " 시간을 활동하였습니다.\n " + last_fname + " 업로드하였습니다.";
-                                MyNotifier.go(Main2Activity.this, "100대명산시간알람", alertmsg);
-                            }
-                        } else if ((int) (elapsed_sec / 600) > lastmin) { //10분 알람
-                            lastmin = lastmin + 10;
-
-                            // weather check
-                            getMyWeather();
-
-                            if(cur_myweather != null) {
-                                if(cur_myweather.getTemp() != 0.0f) {
-                                    tv_cur_temp.setText(String.format("%.1f", cur_myweather.getTemp()));
-                                }
-                            }
-
-                            last_fname = ActivityUtil.serializeWithCurrentTime(mList);
-                            if(mode_noti) {
-                                doHttpFileUpload3(Main2Activity.this, last_fname);
-                                String alertmsg = "" + lastmin + " 분을 활동하였습니다. " + last_fname + " 업데이트하였습니다.";
-                                MyNotifier.go(Main2Activity.this, "100대명산10분알람", alertmsg);
-                            }
-                        }
-
-                        double cur_dist_kilo = cur_dist / 1000f;
-                        double cur_elapsed_time_sec = (double) (cur_elapsed_time / 1000L);
-                        double cur_min_per_km = (double)((cur_elapsed_time_sec /60f) / cur_dist_kilo);
-
-                        //if (cur_dist_kilo != 0) tv_cur_pace.setText(String.format("%.2f", cur_min_per_km));
 
                     }
-                }
+
+                    switch(mode2) {
+                        case 0: tv_total_distance.setText(String.format("%.2f",total_distance/1000f));
+                                break;
+                        case 1: tv_total_distance.setText(String.format("%.1fkm/h", getSpeed_Km_per_h(total_distance, start_time )));
+                                break;
+                        case 2: tv_total_distance.setText(String.format("%.1fkm/h", getSpeed_Km_per_h(section_distance, section_start_time)));
+                    }
+
+                    /* activity type setting based on current speed */
+                    double current_speed = getSpeed_Km_per_h(section_distance, section_start_time);
+                    String current_act_type = null;
+
+                    if(current_speed > 500f )  current_act_type = "FLYING";
+                    else if(current_speed > 80f) current_act_type = "DRIVING (+80km/h)";
+                    else if(current_speed > 50f) current_act_type = "DRIVING (+50km/h)";
+                    else if(current_speed > 20f) current_act_type = "DRIVING (+20km/h)";
+                    else if(current_speed > 10f) current_act_type = "DRIVING (+10km/h)";
+                    else if(current_speed > 9f)  current_act_type = "RUNNING (+9km/h)";
+                    else if(current_speed > 7f)  current_act_type = "RUNNING (+7km/h)";
+                    else if(current_speed > 5f)  current_act_type = "RUNNIUN (+5km/h)";
+                    else if(current_speed > 4f)  current_act_type = "WALKING (+4km/h)";
+                    else if(current_speed > 3f)  current_act_type = "WALKING (+3km/h)";
+                    else if(current_speed > 2f)  current_act_type = "HIKING. (+2km/h)";
+                    else if(current_speed > 1f)  current_act_type = "HIKING. (+1km/h)";
+                    else if(current_speed > 0.5f)  current_act_type = "HIKING. (+0.5km/h)";
+                    else if(current_speed > 0.1f)  current_act_type = "100-500m/h";
+                    else if(current_speed > 0.05f) current_act_type = "+50m/h";
+                    else if(current_speed > 0.01f) current_act_type = "+10m/h";
+                    else if(current_speed > 0.001f) current_act_type = "REST...2";
+                    else if(current_speed > 0.000f) current_act_type = "REST...1";
+                    else current_act_type = "SLEEP";
+                    tv_act_type.setText(current_act_type);
+
+                    /* save activities every 10 minutes */
+                    if(StringUtil.DateToString1(new Date(end_time),"mm:ss").equals("00:00")) {
+                        last_fname = ActivityUtil.serializeWithCurrentTime(mList);
+                        doHttpFileUpload3(Main2Activity.this, last_fname);
+                    }
+
+                } /* end of Run() */
             });
         }
     }
@@ -1089,7 +1131,7 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
                 request.flush();
                 request.close();
 
-                Log.e(TAG,"end of write to web server");
+                //Log.e(TAG,"end of write to web server");
 
                 //==============받기===============
                 InputStream is = httpUrlConnection.getInputStream();
@@ -1097,7 +1139,7 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
                 StringBuffer sbResult = new StringBuffer();
                 String str = "";
                 while ((str = br.readLine()) != null) {
-                    Log.e(TAG, "RESPONSE:" + str);
+                    //Log.e(TAG, "RESPONSE:" + str);
                     sbResult.append(str);
                 }
             }

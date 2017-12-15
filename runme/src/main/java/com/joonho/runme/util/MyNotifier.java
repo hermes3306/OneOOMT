@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.v4.app.NotificationCompat;
 
+import com.joonho.runme.Main2Activity;
 import com.joonho.runme.R;
 
 import static android.content.Context.NOTIFICATION_SERVICE;
@@ -16,7 +17,9 @@ import static android.content.Context.NOTIFICATION_SERVICE;
  */
 
 public class MyNotifier {
+
     public static void go(Context ctx, String title, String cont) {
+
         Bitmap mLargeIconForNoti = BitmapFactory.decodeResource(ctx.getResources(), R.drawable.arrow_left128);
 
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(ctx)

@@ -623,7 +623,7 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
 
 
     private void doHttpFileUploadAll(final Context context, String url) {
-        if(url==null) url = "http://180.69.217.73:9090/OneOOMT/upload";
+        if(url==null) url = "http://180.69.217.73:8080/OneOOMT/Upload";
         final String _serverUrl = url;
 
         // Pop Up a Dialog

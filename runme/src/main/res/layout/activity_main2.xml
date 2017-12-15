@@ -137,6 +137,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
+                android:onClick="onClick"
                 android:text="N/A"
                 android:textColor="@android:color/darker_gray"
                 android:textSize="30sp"
@@ -170,6 +171,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
+                android:onClick="onClick"
                 android:text="N/A"
                 android:textColor="@android:color/darker_gray"
                 android:textSize="30sp"
@@ -208,13 +210,15 @@
             tools:layout_editor_absoluteY="255dp" />
 
         <TextView
-            android:id="@+id/tv_oo"
+            android:id="@+id/tv_act_type"
             android:layout_width="match_parent"
-            android:textSize="17sp"
+            android:layout_height="50sp"
+            android:background="@android:color/transparent"
             android:gravity="center"
-            android:text=""
-            android:textColor="@android:color/holo_green_dark"
-            android:layout_height="50sp" />
+            android:onClick="onClick"
+            android:text="SLEEPING"
+            android:textColor="@android:color/holo_blue_bright"
+            android:textSize="30sp" />
 
         <ImageButton
             android:id="@+id/imb_stop_timer"

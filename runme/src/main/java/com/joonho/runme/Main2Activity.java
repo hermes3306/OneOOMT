@@ -100,7 +100,7 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
     private  boolean mode3 =  false;
     private  int mode4 =  0;
     private  boolean mode_noti = false;
-
+    private boolean mode_low_battery = false;
 
     private double paces[] = new double[1000]; //upto 1000 km
     private long   startime_paces[] = new long[1000]; // upto 1000 start time
@@ -172,7 +172,7 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
         }
 
         /* Total Distance - Recalcuration */
-        recalculate_total_distance();
+        if(mList != null) recalculate_total_distance();
 
         Log.e(TAG,"isStarted:" + isStarted);
         Log.e(TAG, "total_distance:" + total_distance);
@@ -181,7 +181,7 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
         Log.e(TAG,"lastkm:" + lastkm);
         Log.e(TAG,"lastmin:" + lastmin);
         Log.e(TAG,"lasthour:" + lasthour);
-        Log.e(TAG, "#of Act:" + mList.size());
+        Log.e(TAG, "#of Act:" + (mList==null? 0: mList.size()));
     }
 
     @Override
@@ -262,8 +262,8 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
     @Override
     protected void onStart() {
         Log.e(TAG,"------- onStart() called");
-        loadSharedPreferences();
         super.onStart();
+        loadSharedPreferences();
     }
 
     @Override
@@ -387,9 +387,18 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
     }
 
     public void doMyTimeTask() {
+        if(mTask != null) mTask.cancel();
         mTask =new Main2Activity.MyTimerTask();
         mTimer = new Timer();
-        mTimer.schedule(mTask, 1000, 1000);  // 10초
+        int period = 10000; // 1초
+
+        if(mode_low_battery) period=10000; //10초
+        else period = 1000;
+
+        mTimer.schedule(mTask, 1000, period);
+
+        Log.e(TAG, "Low Battery Mode = " + mode_low_battery);
+        Log.e(TAG, "Time Period = " + period);
 
         int msize = 0;
         if(mList != null) msize = mList.size();
@@ -427,8 +436,15 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
         alertDialog.setNeutralButton("MAP", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                Intent intent = new Intent(Main2Activity.this, MapsActivity.class);
-                intent.putExtra("locations", mList);
+//                String fname = ActivityUtil.serializeWithCurrentTime(mList);
+//                Intent intent = new Intent(Main2Activity.this, ActFileActivity.class);
+//                intent.putExtra("file", new File(mediaStorageDir,fname).getAbsolutePath());
+//                intent.putExtra("pos", 0);
+//                startActivity(intent);
+
+                String fname = ActivityUtil.serializeWithCurrentTime(mList);
+                Intent intent = new Intent(Main2Activity.this, CurActivity.class);
+                intent.putExtra("file", new File(mediaStorageDir,fname).getAbsolutePath());
                 startActivity(intent);
             }
         });
@@ -796,6 +812,7 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
             case R.id.files_d:
                 ActivityUtil._default_ext = ".ser";
                 File list[] = ActivityUtil.getFiles();
+
                 if(list == null) {
                     Toast.makeText(getApplicationContext(), "ERR: No Activities to show !", Toast.LENGTH_LONG).show();
                     return false;
@@ -882,6 +899,12 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
                 mode_noti = !mode_noti;
                 if(mode_noti) MyNotifier.go(Main2Activity.this, "100대명산알람설정", "알람설정이 켜졌습니다.");
                 else MyNotifier.go(Main2Activity.this, "100대명산알람설정", "알람설정이 껴졌습니다.");
+                return true;
+
+            case R.id.lowbattery:
+                mode_low_battery = ! mode_low_battery;
+                if(mode_low_battery) MyNotifier.go(Main2Activity.this, "100대명산알람설정", "Low Battery Mode..");
+                else MyNotifier.go(Main2Activity.this, "100대명산알람설정", "Low Battery Mode Off...");
                 return true;
 
             case R.id.weather:

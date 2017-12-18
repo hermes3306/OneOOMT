@@ -30,6 +30,10 @@
     <item
         android:id="@+id/notify"
         android:title="Toggle Notification..." />
+
+    <item
+        android:id="@+id/lowbattery"
+        android:title="Low Battery mode" />
     <item
         android:id="@+id/weather"
         android:title="weather" />

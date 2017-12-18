@@ -45,6 +45,7 @@ import java.io.ObjectOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -289,7 +290,8 @@ public class ActivityUtil {
 
         File[] flist  = mediaStorageDir.listFiles(fnf);
         if (flist == null) return null;
-        Arrays.sort(flist);
+
+        Arrays.sort(flist, Collections.reverseOrder());
         return flist;
     }
 
@@ -302,7 +304,8 @@ public class ActivityUtil {
         };
 
         File[] flist  = mediaStorageDir.listFiles(fnf);
-        Arrays.sort(flist);
+        Arrays.sort(flist, Collections.<File>reverseOrder());
+
         return flist;
     }
 
@@ -489,6 +492,7 @@ public class ActivityUtil {
 
 
     public static void drawTrack(GoogleMap gmap, ArrayList<MyActivity> list) {
+        if(list == null) return;
         ArrayList<LatLng> l = new ArrayList<>();
         for(int i=0; i<list.size();i++) {
             l.add(new LatLng(list.get(i).latitude, list.get(i).longitude));

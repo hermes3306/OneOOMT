@@ -1,15 +1,20 @@
 package com.joonho.runme;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -34,6 +39,7 @@ import com.joonho.runme.util.ActivityUtil;
 import com.joonho.runme.util.CalDistance;
 import com.joonho.runme.util.MapUtil;
 import com.joonho.runme.util.MyActivity;
+import com.joonho.runme.util.MyNotifier;
 import com.joonho.runme.util.StringUtil;
 
 import java.io.BufferedInputStream;
@@ -52,6 +58,7 @@ public class CurActivity extends AppCompatActivity {
     public static String add2 = null;
     public static boolean tog_add = false;
     static MapView mMapView = null;
+    public static final int REQUEST_ACTIVITY_FILE_LIST = 0x0001;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -448,5 +455,193 @@ public class CurActivity extends AppCompatActivity {
         return list;
 
     }
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        switch(id) {
+            case R.id.web:
+                Intent wintent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://180.69.217.73:8080/OneOOMT"));
+                startActivity(wintent);
+                return true;
+
+            case R.id.webupload:
+//                last_fname = ActivityUtil.serializeWithCurrentTime(mList);
+//                doHttpFileUpload3(Main2Activity.this, last_fname);
+                return true;
+
+            case R.id.uploadall2:
+//                alertUploadServerChoice();
+                return true;
+
+            case R.id.uploadall:
+//                doHttpFileUploadAll(Main2Activity.this, null);
+                return true;
+
+            case R.id.map:
+////                Intent intent = new Intent(Main2Activity.this, CurActivity.class);
+////                intent.putExtra("locations",mList);
+//
+//                startActivity(intent);
+                return true;
+
+            case R.id.files_d:
+//                ActivityUtil._default_ext = ".ser";
+//                File list[] = ActivityUtil.getFiles();
+//
+//                if(list == null) {
+//                    Toast.makeText(getApplicationContext(), "ERR: No Activities to show !", Toast.LENGTH_LONG).show();
+//                    return false;
+//                }
+//
+//                int msize = list.length;
+//
+//                final CharSequence items[] = new CharSequence[msize];
+//                final String filepath[] = new String[msize];
+//
+//                for(int i=0;i<msize;i++) {
+//                    items[i] = list[i].getName();
+//                    filepath[i] = list[i].getAbsolutePath();
+//                }
+//                //final CharSequence items[] = {" A "," B "};
+//
+//                AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+//                //alertDialog.setIcon(R.drawable.window);
+//                alertDialog.setTitle("Select An Activity");
+//                alertDialog.setItems(items, new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialogInterface, int index) {
+//                        File afile = new File(filepath[index]);
+//                        ActivityUtil.showActivityAlertDialog(Main2Activity.this, afile, index);
+//                    }
+//                });
+//                alertDialog.setNegativeButton("Back",null);
+//                AlertDialog alert = alertDialog.create();
+//                alert.show();
+                return true;
+
+            case R.id.files_a:
+
+                ActivityUtil._default_ext = ".ser";
+                File list2[] = ActivityUtil.getFiles();
+                if(list2 == null) {
+                    Toast.makeText(getApplicationContext(), "ERR: No Activities to show !", Toast.LENGTH_LONG).show();
+                    return false;
+                }
+
+                int msize2 = list2.length;
+
+                final CharSequence items2[] = new CharSequence[msize2];
+                final String filepath2[] = new String[msize2];
+
+                for(int i=0;i<msize2;i++) {
+                    items2[i] = list2[i].getName();
+                    filepath2[i] = list2[i].getAbsolutePath();
+                }
+                //final CharSequence items[] = {" A "," B "};
+
+                AlertDialog.Builder alertDialog2 = new AlertDialog.Builder(this);
+                //alertDialog.setIcon(R.drawable.window);
+                alertDialog2.setTitle("Select An Activity");
+                alertDialog2.setItems(items2, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int index) {
+                        File afile = new File(filepath2[index]);
+                        Intent intent = new Intent(CurActivity.this, ActFileActivity.class);
+                        intent.putExtra("file", afile.getAbsolutePath());
+                        intent.putExtra("pos", index);
+                        startActivityForResult(intent, REQUEST_ACTIVITY_FILE_LIST);
+                    }
+                });
+                alertDialog2.setNegativeButton("Back",null);
+                AlertDialog alert2 = alertDialog2.create();
+                alert2.show();
+                return true;
+
+            case R.id.upgrade:
+                ActivityUtil._default_ext = ".ser";
+                File uplist[] = ActivityUtil.getFiles();
+                if(uplist == null) {
+                    Toast.makeText(getApplicationContext(), "ERR: No Activities to show !", Toast.LENGTH_LONG).show();
+                    return false;
+                }
+
+                int upsize = uplist.length;
+                for(int i=0;i<upsize;i++) ActivityUtil.upgrade(uplist[i]);
+                return true;
+
+            case R.id.notify:
+//                mode_noti = !mode_noti;
+//                if(mode_noti) MyNotifier.go(Main2Activity.this, "100대명산알람설정", "알람설정이 켜졌습니다.");
+//                else MyNotifier.go(Main2Activity.this, "100대명산알람설정", "알람설정이 껴졌습니다.");
+                return true;
+
+            case R.id.lowbattery:
+//                mode_low_battery = ! mode_low_battery;
+//                if(mode_low_battery) MyNotifier.go(Main2Activity.this, "100대명산알람설정", "Low Battery Mode..");
+//                else MyNotifier.go(Main2Activity.this, "100대명산알람설정", "Low Battery Mode Off...");
+//                return true;
+
+            case R.id.weather:
+//                if(mList.size()>0) {
+//                    getMyWeather();
+//                    while(cur_myweather == null) {}
+//                    Toast.makeText(Main2Activity.this, cur_myweather.toString(), Toast.LENGTH_LONG).show();
+//                }
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+
+    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        super.onActivityResult(requestCode,resultCode,intent);
+        switch(requestCode) {
+            case REQUEST_ACTIVITY_FILE_LIST:
+                if(intent == null) return;
+                String tmpFname = (String)intent.getStringExtra("fname");
+                if(tmpFname==null) return;
+
+                ArrayList<MyActivity> tmpActList =(ArrayList<MyActivity>)intent.getSerializableExtra("locations");
+                ActivityStat as = ActivityUtil.getActivityStat(tmpActList);
+
+                long endTime, startTime;
+                startTime = as.start.getTime();
+                endTime = new Date().getTime();
+                long duration = endTime - startTime;
+                long dur_sec = duration / 1000;
+                long duration_r;
+                int dur_hour_Int = (int)(dur_sec/3600);
+                duration_r = dur_sec - (long)(dur_hour_Int) * 60 * 60;
+                int dur_min_Int = (int)(duration_r / 60);
+                duration_r = duration_r  - (long)(dur_min_Int) * 60;
+                int dur_sec_Int = (int)(duration_r);
+
+//                initSharedPreferences(tmpActList,
+//                        as.distanceM,
+//                        true,
+//                        as.start.getTime(),
+//                        tmpFname,
+//                        (int)as.distanceKm,
+//                        dur_min_Int,
+//                        dur_hour_Int
+//                );
+//                Toast.makeText(Main2Activity.this,"Activity Reloaded ..... ", Toast.LENGTH_LONG).show();
+        }
+    }
+
 
 }

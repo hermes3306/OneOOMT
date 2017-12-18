@@ -26,8 +26,7 @@
         <activity android:name=".ActFileActivity" />
         <activity
             android:name=".CurActivity"
-            android:label="@string/title_activity_cur"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".Main2Activity"
             android:screenOrientation="portrait">

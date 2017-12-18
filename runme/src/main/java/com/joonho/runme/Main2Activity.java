@@ -587,6 +587,10 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
                     if(Arrays.asList(t_str_array).contains(StringUtil.DateToString1(new Date(end_time), "mm:ss"))) {
                         getMyWeather();
                         Log.e(TAG, "getMyWeather() called ... ");
+
+                        last_fname = ActivityUtil.serializeWithCurrentTime(mList);
+                        //doHttpFileUpload3(Main2Activity.this, last_fname);
+                        Log.e(TAG, "File Saved... ");
                     }
                     if(cur_myweather != null) {
                         if(cur_myweather.getTemp() != 0.0f) {
@@ -726,13 +730,6 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
                     else if(current_speed > 0.000f) current_act_type = "REST...1";
                     else current_act_type = "SLEEP";
                     tv_act_type.setText(current_act_type);
-
-                    /* save activities every 10 minutes */
-                    if(StringUtil.DateToString1(new Date(end_time),"mm:ss").equals("00:00")) {
-                        last_fname = ActivityUtil.serializeWithCurrentTime(mList);
-                        doHttpFileUpload3(Main2Activity.this, last_fname);
-                    }
-
                 } /* end of Run() */
             });
         }

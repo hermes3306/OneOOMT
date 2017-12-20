@@ -1,5 +1,6 @@
 package com.joonho.runme;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -60,12 +61,16 @@ public class CurActivity extends AppCompatActivity {
 
     public static String add1 = null;
     public static String add2 = null;
+
+    public static int marker_pos = 0;
+
     public static boolean tog_add = false;
     static MapView mMapView = null;
     public static final int REQUEST_ACTIVITY_FILE_LIST = 0x0001;
 
     public static boolean nomarker = true;
     public static boolean notrack = false;
+    public static boolean satellite = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,11 +106,107 @@ public class CurActivity extends AppCompatActivity {
 
                 imbt_prev.setOnClickListener(new View.OnClickListener(){
                     public void onClick (View view) {
+                        if(marker_pos == 0) {
+                            Toast.makeText(CurActivity.this, "Start Postion!!", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
+                        Date st_date = ActivityUtil.getStartTimeDate(mActivityList);
+                        Date ed_date = ActivityUtil.getEndTimeDate(mActivityList);
+
+                        if(st_date==null || ed_date==null) return;
+                        long st_date_l = st_date.getTime();
+                        long ed_date_l = ed_date.getTime();
+                        long duration = ed_date_l - st_date_l;
+
+                        int dis_type = 0;  /* 0: 1시간 이상 1: 10분이상 2: 10분 이하 */
+
+                        if(duration > 5 * 60 * 60 * 1000) { // 5시간 이상
+                            dis_type = 0;
+                        } else if(duration > 1 * 60 * 60 * 1000) {  // 1시간 이상
+                            dis_type =1;
+                        }else if(duration > 1 * 10 * 60 * 1000) { // 10분 이상
+                            dis_type = 2;
+                        }else {
+                            dis_type=3;
+                        }
+
+                        int gap = 10;
+                        if(dis_type==0) gap = 100;
+                        if(dis_type==1) gap = 50;
+                        if(dis_type==2) gap =10;
+                        if(dis_type==3) gap =1;
+
+                        marker_pos = marker_pos - gap;
+                        if (marker_pos < 0)
+                            marker_pos = 0;
+                        LatLng nextpos = new LatLng(mActivityList.get(marker_pos).latitude,
+                                mActivityList.get(marker_pos).longitude);
+
+                        moveCamera(googleMap, nextpos);
+
+                        Marker marker = googleMap.addMarker(new MarkerOptions().position(nextpos).title("" + marker_pos)
+                                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
+                                .draggable(true)
+                                .visible(true)
+                                .snippet("" + mActivityList.get(marker_pos).added_on));
+
+                        tv_heading.setText(ActivityUtil.getTimeStr(mActivityList, marker_pos));
+                        tv_address.setText(MapUtil.getAddress(_ctx, mActivityList.get(marker_pos)));
+                        tv_cursor.setText("" + marker_pos + "/" + mActivityList.size());
                     }
                 });
 
                 imbt_next.setOnClickListener(new View.OnClickListener(){
                     public void onClick (View view) {
+                        if(marker_pos == mActivityList.size()-1) {
+                            Toast.makeText(CurActivity.this, "End Position!!", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
+                        Date st_date = ActivityUtil.getStartTimeDate(mActivityList);
+                        Date ed_date = ActivityUtil.getEndTimeDate(mActivityList);
+
+                        if(st_date==null || ed_date==null) return;
+                        long st_date_l = st_date.getTime();
+                        long ed_date_l = ed_date.getTime();
+                        long duration = ed_date_l - st_date_l;
+
+                        int dis_type = 0;  /* 0: 1시간 이상 1: 10분이상 2: 10분 이하 */
+
+                        if(duration > 5 * 60 * 60 * 1000) { // 5시간 이상
+                            dis_type = 0;
+                        } else if(duration > 1 * 60 * 60 * 1000) {  // 1시간 이상
+                            dis_type =1;
+                        }else if(duration > 1 * 10 * 60 * 1000) { // 10분 이상
+                            dis_type = 2;
+                        }else {
+                            dis_type=3;
+                        }
+
+                        int gap = 10;
+                        if(dis_type==0) gap = 100;
+                        if(dis_type==1) gap = 50;
+                        if(dis_type==2) gap =10;
+                        if(dis_type==3) gap =1;
+
+                        marker_pos = marker_pos + gap;
+                        if (marker_pos > mActivityList.size() - 1)
+                            marker_pos = mActivityList.size() - 1;
+                        LatLng nextpos = new LatLng(mActivityList.get(marker_pos).latitude,
+                                mActivityList.get(marker_pos).longitude);
+
+                        moveCamera(googleMap, nextpos);
+
+                        Marker marker = googleMap.addMarker(new MarkerOptions().position(nextpos).title("" + marker_pos)
+                                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
+                                .draggable(true)
+                                .visible(true)
+                                .snippet("" + mActivityList.get(marker_pos).added_on));
+
+                        tv_heading.setText(ActivityUtil.getTimeStr(mActivityList, marker_pos));
+                        tv_address.setText(MapUtil.getAddress(_ctx, mActivityList.get(marker_pos)));
+                        tv_cursor.setText("" + marker_pos + "/" + mActivityList.size());
                     }
                 });
 
@@ -117,20 +218,67 @@ public class CurActivity extends AppCompatActivity {
                         if(tog_add) {
                             tv_address.setText("To:" +  add2);
                             tv_address.setTextColor(Color.RED);
+                            tv_heading.setText(ActivityUtil.getEndTime(mActivityList));
                             Log.e(TAG, "To: " + add2);
                             tog_add = false;
                             LatLng lastpos = new LatLng(mActivityList.get(mActivityList.size()-1).latitude,
                                     mActivityList.get(mActivityList.size()-1).longitude);
-                            moveCamera(googleMap,lastpos, myzoom);
+                            moveCamera(googleMap,lastpos);
                         } else {
                             tv_address.setText("From:" +  add1);
                             tv_address.setTextColor(Color.GREEN);
+                            tv_heading.setText(ActivityUtil.getStartTime(mActivityList));
                             Log.e(TAG, "From: " + add1);
                             LatLng lastpos = new LatLng(mActivityList.get(0).latitude,
                                     mActivityList.get(0).longitude);
-                            moveCamera(googleMap,lastpos, myzoom);
+                            moveCamera(googleMap,lastpos);
                             tog_add = true;
                         }
+                    }
+                });
+
+                tv_heading.setOnClickListener(new View.OnClickListener(){
+                    @Override
+                    public void onClick(View v) {
+                        Date st_date = ActivityUtil.getStartTimeDate(mActivityList);
+                        Date ed_date = ActivityUtil.getEndTimeDate(mActivityList);
+
+                        if(st_date==null || ed_date==null) return;
+                        long st_date_l = st_date.getTime();
+                        long ed_date_l = ed_date.getTime();
+                        long duration = ed_date_l - st_date_l;
+
+                        int dis_type = 0;  /* 0: 1시간 이상 1: 10분이상 2: 10분 이하 */
+
+                        if(duration > 1 * 60 * 60 * 1000) {  // 1시간 이상
+                            dis_type =0;
+                        }else if(duration > 1 * 10 * 60 * 1000) { // 10분 이상
+                            dis_type = 1;
+                        }else {
+                            dis_type=2;
+                        }
+
+                        int gap = 10;
+                        if(dis_type==0) gap = 100;
+                        if(dis_type==1) gap = 10;
+                        if(dis_type==2) gap =1;
+
+                        if(!tog_add) {  // From ~ To
+
+                            marker_pos = marker_pos + gap;
+                            if(marker_pos > mActivityList.size()-1) marker_pos=mActivityList.size()-1;
+                            LatLng lastpos = new LatLng(mActivityList.get(marker_pos).latitude,
+                            mActivityList.get(marker_pos).longitude);
+                            moveCamera(googleMap,lastpos);
+
+                        }else { // To ~ From
+                            marker_pos = marker_pos - gap;
+                            if(marker_pos <0) marker_pos =0;
+                            LatLng lastpos = new LatLng(mActivityList.get(marker_pos).latitude,
+                                    mActivityList.get(marker_pos).longitude);
+                            moveCamera(googleMap,lastpos);
+                        }
+
                     }
                 });
 
@@ -143,8 +291,8 @@ public class CurActivity extends AppCompatActivity {
                 googleMap.clear();
                 markers = new ArrayList<Marker>();
 
-                imbt_prev.setVisibility(View.INVISIBLE);
-                imbt_next.setVisibility(View.INVISIBLE);
+//                imbt_prev.setVisibility(View.INVISIBLE);
+//                imbt_next.setVisibility(View.INVISIBLE);
 
                 Intent intent = getIntent();
                 final String fname = intent.getStringExtra("file");
@@ -156,6 +304,7 @@ public class CurActivity extends AppCompatActivity {
                 if(mActivityList.size()>1) {
                     add1 = MapUtil.getAddress(_ctx, mActivityList.get(0));
                     add2 = MapUtil.getAddress(_ctx, mActivityList.get(mActivityList.size()-1));
+                    marker_pos = mActivityList.size()-1;
                 }
 
                 Geocoder geocoder = new Geocoder(_ctx, Locale.getDefault());
@@ -205,6 +354,9 @@ public class CurActivity extends AppCompatActivity {
 
                 if(!nomarker) drawMarkers(googleMap,mActivityList);
                 if(!notrack) drawTrack(googleMap,mActivityList);
+                if(!satellite) googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                else googleMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+
                 if(nomarker || notrack) {
                     drawStartMarker(googleMap,mActivityList);
                     drawEndMarker(googleMap,mActivityList);
@@ -231,7 +383,7 @@ public class CurActivity extends AppCompatActivity {
                     }
                 }while(!got_bound_wo_error && try_cnt < 3);
 
-                if(!got_bound_wo_error) moveCamera(googleMap, 16);
+                if(!got_bound_wo_error) { myzoom = 16; moveCamera(googleMap, myzoom); }
 
             }
 
@@ -409,13 +561,6 @@ public class CurActivity extends AppCompatActivity {
             CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
             gmap.moveCamera(cu);
 
-            LatLng curloc = new LatLng(mActivityList.get(mActivityList.size()-1).latitude,
-                    mActivityList.get(mActivityList.size()-1).longitude);
-
-            float myzoom = gmap.getCameraPosition().zoom;
-            CameraPosition cameraPosition = new CameraPosition.Builder().target(curloc).zoom(myzoom).build();
-            gmap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-
         }catch(Exception e) {
             berr = true;
             Log.e(TAG,"ERR] BoundBuild:" + e.toString());
@@ -423,20 +568,41 @@ public class CurActivity extends AppCompatActivity {
         }
     }
 
-    public void moveCamera(GoogleMap googleMap, float myzoom) {
+    public void moveCamera(GoogleMap googleMap, float _zoom) {
         if(mActivityList==null) return;
         if(mActivityList.size()==0) return;
+
         LatLng curloc = new LatLng(mActivityList.get(mActivityList.size()-1).latitude,
                                  mActivityList.get(mActivityList.size()-1).longitude);
-
-       //float myzoom = googleMap.getCameraPosition().zoom;
-
-       CameraPosition cameraPosition = new CameraPosition.Builder().target(curloc).zoom(myzoom).build();
+        myzoom = _zoom;
+        CameraPosition cameraPosition = new CameraPosition.Builder().target(curloc).zoom(_zoom).build();
             googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
 
     }
 
-    public void moveCamera(GoogleMap googleMap, LatLng loc, float myzoom) {
+    public void moveCamera(GoogleMap googleMap) {
+        if(mActivityList==null) return;
+        if(mActivityList.size()==0) return;
+
+        myzoom = googleMap.getCameraPosition().zoom;
+
+        LatLng curloc = new LatLng(mActivityList.get(mActivityList.size()-1).latitude,
+                mActivityList.get(mActivityList.size()-1).longitude);
+        CameraPosition cameraPosition = new CameraPosition.Builder().target(curloc).zoom(myzoom).build();
+        googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+
+    }
+
+    public void moveCamera(GoogleMap googleMap, LatLng loc, float _zoom) {
+        myzoom = _zoom;
+        myzoom = googleMap.getCameraPosition().zoom;
+        CameraPosition cameraPosition = new CameraPosition.Builder().target(loc).zoom(myzoom).build();
+        googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+
+    }
+
+    public void moveCamera(GoogleMap googleMap, LatLng loc) {
+        myzoom = googleMap.getCameraPosition().zoom;
         CameraPosition cameraPosition = new CameraPosition.Builder().target(loc).zoom(myzoom).build();
         googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
 
@@ -520,6 +686,10 @@ public class CurActivity extends AppCompatActivity {
                 return true;
             case R.id.notrack:
                 notrack = !notrack;
+                onStart();
+                return true;
+            case R.id.satellite:
+                satellite = !satellite;
                 onStart();
                 return true;
             case R.id.web:

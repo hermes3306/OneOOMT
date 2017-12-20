@@ -420,6 +420,30 @@ public class ActivityUtil {
         return date_str;
     }
 
+    public static String getTimeStr(ArrayList<MyActivity> list, int pos) {
+        if(list == null) return null;
+        if(list.size()-1 <0) return null;
+
+        Date date = StringUtil.StringToDate(list.get(pos).added_on, "yyyy년MM월dd일_HH시mm분ss초");
+        String date_str = StringUtil.DateToString1(date, "M월 d일 (E) H시 m분");
+        return date_str;
+    }
+
+    public static Date getStartTimeDate(ArrayList<MyActivity> list) {
+        if(list == null) return null;
+        if(list.size()==0) return null;
+        Date date = StringUtil.StringToDate(list.get(0).added_on, "yyyy년MM월dd일_HH시mm분ss초");
+        return date;
+    }
+
+    public static Date getEndTimeDate(ArrayList<MyActivity> list) {
+        if(list == null) return null;
+        if(list.size()==0) return null;
+        Date date = StringUtil.StringToDate(list.get(list.size()-1).added_on, "yyyy년MM월dd일_HH시mm분ss초");
+        return date;
+    }
+
+
     public static void deserializeIntoMap(Context ctx, File file, GoogleMap gmap, int width, int height, boolean mode_append) {
         if(file == null)  {
             Log.e(TAG, "No File to deserialized");

@@ -58,6 +58,7 @@ public class CurActivity extends AppCompatActivity {
     static ArrayList<MyActivity> mActivityList = null;
     public static ArrayList<Marker> markers = null;
     public float myzoom = 16f;
+    public static Marker last_marker=null;
 
     public static String add1 = null;
     public static String add2 = null;
@@ -145,11 +146,16 @@ public class CurActivity extends AppCompatActivity {
 
                         moveCamera(googleMap, nextpos);
 
+                        float color = (marker_pos==0?BitmapDescriptorFactory.HUE_GREEN:BitmapDescriptorFactory.HUE_BLUE);
                         Marker marker = googleMap.addMarker(new MarkerOptions().position(nextpos).title("" + marker_pos)
-                                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
+                                .icon(BitmapDescriptorFactory.defaultMarker(color))
                                 .draggable(true)
                                 .visible(true)
                                 .snippet("" + mActivityList.get(marker_pos).added_on));
+
+                        if(last_marker!=null) last_marker.remove();
+                        last_marker = marker;
+                        marker.showInfoWindow();
 
                         tv_heading.setText(ActivityUtil.getTimeStr(mActivityList, marker_pos));
                         tv_address.setText(MapUtil.getAddress(_ctx, mActivityList.get(marker_pos)));
@@ -198,11 +204,16 @@ public class CurActivity extends AppCompatActivity {
 
                         moveCamera(googleMap, nextpos);
 
+                        float color = (marker_pos==0?BitmapDescriptorFactory.HUE_RED:BitmapDescriptorFactory.HUE_CYAN);
                         Marker marker = googleMap.addMarker(new MarkerOptions().position(nextpos).title("" + marker_pos)
-                                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
+                                .icon(BitmapDescriptorFactory.defaultMarker(color))
                                 .draggable(true)
                                 .visible(true)
                                 .snippet("" + mActivityList.get(marker_pos).added_on));
+
+                        if(last_marker!=null) last_marker.remove();
+                        last_marker = marker;
+                        marker.showInfoWindow();
 
                         tv_heading.setText(ActivityUtil.getTimeStr(mActivityList, marker_pos));
                         tv_address.setText(MapUtil.getAddress(_ctx, mActivityList.get(marker_pos)));

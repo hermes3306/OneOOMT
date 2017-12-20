@@ -28,6 +28,7 @@ import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.GroundOverlay;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
@@ -54,11 +55,17 @@ import java.util.Locale;
 public class CurActivity extends AppCompatActivity {
     public static String TAG = "CurActivity";
     static ArrayList<MyActivity> mActivityList = null;
+    public static ArrayList<Marker> markers = null;
+    public float myzoom = 16f;
+
     public static String add1 = null;
     public static String add2 = null;
     public static boolean tog_add = false;
     static MapView mMapView = null;
     public static final int REQUEST_ACTIVITY_FILE_LIST = 0x0001;
+
+    public static boolean nomarker = true;
+    public static boolean notrack = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,16 +111,24 @@ public class CurActivity extends AppCompatActivity {
 
                 tv_address.setOnClickListener(new View.OnClickListener(){
                     public void onClick(View view) {
+                        myzoom = googleMap.getCameraPosition().zoom;
+
                         Log.e(TAG, "address clocked !!");
                         if(tog_add) {
                             tv_address.setText("To:" +  add2);
                             tv_address.setTextColor(Color.RED);
                             Log.e(TAG, "To: " + add2);
                             tog_add = false;
+                            LatLng lastpos = new LatLng(mActivityList.get(mActivityList.size()-1).latitude,
+                                    mActivityList.get(mActivityList.size()-1).longitude);
+                            moveCamera(googleMap,lastpos, myzoom);
                         } else {
                             tv_address.setText("From:" +  add1);
                             tv_address.setTextColor(Color.GREEN);
                             Log.e(TAG, "From: " + add1);
+                            LatLng lastpos = new LatLng(mActivityList.get(0).latitude,
+                                    mActivityList.get(0).longitude);
+                            moveCamera(googleMap,lastpos, myzoom);
                             tog_add = true;
                         }
                     }
@@ -125,6 +140,9 @@ public class CurActivity extends AppCompatActivity {
 
 
             public void GO(final GoogleMap googleMap) {
+                googleMap.clear();
+                markers = new ArrayList<Marker>();
+
                 imbt_prev.setVisibility(View.INVISIBLE);
                 imbt_next.setVisibility(View.INVISIBLE);
 
@@ -185,8 +203,12 @@ public class CurActivity extends AppCompatActivity {
                     tv_carolies.setText("-");
                 }
 
-                drawMarkers(googleMap,mActivityList);
-                drawTrack(googleMap,mActivityList);
+                if(!nomarker) drawMarkers(googleMap,mActivityList);
+                if(!notrack) drawTrack(googleMap,mActivityList);
+                if(nomarker || notrack) {
+                    drawStartMarker(googleMap,mActivityList);
+                    drawEndMarker(googleMap,mActivityList);
+                }
 
 
                 Display display = getWindowManager().getDefaultDisplay();
@@ -286,7 +308,7 @@ public class CurActivity extends AppCompatActivity {
         return dist_meter;
     }
 
-    public static ArrayList<Marker> markers = new ArrayList<Marker>();
+
 
 
     public static void drawTrack(GoogleMap gmap, ArrayList<MyActivity> list) {
@@ -301,6 +323,28 @@ public class CurActivity extends AppCompatActivity {
         Polyline line = gmap.addPolyline(plo);
         line.setWidth(20);
         line.setPoints(l);
+    }
+
+    public static void drawStartMarker(GoogleMap gmap, ArrayList<MyActivity> list) {
+        if(list.size()==0) return;
+        LatLng ll = new LatLng(list.get(0).latitude, list.get(0).longitude);
+        Marker marker = gmap.addMarker(new MarkerOptions().position(ll).title("출발")
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
+                .draggable(true)
+                .visible(true)
+                .snippet("출발"));
+        markers.add(marker);
+    }
+
+    public static void drawEndMarker(GoogleMap gmap, ArrayList<MyActivity> list) {
+        if(list.size()==0) return;
+        LatLng ll = new LatLng(list.get(list.size()-1).latitude, list.get(list.size()-1).longitude);
+        Marker marker = gmap.addMarker(new MarkerOptions().position(ll).title("종료")
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
+                .draggable(true)
+                .visible(true)
+                .snippet("종료"));
+        markers.add(marker);
     }
 
 
@@ -321,21 +365,8 @@ public class CurActivity extends AppCompatActivity {
             float color = (i==0) ?  BitmapDescriptorFactory.HUE_GREEN : ((i==list.size()-1)? BitmapDescriptorFactory.HUE_RED  :  BitmapDescriptorFactory.HUE_CYAN);
 
             String title = list.get(i).added_on;
-            if(i==0) {
-                Marker marker = gmap.addMarker(new MarkerOptions().position(ll).title(title)
-                        .icon(BitmapDescriptorFactory.defaultMarker(color))
-                        .draggable(true)
-                        .visible(true)
-                        .snippet("출발"));
-                markers.add(marker);
-            } else if(i==list.size()-1) {
-                Marker marker = gmap.addMarker(new MarkerOptions().position(ll).title(title)
-                        .icon(BitmapDescriptorFactory.defaultMarker(color))
-                        .draggable(true)
-                        .visible(true)
-                        .snippet("종료"));
-                markers.add(marker);
-            }
+            if(i==0) drawStartMarker(gmap,list);
+            else if(i==list.size()-1) drawEndMarker(gmap,list);
             else {
                 CalDistance cd = new CalDistance(list.get(i-1).latitude, list.get(i-1).longitude, list.get(i).latitude, list.get(i).longitude);
                 double dist = cd.getDistance();
@@ -405,6 +436,12 @@ public class CurActivity extends AppCompatActivity {
 
     }
 
+    public void moveCamera(GoogleMap googleMap, LatLng loc, float myzoom) {
+        CameraPosition cameraPosition = new CameraPosition.Builder().target(loc).zoom(myzoom).build();
+        googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+
+    }
+
     public ArrayList<MyActivity> deserialize(File file) {
         if(file == null)  {
             Log.e(TAG, "No File to deserialized");
@@ -459,7 +496,7 @@ public class CurActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+        getMenuInflater().inflate(R.menu.menu_curact, menu);
         return true;
     }
 
@@ -473,6 +510,18 @@ public class CurActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         switch(id) {
+            case R.id.save:
+                String fname = ActivityUtil.serializeWithCurrentTime(mActivityList);
+                Toast.makeText(CurActivity.this,"Activity saved to file(" + fname + ")",Toast.LENGTH_LONG).show();
+                return true;
+            case R.id.nomarker:
+                nomarker = !nomarker;
+                onStart();
+                return true;
+            case R.id.notrack:
+                notrack = !notrack;
+                onStart();
+                return true;
             case R.id.web:
                 Intent wintent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://180.69.217.73:8080/OneOOMT"));
                 startActivity(wintent);

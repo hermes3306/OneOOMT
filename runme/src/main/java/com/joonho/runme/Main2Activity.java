@@ -781,6 +781,12 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
         int id = item.getItemId();
 
         switch(id) {
+            case R.id.memory:
+                Intent memoryIntent = new Intent(Main2Activity.this, MemoryActivity.class);
+                //memoryIntent.putExtra("curloc", "curloc");
+                startActivity(memoryIntent);
+                return true;
+
             case R.id.web:
                 Intent wintent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://180.69.217.73:8080/OneOOMT"));
                 startActivity(wintent);

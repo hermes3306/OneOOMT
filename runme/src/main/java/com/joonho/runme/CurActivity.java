@@ -39,6 +39,7 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import com.joonho.runme.util.ActivityStat;
 import com.joonho.runme.util.ActivityUtil;
 import com.joonho.runme.util.CalDistance;
+import com.joonho.runme.util.CalTime;
 import com.joonho.runme.util.MapUtil;
 import com.joonho.runme.util.MyActivity;
 import com.joonho.runme.util.MyNotifier;
@@ -59,11 +60,13 @@ public class CurActivity extends AppCompatActivity {
     public static ArrayList<Marker> markers = null;
     public float myzoom = 16f;
     public static Marker last_marker=null;
+    public static Marker bef_last_marker=null;
 
     public static String add1 = null;
     public static String add2 = null;
 
     public static int marker_pos = 0;
+    public static int marker_pos_prev =0;
 
     public static boolean tog_add = false;
     static MapView mMapView = null;
@@ -138,23 +141,48 @@ public class CurActivity extends AppCompatActivity {
                         if(dis_type==2) gap =10;
                         if(dis_type==3) gap =1;
 
+                        marker_pos_prev = marker_pos;
                         marker_pos = marker_pos - gap;
+
                         if (marker_pos < 0)
                             marker_pos = 0;
                         LatLng nextpos = new LatLng(mActivityList.get(marker_pos).latitude,
                                 mActivityList.get(marker_pos).longitude);
+                        LatLng prevpos = new LatLng(mActivityList.get(marker_pos_prev).latitude,
+                                mActivityList.get(marker_pos_prev).longitude);
+
+                        CalDistance cd =  new CalDistance(prevpos, nextpos);
+                        double dist = cd.getDistance();
+
+                        String diststr = null;
+                        String elapsedstr=null;
+                        if(dist > 1000.0f) diststr = cd.getDistanceKmStr();
+                        else diststr = cd.getDistanceMStr();
+
+                        CalTime ct = new CalTime(mActivityList.get(marker_pos_prev), mActivityList.get(marker_pos));
+                        long elapsed = ct.getElapsed();
+
+                        if(elapsed > 60*60000) elapsedstr = ct.getElapsedHourStr();
+                        else if(elapsed > 60000) elapsedstr = ct.getElapsedMinStr();
+                        else elapsedstr = ct.getElapsedSecStr();
 
                         moveCamera(googleMap, nextpos);
 
-                        float color = (marker_pos==0?BitmapDescriptorFactory.HUE_GREEN:BitmapDescriptorFactory.HUE_BLUE);
-                        Marker marker = googleMap.addMarker(new MarkerOptions().position(nextpos).title("" + marker_pos)
+                        float color = (marker_pos==0?BitmapDescriptorFactory.HUE_ROSE:BitmapDescriptorFactory.HUE_BLUE);
+                        Marker marker = googleMap.addMarker(new MarkerOptions().position(nextpos).title(diststr)
                                 .icon(BitmapDescriptorFactory.defaultMarker(color))
                                 .draggable(true)
                                 .visible(true)
-                                .snippet("" + mActivityList.get(marker_pos).added_on));
+                                .snippet(elapsedstr));
 
-                        if(last_marker!=null) last_marker.remove();
+                        if(bef_last_marker!=null) bef_last_marker.remove();
+                        bef_last_marker = last_marker;
                         last_marker = marker;
+                        if(bef_last_marker!=null) {
+                            bef_last_marker.setTitle("<");
+                            bef_last_marker.setTitle(">");
+                        }
+
                         marker.showInfoWindow();
 
                         tv_heading.setText(ActivityUtil.getTimeStr(mActivityList, marker_pos));
@@ -196,7 +224,9 @@ public class CurActivity extends AppCompatActivity {
                         if(dis_type==2) gap =10;
                         if(dis_type==3) gap =1;
 
+                        marker_pos_prev = marker_pos;
                         marker_pos = marker_pos + gap;
+
                         if (marker_pos > mActivityList.size() - 1)
                             marker_pos = mActivityList.size() - 1;
                         LatLng nextpos = new LatLng(mActivityList.get(marker_pos).latitude,
@@ -204,7 +234,7 @@ public class CurActivity extends AppCompatActivity {
 
                         moveCamera(googleMap, nextpos);
 
-                        float color = (marker_pos==0?BitmapDescriptorFactory.HUE_RED:BitmapDescriptorFactory.HUE_CYAN);
+                        float color = (marker_pos==0?BitmapDescriptorFactory.HUE_VIOLET:BitmapDescriptorFactory.HUE_GREEN);
                         Marker marker = googleMap.addMarker(new MarkerOptions().position(nextpos).title("" + marker_pos)
                                 .icon(BitmapDescriptorFactory.defaultMarker(color))
                                 .draggable(true)
@@ -235,6 +265,7 @@ public class CurActivity extends AppCompatActivity {
                             LatLng lastpos = new LatLng(mActivityList.get(mActivityList.size()-1).latitude,
                                     mActivityList.get(mActivityList.size()-1).longitude);
                             moveCamera(googleMap,lastpos);
+                            marker_pos=mActivityList.size()-1;
                         } else {
                             tv_address.setText("From:" +  add1);
                             tv_address.setTextColor(Color.GREEN);
@@ -244,6 +275,7 @@ public class CurActivity extends AppCompatActivity {
                                     mActivityList.get(0).longitude);
                             moveCamera(googleMap,lastpos);
                             tog_add = true;
+                            marker_pos = 0;
                         }
                     }
                 });
@@ -251,44 +283,7 @@ public class CurActivity extends AppCompatActivity {
                 tv_heading.setOnClickListener(new View.OnClickListener(){
                     @Override
                     public void onClick(View v) {
-                        Date st_date = ActivityUtil.getStartTimeDate(mActivityList);
-                        Date ed_date = ActivityUtil.getEndTimeDate(mActivityList);
 
-                        if(st_date==null || ed_date==null) return;
-                        long st_date_l = st_date.getTime();
-                        long ed_date_l = ed_date.getTime();
-                        long duration = ed_date_l - st_date_l;
-
-                        int dis_type = 0;  /* 0: 1시간 이상 1: 10분이상 2: 10분 이하 */
-
-                        if(duration > 1 * 60 * 60 * 1000) {  // 1시간 이상
-                            dis_type =0;
-                        }else if(duration > 1 * 10 * 60 * 1000) { // 10분 이상
-                            dis_type = 1;
-                        }else {
-                            dis_type=2;
-                        }
-
-                        int gap = 10;
-                        if(dis_type==0) gap = 100;
-                        if(dis_type==1) gap = 10;
-                        if(dis_type==2) gap =1;
-
-                        if(!tog_add) {  // From ~ To
-
-                            marker_pos = marker_pos + gap;
-                            if(marker_pos > mActivityList.size()-1) marker_pos=mActivityList.size()-1;
-                            LatLng lastpos = new LatLng(mActivityList.get(marker_pos).latitude,
-                            mActivityList.get(marker_pos).longitude);
-                            moveCamera(googleMap,lastpos);
-
-                        }else { // To ~ From
-                            marker_pos = marker_pos - gap;
-                            if(marker_pos <0) marker_pos =0;
-                            LatLng lastpos = new LatLng(mActivityList.get(marker_pos).latitude,
-                                    mActivityList.get(marker_pos).longitude);
-                            moveCamera(googleMap,lastpos);
-                        }
 
                     }
                 });

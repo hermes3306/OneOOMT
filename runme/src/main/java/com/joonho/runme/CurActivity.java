@@ -181,6 +181,7 @@ public class CurActivity extends AppCompatActivity {
                         if(bef_last_marker!=null) {
                             bef_last_marker.setTitle("<");
                             bef_last_marker.setTitle(">");
+                            bef_last_marker.showInfoWindow();
                         }
 
                         marker.showInfoWindow();
@@ -193,8 +194,9 @@ public class CurActivity extends AppCompatActivity {
 
                 imbt_next.setOnClickListener(new View.OnClickListener(){
                     public void onClick (View view) {
-                        if(marker_pos == mActivityList.size()-1) {
-                            Toast.makeText(CurActivity.this, "End Position!!", Toast.LENGTH_SHORT).show();
+                        int l_pos = mActivityList.size()-1;
+                        if(marker_pos == l_pos) {
+                            Toast.makeText(CurActivity.this, "End Postion!!", Toast.LENGTH_SHORT).show();
                             return;
                         }
 
@@ -227,22 +229,46 @@ public class CurActivity extends AppCompatActivity {
                         marker_pos_prev = marker_pos;
                         marker_pos = marker_pos + gap;
 
-                        if (marker_pos > mActivityList.size() - 1)
-                            marker_pos = mActivityList.size() - 1;
+                        if (marker_pos > l_pos)
+                            marker_pos = l_pos;
                         LatLng nextpos = new LatLng(mActivityList.get(marker_pos).latitude,
                                 mActivityList.get(marker_pos).longitude);
+                        LatLng prevpos = new LatLng(mActivityList.get(marker_pos_prev).latitude,
+                                mActivityList.get(marker_pos_prev).longitude);
+
+                        CalDistance cd =  new CalDistance(prevpos, nextpos);
+                        double dist = cd.getDistance();
+
+                        String diststr = null;
+                        String elapsedstr=null;
+                        if(dist > 1000.0f) diststr = cd.getDistanceKmStr();
+                        else diststr = cd.getDistanceMStr();
+
+                        CalTime ct = new CalTime(mActivityList.get(marker_pos_prev), mActivityList.get(marker_pos));
+                        long elapsed = ct.getElapsed();
+
+                        if(elapsed > 60*60000) elapsedstr = ct.getElapsedHourStr();
+                        else if(elapsed > 60000) elapsedstr = ct.getElapsedMinStr();
+                        else elapsedstr = ct.getElapsedSecStr();
 
                         moveCamera(googleMap, nextpos);
 
-                        float color = (marker_pos==0?BitmapDescriptorFactory.HUE_VIOLET:BitmapDescriptorFactory.HUE_GREEN);
-                        Marker marker = googleMap.addMarker(new MarkerOptions().position(nextpos).title("" + marker_pos)
+                        float color = (marker_pos==0?BitmapDescriptorFactory.HUE_VIOLET:BitmapDescriptorFactory.HUE_ROSE);
+                        Marker marker = googleMap.addMarker(new MarkerOptions().position(nextpos).title(diststr)
                                 .icon(BitmapDescriptorFactory.defaultMarker(color))
                                 .draggable(true)
                                 .visible(true)
-                                .snippet("" + mActivityList.get(marker_pos).added_on));
+                                .snippet(elapsedstr));
 
-                        if(last_marker!=null) last_marker.remove();
+                        if(bef_last_marker!=null) bef_last_marker.remove();
+                        bef_last_marker = last_marker;
                         last_marker = marker;
+                        if(bef_last_marker!=null) {
+                            bef_last_marker.setTitle("<");
+                            bef_last_marker.setTitle(">");
+                            bef_last_marker.showInfoWindow();
+                        }
+
                         marker.showInfoWindow();
 
                         tv_heading.setText(ActivityUtil.getTimeStr(mActivityList, marker_pos));

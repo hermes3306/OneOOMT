@@ -18,6 +18,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -67,6 +68,7 @@ public class CurActivity extends AppCompatActivity {
 
     public static int marker_pos = 0;
     public static int marker_pos_prev =0;
+    public static Polyline line_prev = null;
 
     public static boolean tog_add = false;
     static MapView mMapView = null;
@@ -75,6 +77,8 @@ public class CurActivity extends AppCompatActivity {
     public static boolean nomarker = true;
     public static boolean notrack = false;
     public static boolean satellite = false;
+
+    public static int navigation_gap = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,10 +107,48 @@ public class CurActivity extends AppCompatActivity {
             final TextView tv_minperkm = (TextView) findViewById(R.id.tv_minperkm);
             final TextView tv_carolies = (TextView) findViewById(R.id.tv_carolies);
             final TextView tv_address = (TextView) findViewById(R.id.tv_address);
-
+            final SeekBar  seekBar = (SeekBar) findViewById(R.id.seekBar);
 
             @Override
             public void onMapReady(final GoogleMap googleMap) {
+
+                seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                    public void onStopTrackingTouch(SeekBar seekBar) {
+                    }
+
+                    public void onStartTrackingTouch(SeekBar seekBar) {
+                    }
+
+                    public void onProgressChanged(SeekBar seekBar, int progress,
+                                                  boolean fromUser) {
+
+                        if(mActivityList == null) return;
+                        marker_pos_prev = marker_pos;
+                        marker_pos = seekBar.getProgress();
+
+                        LatLng nextpos = new LatLng(mActivityList.get(marker_pos).latitude, mActivityList.get(marker_pos).longitude);
+                        moveCamera(googleMap, nextpos);
+
+                        float color = (marker_pos==0?BitmapDescriptorFactory.HUE_ROSE:BitmapDescriptorFactory.HUE_CYAN);
+                        Marker marker = googleMap.addMarker(new MarkerOptions().position(nextpos).title("-" + marker_pos)
+                                .icon(BitmapDescriptorFactory.defaultMarker(color))
+                                .draggable(true)
+                                .visible(true)
+                                .snippet("-" + marker_pos));
+
+                        if(bef_last_marker!=null) bef_last_marker.remove();
+                        if(last_marker!=null) last_marker.remove();
+                        last_marker = marker;
+
+                        marker.showInfoWindow();
+
+                        drawTrack(googleMap,mActivityList,0,marker_pos);
+
+                        tv_heading.setText(ActivityUtil.getTimeStr(mActivityList, marker_pos));
+                        tv_address.setText(MapUtil.getAddress(_ctx, mActivityList.get(marker_pos)));
+                        tv_cursor.setText("" + marker_pos + "/" + mActivityList.size());
+                    }
+                });
 
                 imbt_prev.setOnClickListener(new View.OnClickListener(){
                     public void onClick (View view) {
@@ -169,11 +211,11 @@ public class CurActivity extends AppCompatActivity {
                         moveCamera(googleMap, nextpos);
 
                         float color = (marker_pos==0?BitmapDescriptorFactory.HUE_ROSE:BitmapDescriptorFactory.HUE_BLUE);
-                        Marker marker = googleMap.addMarker(new MarkerOptions().position(nextpos).title(diststr)
+                        Marker marker = googleMap.addMarker(new MarkerOptions().position(nextpos).title(MapUtil.getAddressDong(_ctx, mActivityList.get(marker_pos)))
                                 .icon(BitmapDescriptorFactory.defaultMarker(color))
                                 .draggable(true)
                                 .visible(true)
-                                .snippet(elapsedstr));
+                                .snippet(elapsedstr + " ("+diststr+")"));
 
                         if(bef_last_marker!=null) bef_last_marker.remove();
                         bef_last_marker = last_marker;
@@ -254,11 +296,11 @@ public class CurActivity extends AppCompatActivity {
                         moveCamera(googleMap, nextpos);
 
                         float color = (marker_pos==0?BitmapDescriptorFactory.HUE_VIOLET:BitmapDescriptorFactory.HUE_ROSE);
-                        Marker marker = googleMap.addMarker(new MarkerOptions().position(nextpos).title(diststr)
+                        Marker marker = googleMap.addMarker(new MarkerOptions().position(nextpos).title(MapUtil.getAddressDong(_ctx, mActivityList.get(marker_pos)))
                                 .icon(BitmapDescriptorFactory.defaultMarker(color))
                                 .draggable(true)
                                 .visible(true)
-                                .snippet(elapsedstr));
+                                .snippet(elapsedstr + " ("+diststr+")"));
 
                         if(bef_last_marker!=null) bef_last_marker.remove();
                         bef_last_marker = last_marker;
@@ -292,6 +334,8 @@ public class CurActivity extends AppCompatActivity {
                                     mActivityList.get(mActivityList.size()-1).longitude);
                             moveCamera(googleMap,lastpos);
                             marker_pos=mActivityList.size()-1;
+
+
                         } else {
                             tv_address.setText("From:" +  add1);
                             tv_address.setTextColor(Color.GREEN);
@@ -303,6 +347,8 @@ public class CurActivity extends AppCompatActivity {
                             tog_add = true;
                             marker_pos = 0;
                         }
+                        if(bef_last_marker!=null) bef_last_marker.remove();
+                        if(last_marker!=null) last_marker.remove();
                     }
                 });
 
@@ -332,11 +378,16 @@ public class CurActivity extends AppCompatActivity {
 
                 if(fname != null) mActivityList = deserialize(new File(fname));
                 else mActivityList = (ArrayList<MyActivity>)intent.getSerializableExtra("locations");
+                if(mActivityList==null) {
+                    Log.e(TAG, "No Activiies...");
+                    return;
+                }
 
                 if(mActivityList.size()>1) {
                     add1 = MapUtil.getAddress(_ctx, mActivityList.get(0));
                     add2 = MapUtil.getAddress(_ctx, mActivityList.get(mActivityList.size()-1));
                     marker_pos = mActivityList.size()-1;
+                    seekBar.setMax(mActivityList.size()-1);
                 }
 
                 Geocoder geocoder = new Geocoder(_ctx, Locale.getDefault());
@@ -493,8 +544,6 @@ public class CurActivity extends AppCompatActivity {
     }
 
 
-
-
     public static void drawTrack(GoogleMap gmap, ArrayList<MyActivity> list) {
         if(list == null) return;
         ArrayList<LatLng> l = new ArrayList<>();
@@ -507,6 +556,23 @@ public class CurActivity extends AppCompatActivity {
         Polyline line = gmap.addPolyline(plo);
         line.setWidth(20);
         line.setPoints(l);
+    }
+
+    public static void drawTrack(GoogleMap map, ArrayList<MyActivity> list, int start, int end) {
+        if(list == null) return;
+        ArrayList<LatLng> l = new ArrayList<>();
+        for(int i=start; i < end; i++) {
+           l.add(new LatLng(list.get(i).latitude, list.get(i).longitude));
+        }
+
+        PolylineOptions plo = new PolylineOptions();
+        plo.color(Color.BLACK);
+        Polyline line = map.addPolyline(plo);
+        line.setWidth(20);
+        line.setPoints(l);
+
+        if(line_prev!=null) line_prev.remove();
+        line_prev = line;
     }
 
     public static void drawStartMarker(GoogleMap gmap, ArrayList<MyActivity> list) {
@@ -686,7 +752,8 @@ public class CurActivity extends AppCompatActivity {
                 }
             }catch(Exception e) {}
         }
-        Log.e(TAG, "# of Activities: " + list.size() );
+
+        if(list ==null) return null;
         return list;
 
     }

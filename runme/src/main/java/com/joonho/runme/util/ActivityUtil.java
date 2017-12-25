@@ -26,6 +26,7 @@ import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
@@ -606,7 +607,21 @@ public class ActivityUtil {
         }catch(Exception e) {
             berr = true;
             Log.e(TAG,"ERR] BoundBuild:" + e.toString());
+
+            moveCamera(gmap, myzoom);
         }
+    }
+
+    public static void moveCamera(GoogleMap googleMap, float _zoom) {
+        if(mActivityList==null) return;
+        if(mActivityList.size()==0) return;
+
+        LatLng curloc = new LatLng(mActivityList.get(mActivityList.size()-1).latitude,
+                mActivityList.get(mActivityList.size()-1).longitude);
+        myzoom = _zoom;
+        CameraPosition cameraPosition = new CameraPosition.Builder().target(curloc).zoom(_zoom).build();
+        googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+
     }
 
 

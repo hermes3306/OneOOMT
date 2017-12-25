@@ -29,6 +29,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -100,7 +101,7 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
     private  boolean mode3 =  false;
     private  int mode4 =  0;
     private  boolean mode_noti = false;
-    private boolean mode_low_battery = false;
+    private boolean mode_low_battery = true;
 
     private double paces[] = new double[1000]; //upto 1000 km
     private long   startime_paces[] = new long[1000]; // upto 1000 start time
@@ -139,6 +140,10 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
         mEditor.putInt("lastmin", lastmin);
         mEditor.putInt("lasthour", lasthour);
         mEditor.commit();
+    }
+
+    public  void show_message(String msg) {
+        tv_message.setText(msg);
     }
 
     public void recalculate_total_distance() {
@@ -236,6 +241,7 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
             tv_pace = (TextView) findViewById(R.id.tv_pace);
             tv_time = (TextView) findViewById(R.id.tv_time);
 
+
             imb_stop_timer = (ImageButton) findViewById(R.id.imb_stop_timer);
             //doMyTimeTask(); 신규 활동이 아닌 과거 활동을 복원함.
 
@@ -296,6 +302,7 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
     Boolean isGPSEnabled = null;
     Boolean isNetworkEnabled = null;
     Boolean noGPS = false;
+    Boolean locationChanged = false;
 
     public void initialize_Location_Manager() {
         if (locationManager == null) {
@@ -308,11 +315,9 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
 
         LocationListener locationListener = new LocationListener() {
             public void onLocationChanged(Location location) {
+                locationChanged = true;
                 double lat = location.getLatitude();
                 double lng = location.getLongitude();
-                String provider = location.getProvider();
-//                String msg = String.format("위치가 %s로부터 추가되어 경로의수는 %d입니다", provider, mList.size());
-//                tv_message.setText(msg);
             }
 
             public void onStatusChanged(String provider, int status, Bundle extras) {
@@ -359,10 +364,10 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
 
             Location lastKnownLocation = locationManager.getLastKnownLocation(locationProvider);
             if (lastKnownLocation != null) {
-                double lng = lastKnownLocation.getLatitude();
-                double lat = lastKnownLocation.getLatitude();
                 return lastKnownLocation;
             }
+
+
         }catch(Exception e) {
             e.printStackTrace();
             Log.e(TAG, e.toString());
@@ -927,12 +932,18 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
         super.onActivityResult(requestCode,resultCode,intent);
         switch(requestCode) {
             case REQUEST_ACTIVITY_FILE_LIST:
+
+                Log.e(TAG,"-- REQUEST_ACTIVITY_FILE_LIST ");
                 if(intent == null) return;
                 String tmpFname = (String)intent.getStringExtra("fname");
                 if(tmpFname==null) return;
 
                 ArrayList<MyActivity> tmpActList =(ArrayList<MyActivity>)intent.getSerializableExtra("locations");
                 ActivityStat as = ActivityUtil.getActivityStat(tmpActList);
+
+                Log.e(TAG,"-- REQUEST_ACTIVITY_FILE_LIST - GOT LOCATIONS");
+
+
 
                 long endTime, startTime;
                 startTime = as.start.getTime();
@@ -1137,7 +1148,6 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
                 Toast.makeText(context, "Uploading success", Toast.LENGTH_LONG).show();
             }
         }.execute();
-
     }
 
     private void doHttpFileUpload3(final Context context, final String fname) {

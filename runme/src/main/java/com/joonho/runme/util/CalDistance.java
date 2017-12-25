@@ -45,11 +45,11 @@ public class CalDistance {
     }
 
     public String getDistanceKmStr() {
-        return String.format("%.3fKilo",getDistance() / 1000.0);
+        return String.format("%.1fkm",getDistance() / 1000.0);
     }
 
     public String getDistanceMStr(){
-        return String.format("%.3fMeter",getDistance());
+        return String.format("%.0fm",getDistance());
     }
 
     private double deg2rad(double deg) {

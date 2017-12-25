@@ -51,15 +51,15 @@ public class CalTime {
     }
 
     public String getElapsedSecStr() {
-        return String.format("%.1fSec", getElapsedSec());
+        return String.format("%.0f초", getElapsedSec());
     }
 
     public String getElapsedMinStr() {
-        return String.format("%.1fMin", getElapsedMin());
+        return String.format("%.0f분", getElapsedMin());
     }
 
     public String getElapsedHourStr() {
-        return String.format("%.1fHour", getElapsedHour());
+        return String.format("%.0f시간%d분", getElapsedHour(), (int)getElapsedMin() - (int)getElapsedHour() * 60 );
     }
 
 

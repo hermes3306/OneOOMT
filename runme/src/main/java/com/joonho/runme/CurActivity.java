@@ -126,15 +126,34 @@ public class CurActivity extends AppCompatActivity {
                         marker_pos_prev = marker_pos;
                         marker_pos = seekBar.getProgress();
 
-                        LatLng nextpos = new LatLng(mActivityList.get(marker_pos).latitude, mActivityList.get(marker_pos).longitude);
-                        moveCamera(googleMap, nextpos);
+                        LatLng nextpos = new LatLng(mActivityList.get(marker_pos).latitude,
+                                mActivityList.get(marker_pos).longitude);
+                        LatLng prevpos = new LatLng(mActivityList.get(0).latitude,
+                                mActivityList.get(0).longitude);
+
+                        CalDistance cd =  new CalDistance(prevpos, nextpos);
+                        double dist = cd.getDistance();
+
+                        String diststr = null;
+                        String elapsedstr=null;
+                        if(dist > 1000.0f) diststr = cd.getDistanceKmStr();
+                        else diststr = cd.getDistanceMStr();
+
+                        CalTime ct = new CalTime(mActivityList.get(marker_pos_prev), mActivityList.get(marker_pos));
+                        long elapsed = ct.getElapsed();
+
+                        if(elapsed > 60*60000) elapsedstr = ct.getElapsedHourStr();
+                        else if(elapsed > 60000) elapsedstr = ct.getElapsedMinStr();
+                        else elapsedstr = ct.getElapsedSecStr();
+
+                        //moveCamera(googleMap, nextpos);
 
                         float color = (marker_pos==0?BitmapDescriptorFactory.HUE_ROSE:BitmapDescriptorFactory.HUE_CYAN);
-                        Marker marker = googleMap.addMarker(new MarkerOptions().position(nextpos).title("-" + marker_pos)
+                        Marker marker = googleMap.addMarker(new MarkerOptions().position(nextpos).title(MapUtil.getAddressDong(_ctx, mActivityList.get(marker_pos)))
                                 .icon(BitmapDescriptorFactory.defaultMarker(color))
                                 .draggable(true)
                                 .visible(true)
-                                .snippet("-" + marker_pos));
+                                .snippet(elapsedstr + " ("+diststr+")"));
 
                         if(bef_last_marker!=null) bef_last_marker.remove();
                         if(last_marker!=null) last_marker.remove();
@@ -208,7 +227,7 @@ public class CurActivity extends AppCompatActivity {
                         else if(elapsed > 60000) elapsedstr = ct.getElapsedMinStr();
                         else elapsedstr = ct.getElapsedSecStr();
 
-                        moveCamera(googleMap, nextpos);
+                        //moveCamera(googleMap, nextpos);
 
                         float color = (marker_pos==0?BitmapDescriptorFactory.HUE_ROSE:BitmapDescriptorFactory.HUE_BLUE);
                         Marker marker = googleMap.addMarker(new MarkerOptions().position(nextpos).title(MapUtil.getAddressDong(_ctx, mActivityList.get(marker_pos)))
@@ -293,7 +312,7 @@ public class CurActivity extends AppCompatActivity {
                         else if(elapsed > 60000) elapsedstr = ct.getElapsedMinStr();
                         else elapsedstr = ct.getElapsedSecStr();
 
-                        moveCamera(googleMap, nextpos);
+                        //moveCamera(googleMap, nextpos);
 
                         float color = (marker_pos==0?BitmapDescriptorFactory.HUE_VIOLET:BitmapDescriptorFactory.HUE_ROSE);
                         Marker marker = googleMap.addMarker(new MarkerOptions().position(nextpos).title(MapUtil.getAddressDong(_ctx, mActivityList.get(marker_pos)))

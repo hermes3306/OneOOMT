@@ -352,10 +352,8 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
     }
 
     public Location getLocation() {
-        String locationProvider = null;
-        // locationProvider = LocationManager.NETWORK_PROVIDER;
-        if(!noGPS) locationProvider = LocationManager.GPS_PROVIDER;
-
+        // 먼저 GPS를 통해서 위치 찾기
+        String locationProvider =  LocationManager.GPS_PROVIDER;
         try {
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 Log.e(TAG, "no Permission"); // but never occur!
@@ -364,10 +362,45 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
 
             Location lastKnownLocation = locationManager.getLastKnownLocation(locationProvider);
             if (lastKnownLocation != null) {
+                Log.e(TAG, "New Location Found from -  " + locationProvider);
                 return lastKnownLocation;
             }
+        }catch(Exception e) {
+            e.printStackTrace();
+            Log.e(TAG, e.toString());
+        }
 
+        // GPS로 못찾을 경우 NETWORK 위치 찾기
+        locationProvider = LocationManager.NETWORK_PROVIDER;
+        try {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                Log.e(TAG, "no Permission"); // but never occur!
+                return null;
+            }
 
+            Location lastKnownLocation = locationManager.getLastKnownLocation(locationProvider);
+            if (lastKnownLocation != null) {
+                Log.e(TAG, "New Location Found from -  " + locationProvider);
+                return lastKnownLocation;
+            }
+        }catch(Exception e) {
+            e.printStackTrace();
+            Log.e(TAG, e.toString());
+        }
+
+        // GPS/NETWORK 모두 못 찾을 경우 다른 APP의 네트웤을 통해서 위치 찾기
+        locationProvider = LocationManager.PASSIVE_PROVIDER;
+        try {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                Log.e(TAG, "no Permission"); // but never occur!
+                return null;
+            }
+
+            Location lastKnownLocation = locationManager.getLastKnownLocation(locationProvider);
+            if (lastKnownLocation != null) {
+                Log.e(TAG, "New Location Found from -  " + locationProvider);
+                return lastKnownLocation;
+            }
         }catch(Exception e) {
             e.printStackTrace();
             Log.e(TAG, e.toString());
@@ -391,46 +424,42 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
         return date.getTime();
     }
 
-    public void doMyTimeTask() {
-        if(mTask != null) mTask.cancel();
-        mTask =new Main2Activity.MyTimerTask();
-        mTimer = new Timer();
-        int period = 10000; // 1초
+        public void doMyTimeTask(long period) {
+            if(mTask != null) mTask.cancel();
+            mTask =new Main2Activity.MyTimerTask();
+            mTimer = new Timer();
+            mTimer.schedule(mTask, 1000, period);
 
-        if(mode_low_battery) period=10000; //10초
-        else period = 1000;
+            int msize = 0;
+            if(mList != null) msize = mList.size();
+            if( isStarted  && (mList != null) && msize > 0) {
+                start_loc = mList.get(0);
+                start_time = start;
+            } else {
+                total_distance = 0;
+                isStarted = true;
+                start_time = new Date().getTime();
+                mList = new ArrayList<MyActivity>();
 
-        mTimer.schedule(mTask, 1000, period);
+                Location sl = getLocation();
+                if(sl != null) {
+                    start_loc = new MyActivity(sl.getLatitude(), sl.getLongitude(), sl.getAltitude(), LocTimeStr(sl));
+                    mList.add(start_loc);
+                    getMyWeather();
 
-        Log.e(TAG, "Low Battery Mode = " + mode_low_battery);
-        Log.e(TAG, "Time Period = " + period);
-
-        int msize = 0;
-        if(mList != null) msize = mList.size();
-        if( isStarted  && (mList != null) && msize > 0) {
-            start_loc = mList.get(0);
-            start_time = start;
-        } else {
-            total_distance = 0;
-            isStarted = true;
-            start_time = new Date().getTime();
-            mList = new ArrayList<MyActivity>();
-
-            Location sl = getLocation();
-            if(sl != null) {
-                start_loc = new MyActivity(sl.getLatitude(), sl.getLongitude(), sl.getAltitude(), LocTimeStr(sl));
-                mList.add(start_loc);
-                getMyWeather();
-
-                String caddr = getCurAddress(getApplicationContext(),sl);
-                tv_address.setText(caddr);
-                String lla = String.format("위도:%3.3f, 경도:%3.3f, 고도:%3.1f", sl.getLatitude(), sl.getLongitude(), sl.getAltitude());
-                tv_lat_lng_altitude.setText(lla);
-                String provider = sl.getProvider();
-                //String msg = String.format("위치가 %s로부터 추가되어 경로의수는 %d입니다", provider, mList.size());
-                //tv_message.setText(msg);
+                    String caddr = getCurAddress(getApplicationContext(),sl);
+                    tv_address.setText(caddr);
+                    String lla = String.format("위도:%3.3f, 경도:%3.3f, 고도:%3.1f", sl.getLatitude(), sl.getLongitude(), sl.getAltitude());
+                    tv_lat_lng_altitude.setText(lla);
+                    String provider = sl.getProvider();
+                    //String msg = String.format("위치가 %s로부터 추가되어 경로의수는 %d입니다", provider, mList.size());
+                    //tv_message.setText(msg);
+                }
             }
-        }
+    }
+
+    public void doMyTimeTask() {
+        doMyTimeTask(1000);
     }
 
     public void alertDialogChoice() {
@@ -485,6 +514,19 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
         alert.show();
     }
 
+    public void disp_tv_time_elapsed() {
+        end_time = new Date().getTime();
+        String duration = StringUtil.Duration(new Date(start_time), new Date(end_time));
+        if(mode1==0) tv_time_elapsed.setText(duration);
+        else if(mode1==1) {
+            String t_str = StringUtil.DateToString1(new Date(start_time), "HH:mm:ss") ;
+            tv_time_elapsed.setText(t_str);
+        } else {
+            String t_str = StringUtil.DateToString1(new Date(end_time), "HH:mm:ss") ;
+            tv_time_elapsed.setText(t_str);
+        }
+    }
+
     @Override
     public void onClick(View view) {
         switch(view.getId()) {
@@ -496,6 +538,7 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
                     case 1: tv_time.setText("START AT"); break;
                     case 2: tv_time.setText("END AT"); break;
                 }
+                disp_tv_time_elapsed();
                 break;
             case R.id.tv_total_distance:
                 mode2 = mode2+1;
@@ -566,26 +609,12 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
             Main2Activity.this.runOnUiThread(new Runnable() {
 
                 public void run() {
-                    end_time = new Date().getTime();
-                    long elapsed_time = end_time - start_time;
-
                     double cur_dist = 0;
                     double cur_dist_in_10_sec = 0;
-
                     long cur_elapsed_time = 0;
                     long cur_elapsed_time_in_10_sec = 0;
 
-                    String duration = StringUtil.Duration(new Date(start_time), new Date(end_time));
-
-                    if(mode1==0) tv_time_elapsed.setText(duration);
-                    else if(mode1==1) {
-                        String t_str = StringUtil.DateToString1(new Date(start_time), "HH:mm:ss") ;
-                        tv_time_elapsed.setText(t_str);
-                    } else {
-                        String t_str = StringUtil.DateToString1(new Date(end_time), "HH:mm:ss") ;
-                        tv_time_elapsed.setText(t_str);
-                    }
-
+                    disp_tv_time_elapsed();
 
                     /* get Weather every 10 minutes */
                     String[] t_str_array = {"00:00", "10:00", "20:00", "30:00", "40:00", "50:00"};
@@ -911,8 +940,8 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
 
             case R.id.lowbattery:
                 mode_low_battery = ! mode_low_battery;
-                if(mode_low_battery) MyNotifier.go(Main2Activity.this, "100대명산알람설정", "Low Battery Mode..");
-                else MyNotifier.go(Main2Activity.this, "100대명산알람설정", "Low Battery Mode Off...");
+                doMyTimeTask(mode_low_battery?10000:1000);
+                Toast.makeText(Main2Activity.this,mode_low_battery?"Timer period - 10sec":"Timer period - 1sec", Toast.LENGTH_SHORT).show();
                 return true;
 
             case R.id.weather:
@@ -942,8 +971,6 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
                 ActivityStat as = ActivityUtil.getActivityStat(tmpActList);
 
                 Log.e(TAG,"-- REQUEST_ACTIVITY_FILE_LIST - GOT LOCATIONS");
-
-
 
                 long endTime, startTime;
                 startTime = as.start.getTime();

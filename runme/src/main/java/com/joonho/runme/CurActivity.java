@@ -563,6 +563,8 @@ public class CurActivity extends AppCompatActivity {
     }
 
 
+
+
     public static void drawTrack(GoogleMap gmap, ArrayList<MyActivity> list) {
         if(list == null) return;
         ArrayList<LatLng> l = new ArrayList<>();

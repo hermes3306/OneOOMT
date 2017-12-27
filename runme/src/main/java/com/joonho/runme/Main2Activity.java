@@ -362,7 +362,7 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
 
             Location lastKnownLocation = locationManager.getLastKnownLocation(locationProvider);
             if (lastKnownLocation != null) {
-                Log.e(TAG, "New Location Found from -  " + locationProvider);
+                //Log.e(TAG, "New Location Found from -  " + locationProvider);
                 return lastKnownLocation;
             }
         }catch(Exception e) {
@@ -380,7 +380,7 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
 
             Location lastKnownLocation = locationManager.getLastKnownLocation(locationProvider);
             if (lastKnownLocation != null) {
-                Log.e(TAG, "New Location Found from -  " + locationProvider);
+                //Log.e(TAG, "New Location Found from -  " + locationProvider);
                 return lastKnownLocation;
             }
         }catch(Exception e) {
@@ -398,7 +398,7 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
 
             Location lastKnownLocation = locationManager.getLastKnownLocation(locationProvider);
             if (lastKnownLocation != null) {
-                Log.e(TAG, "New Location Found from -  " + locationProvider);
+                //Log.e(TAG, "New Location Found from -  " + locationProvider);
                 return lastKnownLocation;
             }
         }catch(Exception e) {
@@ -541,6 +541,7 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
                 disp_tv_time_elapsed();
                 break;
             case R.id.tv_total_distance:
+
                 mode2 = mode2+1;
                 if(mode2==3) mode2 = 0;
                 switch(mode2) {
@@ -548,6 +549,7 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
                     case 1: tv_km.setText("KM/H (AVG)"); break;
                     case 2: tv_km.setText("KM/H (CUR)"); break;
                 }
+                recalculate_total_distance();
                 break;
             case R.id.tv_lat_lng_altitude:
                 mode3 = !mode3;

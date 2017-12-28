@@ -1061,6 +1061,7 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
     }
 
     private String[] getFilesOnCloud(String url[]) {
+        filesOnCloud = null;
         new AsyncTask<String,Void,Boolean>() {
             @Override
             protected Boolean doInBackground(String... url) {

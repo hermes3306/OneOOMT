@@ -36,10 +36,13 @@ import android.widget.Toast;
 import com.joonho.runme.util.ActivityStat;
 import com.joonho.runme.util.ActivityUtil;
 import com.joonho.runme.util.CalDistance;
+import com.joonho.runme.util.JSONUtil;
 import com.joonho.runme.util.MyActivity;
 import com.joonho.runme.util.MyNotifier;
 import com.joonho.runme.util.StringUtil;
 import com.joonho.runme.util.WeatherAPI;
+
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -817,6 +820,13 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
         int id = item.getItemId();
 
         switch(id) {
+            case R.id.files_cloud:
+
+                JSONObject jObj = JSONUtil.getJSONFromUrl("http://180.69.217.73:8080/OneOOMT/list.jsp");
+
+                Log.e(TAG,jObj.toString());
+                return true;
+
             case R.id.memory:
                 Intent memoryIntent = new Intent(Main2Activity.this, MemoryActivity.class);
                 //memoryIntent.putExtra("curloc", "curloc");

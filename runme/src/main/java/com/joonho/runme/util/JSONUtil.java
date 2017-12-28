@@ -71,13 +71,4 @@ public class JSONUtil {
         return jObj;
     }
 
-    public static void main(String args[]) {
-        // 작동 안됨. 안드로이드 에서 해야 함.
-        try {
-            String json = httpParser("http://180.69.217.73:8080/OneOOMT/list.jsp");
-            System.out.println(json);
-        }catch(Exception e) {
-            e.printStackTrace();
-        }
-    }
 }

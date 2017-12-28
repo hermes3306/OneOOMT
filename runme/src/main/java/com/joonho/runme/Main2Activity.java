@@ -42,6 +42,7 @@ import com.joonho.runme.util.MyNotifier;
 import com.joonho.runme.util.StringUtil;
 import com.joonho.runme.util.WeatherAPI;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -84,6 +85,8 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
 
     private static WeatherAPI.Weather cur_weather = null;
     private static WeatherAPI.myWeather cur_myweather = null;
+    private static String filesOnCloud[];
+    private static Long filesizeOnCloud[];
 
     private ImageButton imb_stop_timer = null;
 
@@ -821,10 +824,46 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
 
         switch(id) {
             case R.id.files_cloud:
+                String urls[] = new String[1];
+                urls[0] = "http://180.69.217.73:8080/OneOOMT/filelist.jsp";
+                filesOnCloud = getFilesOnCloud(urls);
 
-                JSONObject jObj = JSONUtil.getJSONFromUrl("http://180.69.217.73:8080/OneOOMT/list.jsp");
+                if(filesOnCloud == null) {
+                    Toast.makeText(getApplicationContext(), "ERR: No Files on Cloud to show !", Toast.LENGTH_LONG).show();
+                    return false;
+                }
 
-                Log.e(TAG,jObj.toString());
+                if(filesOnCloud.length==0) {
+                    Toast.makeText(getApplicationContext(), "ERR: No Files on Cloud to show !", Toast.LENGTH_LONG).show();
+                    return false;
+                }
+
+                int msize3 = filesOnCloud.length;
+                final CharSequence items3[] = new CharSequence[msize3];
+                for(int i=0;i<msize3;i++) {
+                    long sz = filesizeOnCloud[i];
+                    String _sz=null;
+                    if(sz > 1024*1024) _sz = "" + sz / (1024 * 1024) + "MB";
+                    else if(sz > 1024) _sz = "" + sz / (1024) + "KB";
+                    else _sz = "" + sz + "B";
+                    items3[i] = filesOnCloud[i] +  "(" + _sz + ")" ;
+                }
+
+                AlertDialog.Builder alertDialog3 = new AlertDialog.Builder(this);
+                //alertDialog.setIcon(R.drawable.window);
+                alertDialog3.setTitle("Select An File on the Cloud");
+                alertDialog3.setItems(items3, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int index) {
+                        Intent intent = new Intent(Main2Activity.this, CloudFileActivity.class);
+                        intent.putExtra("files", filesOnCloud);
+                        intent.putExtra("pos", index);
+                        startActivityForResult(intent, REQUEST_ACTIVITY_FILE_LIST);
+                    }
+                });
+                alertDialog3.setNegativeButton("Back",null);
+                AlertDialog alert3 = alertDialog3.create();
+                alert3.show();
                 return true;
 
             case R.id.memory:
@@ -873,7 +912,13 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
                 final String filepath[] = new String[msize];
 
                 for(int i=0;i<msize;i++) {
-                    items[i] = list[i].getName();
+                    long sz = list[i].length();
+                    String _sz=null;
+                    if(sz > 1024*1024) _sz = "" + sz / (1024 * 1024) + "MB";
+                    else if(sz > 1024) _sz = "" + sz / (1024) + "KB";
+                    else _sz = "" + sz + "B";
+                    items[i] = list[i].getName() + "(" + _sz + ")" ;
+
                     filepath[i] = list[i].getAbsolutePath();
                 }
                 //final CharSequence items[] = {" A "," B "};
@@ -908,7 +953,13 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
                 final String filepath2[] = new String[msize2];
 
                 for(int i=0;i<msize2;i++) {
-                    items2[i] = list2[i].getName();
+                    long sz = list2[i].length();
+                    String _sz=null;
+                    if(sz > 1024*1024) _sz = "" + sz / (1024 * 1024) + "MB";
+                    else if(sz > 1024) _sz = "" + sz / (1024) + "KB";
+                    else _sz = "" + sz + "B";
+
+                    items2[i] = list2[i].getName() + "(" + _sz + ")" ;
                     filepath2[i] = list2[i].getAbsolutePath();
                 }
                 //final CharSequence items[] = {" A "," B "};
@@ -1008,6 +1059,50 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
                 Toast.makeText(Main2Activity.this,"Activity Reloaded ..... ", Toast.LENGTH_LONG).show();
         }
     }
+
+    private String[] getFilesOnCloud(String url[]) {
+        new AsyncTask<String,Void,Boolean>() {
+            @Override
+            protected Boolean doInBackground(String... url) {
+                JSONObject jObj = JSONUtil.getJSONFromUrl(url[0]);
+                try {
+                    JSONArray arr = (JSONArray)jObj.get("files");
+                    filesOnCloud = new String[arr.length()];
+                    filesizeOnCloud = new Long[arr.length()];
+
+                    for(int i=0;i<arr.length();i++) {
+                        JSONObject j = (JSONObject)arr.get(i);
+                        filesOnCloud[i] = (String)j.get("name");
+                        filesizeOnCloud[i] = Long.parseLong((String)j.get("size"));
+                    }
+                }catch(Exception e) {
+                    Log.e(TAG,e.toString());
+                }
+                return true;
+            }
+            @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+            }
+
+            @Override
+            protected void onPostExecute(Boolean result) {
+                super.onPostExecute(result);
+                Log.e(TAG, result?"Sucess":"Fail");
+            }
+        }.execute(url);
+
+        while(filesOnCloud==null) {
+            //Log.e(TAG, "waiting for get filesOnCloud....");
+        }
+
+        for(int i=0;i<filesOnCloud.length;i++) {
+            Log.e(TAG, "Files:" + filesOnCloud[i]);
+        }
+
+        return filesOnCloud;
+    }
+
 
     private void getMyWeather() {
         new AsyncTask<Void,Void,Void>() {

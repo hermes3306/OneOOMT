@@ -444,7 +444,6 @@ public class ActivityUtil {
         return date;
     }
 
-
     public static void deserializeIntoMap(Context ctx, File file, GoogleMap gmap, int width, int height, boolean mode_append) {
         if(file == null)  {
             Log.e(TAG, "No File to deserialized");

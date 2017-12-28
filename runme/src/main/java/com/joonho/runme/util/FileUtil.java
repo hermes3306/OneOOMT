@@ -38,4 +38,9 @@ public class FileUtil {
         }
     }
 
+    public static String[] list(String path) {
+        File file = new File(path);
+        return file.list();
+    }
+
 }

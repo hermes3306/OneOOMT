@@ -236,7 +236,7 @@ public class ActFileActivity extends AppCompatActivity {
                         else if(elapsed > 60000) elapsedstr = ct.getElapsedMinStr();
                         else elapsedstr = ct.getElapsedSecStr();
 
-                        //moveCamera(googleMap, nextpos);
+                        moveCamera(googleMap, nextpos);
 
                         float color = (marker_pos==0? BitmapDescriptorFactory.HUE_ROSE:BitmapDescriptorFactory.HUE_CYAN);
                         Marker marker = googleMap.addMarker(new MarkerOptions().position(nextpos).title(MapUtil.getAddressDong(_ctx, mActivityList.get(marker_pos)))

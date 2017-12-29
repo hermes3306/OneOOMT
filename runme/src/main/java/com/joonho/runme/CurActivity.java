@@ -771,7 +771,6 @@ public class CurActivity extends AppCompatActivity {
 
         if(list ==null) return null;
         return list;
-
     }
 
 

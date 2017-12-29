@@ -104,7 +104,7 @@ public class CloudFileActivity extends AppCompatActivity {
             final TextView tv_address = (TextView) findViewById(R.id.tv_address);
             final SeekBar seekBar = (SeekBar) findViewById(R.id.seekBar);
 
-            public void GO2(final GoogleMap googleMap) {
+            public void GO(final GoogleMap googleMap) {
                 googleMap.clear();
                 markers = new ArrayList<Marker>();
                 String _url = "http://180.69.217.73:8080/OneOOMT/filedown.jsp?name=" + fnames[position];
@@ -215,68 +215,10 @@ public class CloudFileActivity extends AppCompatActivity {
                 if(!got_bound_wo_error) { myzoom = 16; moveCamera(googleMap, myzoom); }
             }
 
-            public void GO(final GoogleMap googleMap) {
-                Display display = getWindowManager().getDefaultDisplay();
-                DisplayMetrics metrics = new DisplayMetrics();
-                display.getMetrics( metrics );
-                int width = metrics.widthPixels;
-                int height = metrics.heightPixels;
-
-                String _url = "http://180.69.217.73:8080/OneOOMT/filedown.jsp?name=" + fnames[position];
-                try {
-                    HttpDownloadUtility.downloadFile(_url, mediaStorageDir.getAbsolutePath());
-                }catch(Exception e) {
-                    Log.e(TAG, e.toString());
-                }
-
-                File downfile = new File(mediaStorageDir, fnames[position]);
-                if(!downfile.exists()) {
-                    Toast.makeText(_ctx, "file download failed!", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                ActivityUtil.deserializeIntoMap(_ctx, new File(mediaStorageDir, fnames[position]), googleMap, width, height, false );
-                mActivityList = ActivityUtil.mActivityList;
-                ActivityStat activityStat = ActivityUtil.getActivityStat(mActivityList);
-
-                if(mActivityList.size()>1) {
-                    add1 = MapUtil.getAddress(_ctx, mActivityList.get(0));
-                    add2 = MapUtil.getAddress(_ctx, mActivityList.get(mActivityList.size()-1));
-                }
-
-                String inx_str = "\n" + (position+1)  + "/" + fnames.length + "\n" + "Total " + mActivityList.size() + " locations";
-                tv_cursor.setText(inx_str);
-
-                String date_str = ActivityUtil.getStartTime(mActivityList);
-                if(activityStat !=null) {
-
-                    String _minDist = String.format("%.2f", activityStat.distanceKm);
-                    //String sinfo = "\n " + date_str + "\n  (" + _minDist + "Km)";
-                    String sinfo = "\n " + date_str;
-
-                    tv_heading.setText(sinfo);
-                    tv_address.setText("From:" +  add1);
-                    tv_address.setTextColor(Color.GREEN);
-
-                    tv_distance.setText(_minDist);
-                    tv_duration.setText(activityStat.duration);
-                    tv_minperkm.setText(String.format("  %.2f",activityStat.minperKm));
-                    tv_carolies.setText("   " + activityStat.calories);
-                } else {
-                    Toast.makeText(getApplicationContext(), "ERR: No Statistics Information !", Toast.LENGTH_LONG).show();
-                    String _minDist = String.format("-");
-                    String sinfo = "\n " + date_str + "\n  (" + _minDist + "Km)";
-                    tv_heading.setText(sinfo);
-                    tv_distance.setText(_minDist);
-                    tv_duration.setText("-");
-                    tv_minperkm.setText("-");
-                    tv_carolies.setText("-");
-                }
-            }
 
             @Override
             public void onMapReady(final GoogleMap googleMap) {
-                GO2(googleMap);
+                GO(googleMap);
 
                 seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                     public void onStopTrackingTouch(SeekBar seekBar) {
@@ -339,7 +281,7 @@ public class CloudFileActivity extends AppCompatActivity {
                     public void onClick (View view) {
                         if (position > 0 && position < fnames.length) {
                             position--;
-                            GO2(googleMap);
+                            GO(googleMap);
                         }
                     }
                 });
@@ -348,7 +290,7 @@ public class CloudFileActivity extends AppCompatActivity {
                     public void onClick (View view) {
                         if (position >= 0 && position < fnames.length-1) {
                             position++;
-                            GO2(googleMap);
+                            GO(googleMap);
                         }
                     }
                 });

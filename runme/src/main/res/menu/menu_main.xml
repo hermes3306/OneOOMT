@@ -2,11 +2,22 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/files_a"
-        android:title="files activity" />
-
+        android:title="Activities on Mobile" />
     <item
         android:id="@+id/files_cloud"
-        android:title="files on cloud" />
+        android:title="Activities on Cloud" />
+    <item
+        android:id="@+id/sync_cloud2mobile"
+        android:title="Sync from Cloud to  Mobile" />
+    <item
+        android:id="@+id/sync_mobile2cloud"
+        android:title="Sync from Mobile to Cloud" />
+    <item
+        android:id="@+id/clear_useless_mobile_activity"
+        android:title="Clear useless activities (Mobile)" />
+    <item
+        android:id="@+id/clear_useless_cloud_activity"
+        android:title="Clear useless activities (Cloud)" />
     <item
         android:id="@+id/memory"
         android:title="memory ..." />

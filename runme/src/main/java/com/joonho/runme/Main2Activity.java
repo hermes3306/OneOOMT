@@ -36,6 +36,8 @@ import android.widget.Toast;
 import com.joonho.runme.util.ActivityStat;
 import com.joonho.runme.util.ActivityUtil;
 import com.joonho.runme.util.CalDistance;
+import com.joonho.runme.util.DirectoryUtil;
+import com.joonho.runme.util.HttpDownloadUtility;
 import com.joonho.runme.util.JSONUtil;
 import com.joonho.runme.util.MyActivity;
 import com.joonho.runme.util.MyNotifier;
@@ -852,7 +854,7 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
 
                 AlertDialog.Builder alertDialog3 = new AlertDialog.Builder(this);
                 //alertDialog.setIcon(R.drawable.window);
-                alertDialog3.setTitle("Select An File on the Cloud");
+                alertDialog3.setTitle("Select an activity on the cloud("+filesOnCloud.length+")");
                 alertDialog3.setItems(items3, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int index) {
@@ -865,6 +867,27 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
                 alertDialog3.setNegativeButton("Back",null);
                 AlertDialog alert3 = alertDialog3.create();
                 alert3.show();
+                return true;
+
+            case R.id.sync_cloud2mobile:
+                String urls2[] = new String[1];
+                urls2[0] = "http://180.69.217.73:8080/OneOOMT/filelist.jsp";
+                filesOnCloud = getFilesOnCloud(Main2Activity.this, urls2);
+                String fileURL[] = new String[filesOnCloud.length];
+
+                for(int i=0;i<fileURL.length;i++) fileURL[i] = "http://180.69.217.73:8080/OneOOMT/filedown.jsp?name="
+                        + filesOnCloud[i];
+                HttpDownloadUtility.downloadFileAsync(Main2Activity.this,fileURL,mediaStorageDir.getAbsolutePath());
+                return true;
+
+            case R.id.sync_mobile2cloud:
+                return true;
+
+            case R.id.clear_useless_mobile_activity:
+                File flist[] = mediaStorageDir.listFiles();
+                String filepath5[] = new String[flist.length];
+                for(int i=0;i<filepath5.length;i++) filepath5[i] = flist[i].getAbsolutePath();
+                DirectoryUtil.clearUserlessMobileActivities(Main2Activity.this,filepath5);
                 return true;
 
             case R.id.memory:
@@ -926,7 +949,7 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
 
                 AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
                 //alertDialog.setIcon(R.drawable.window);
-                alertDialog.setTitle("Select An Activity");
+                alertDialog.setTitle("Select an activity on the mobile("+msize+")");
                 alertDialog.setItems(items, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int index) {
@@ -967,7 +990,7 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
 
                 AlertDialog.Builder alertDialog2 = new AlertDialog.Builder(this);
                 //alertDialog.setIcon(R.drawable.window);
-                alertDialog2.setTitle("Select An Activity");
+                alertDialog2.setTitle("Select an activity on the mobile("+msize2+")");
                 alertDialog2.setItems(items2, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int index) {

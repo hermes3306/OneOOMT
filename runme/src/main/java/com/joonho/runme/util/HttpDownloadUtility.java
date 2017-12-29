@@ -84,9 +84,7 @@ public class HttpDownloadUtility {
         httpConn.disconnect();
     }
 
-    public static boolean downloadFileProgress[] = null;
     public static void downloadFileAsync(final Context ctx, final String fileURL[], final String saveDir) {
-        downloadFileProgress = null;
         AsyncTask aTask = new AsyncTask<String, Void, Boolean>() {
             ProgressDialog asyncDialog = new ProgressDialog(ctx);
             @Override
@@ -96,7 +94,6 @@ public class HttpDownloadUtility {
                     for(int i=0;i<fileURL.length;i++) {
                         downloadFile(url[i], saveDir);
                         asyncDialog.setProgress(i);
-                        downloadFileProgress[i] = true;
                     }
                 }catch(Exception e) {
                     Log.e(TAG, e.toString());
@@ -107,8 +104,6 @@ public class HttpDownloadUtility {
 
             @Override
             protected void onPreExecute() {
-                downloadFileProgress = new boolean[fileURL.length];
-                for(int i=0;i<downloadFileProgress.length;i++) downloadFileProgress[i] = false;
                 asyncDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
                 asyncDialog.setMessage("Downloading...");
                 asyncDialog.show();
@@ -123,10 +118,12 @@ public class HttpDownloadUtility {
             }
         }.execute(fileURL);
 
-        while (aTask.getStatus() != AsyncTask.Status.FINISHED) {
+        int countdown = 10;
+        while (aTask.getStatus() != AsyncTask.Status.FINISHED && countdown >0) {
             try {
-                Log.e(TAG, "waiting for get filesOnCloud....");
+                Log.e(TAG, "waiting for file download....");
                 Thread.sleep(100); //0.1초 기다림
+                countdown--;
             } catch (Exception e) {
                 Log.e(TAG, e.toString());
             }
@@ -177,10 +174,12 @@ public class HttpDownloadUtility {
 
         }.execute(url);
 
-        while (aTask.getStatus() != AsyncTask.Status.FINISHED) {
+        int countdown = 10;
+        while (aTask.getStatus() != AsyncTask.Status.FINISHED && countdown > 0) {
             try {
                 Log.e(TAG, "waiting for get filesOnCloud....");
                 Thread.sleep(100); //0.1초 기다림
+                countdown--;
             } catch (Exception e) {
                 Log.e(TAG, e.toString());
             }

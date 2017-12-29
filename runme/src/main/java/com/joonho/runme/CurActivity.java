@@ -484,13 +484,9 @@ public class CurActivity extends AppCompatActivity {
                         Log.e(TAG, e.toString() + "Trying to get again... (try_cnt:" +try_cnt+")");
                     }
                 }while(!got_bound_wo_error && try_cnt < 3);
-
                 if(!got_bound_wo_error) { myzoom = 16; moveCamera(googleMap, myzoom); }
-
             }
-
         });
-
     }
 
 
@@ -724,7 +720,6 @@ public class CurActivity extends AppCompatActivity {
         myzoom = googleMap.getCameraPosition().zoom;
         CameraPosition cameraPosition = new CameraPosition.Builder().target(loc).zoom(myzoom).build();
         googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-
     }
 
     public ArrayList<MyActivity> deserialize(File file) {

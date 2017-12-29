@@ -3,6 +3,8 @@ package com.joonho.runme.util;
 /**
  * Created by nice9 on 2017-12-07.
  */
+import android.util.Log;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -13,6 +15,7 @@ import java.net.URL;
 
 public class HttpDownloadUtility {
     private static final int BUFFER_SIZE = 4096;
+    private static String TAG = "HttpDownloadUtility";
 
     /**
      * Downloads a file from a URL
@@ -46,10 +49,10 @@ public class HttpDownloadUtility {
                         fileURL.length());
             }
 
-            System.out.println("Content-Type = " + contentType);
-            System.out.println("Content-Disposition = " + disposition);
-            System.out.println("Content-Length = " + contentLength);
-            System.out.println("fileName = " + fileName);
+            Log.e(TAG,"Content-Type = " + contentType);
+            Log.e(TAG,"Content-Disposition = " + disposition);
+            Log.e(TAG,"Content-Length = " + contentLength);
+            Log.e(TAG,"fileName = " + fileName);
 
             // opens input stream from the HTTP connection
             InputStream inputStream = httpConn.getInputStream();
@@ -67,9 +70,9 @@ public class HttpDownloadUtility {
             outputStream.close();
             inputStream.close();
 
-            System.out.println("File downloaded");
+            Log.e(TAG,"File downloaded");
         } else {
-            System.out.println("No file to download. Server replied HTTP code: " + responseCode);
+            Log.e(TAG,"No file to download. Server replied HTTP code: " + responseCode);
         }
         httpConn.disconnect();
     }

@@ -28,6 +28,9 @@
             android:name=".CurActivity"
             android:screenOrientation="portrait" />
         <activity
+            android:name=".CloudFileActivity"
+            android:screenOrientation="portrait" />
+        <activity
             android:name=".Main2Activity"
             android:screenOrientation="portrait">
             <intent-filter>

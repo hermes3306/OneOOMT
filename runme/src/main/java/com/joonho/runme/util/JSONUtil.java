@@ -56,7 +56,7 @@ public class JSONUtil {
             reader.close();
             json = sb.toString();
             json.trim();
-            Log.e(TAG, json);
+            //Log.e(TAG, json);
             System.out.println(json);
         } catch (Exception e) {
             Log.e(TAG, "Error converting result " + e.toString());

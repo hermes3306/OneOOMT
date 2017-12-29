@@ -41,6 +41,7 @@ import com.joonho.runme.util.MyActivity;
 import com.joonho.runme.util.MyNotifier;
 import com.joonho.runme.util.StringUtil;
 import com.joonho.runme.util.WeatherAPI;
+import com.joonho.runme.CloudFileActivity;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -826,7 +827,7 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
             case R.id.files_cloud:
                 String urls[] = new String[1];
                 urls[0] = "http://180.69.217.73:8080/OneOOMT/filelist.jsp";
-                filesOnCloud = getFilesOnCloud(urls);
+                filesOnCloud = getFilesOnCloud(Main2Activity.this, urls);
 
                 if(filesOnCloud == null) {
                     Toast.makeText(getApplicationContext(), "ERR: No Files on Cloud to show !", Toast.LENGTH_LONG).show();
@@ -1060,9 +1061,10 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
         }
     }
 
-    private String[] getFilesOnCloud(String url[]) {
-        filesOnCloud = null;
+    private String[] getFilesOnCloud(final Context context, String url[]) {
         new AsyncTask<String,Void,Boolean>() {
+            ProgressDialog asyncDialog = new ProgressDialog(context);
+
             @Override
             protected Boolean doInBackground(String... url) {
                 JSONObject jObj = JSONUtil.getJSONFromUrl(url[0]);
@@ -1081,24 +1083,36 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
                 }
                 return true;
             }
+
             @Override
             protected void onPreExecute() {
+                filesOnCloud = null;
+                asyncDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                asyncDialog.setMessage("Downloading...");
+                asyncDialog.show();
                 super.onPreExecute();
             }
 
             @Override
             protected void onPostExecute(Boolean result) {
+                asyncDialog.dismiss();
                 super.onPostExecute(result);
-                Log.e(TAG, result?"Sucess":"Fail");
+                Toast.makeText(context, "list download " + result + "!!", Toast.LENGTH_SHORT).show();
             }
+
         }.execute(url);
 
         while(filesOnCloud==null) {
-            //Log.e(TAG, "waiting for get filesOnCloud....");
+            try {
+                Log.e(TAG, "waiting for get filesOnCloud....");
+                Thread.sleep(100); //0.1초 기다림
+            }catch(Exception e) {
+                Log.e(TAG, e.toString());
+            }
         }
 
         for(int i=0;i<filesOnCloud.length;i++) {
-            Log.e(TAG, "Files:" + filesOnCloud[i]);
+            Log.e(TAG, "File:" + filesOnCloud[i]);
         }
 
         return filesOnCloud;

@@ -3,7 +3,14 @@ package com.joonho.runme.util;
 /**
  * Created by nice9 on 2017-12-07.
  */
+import android.app.ProgressDialog;
+import android.content.Context;
+import android.os.AsyncTask;
 import android.util.Log;
+import android.widget.Toast;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -76,4 +83,110 @@ public class HttpDownloadUtility {
         }
         httpConn.disconnect();
     }
+
+    public static boolean downloadFileProgress[] = null;
+    public static void downloadFileAsync(final Context ctx, final String fileURL[], final String saveDir) {
+        downloadFileProgress = null;
+        AsyncTask aTask = new AsyncTask<String, Void, Boolean>() {
+            ProgressDialog asyncDialog = new ProgressDialog(ctx);
+            @Override
+            protected Boolean doInBackground(String... url) {
+                try {
+                    asyncDialog.setMax(fileURL.length);
+                    for(int i=0;i<fileURL.length;i++) {
+                        downloadFile(url[i], saveDir);
+                        asyncDialog.setProgress(i);
+                        downloadFileProgress[i] = true;
+                    }
+                }catch(Exception e) {
+                    Log.e(TAG, e.toString());
+                    return false;
+                }
+                return true;
+            }
+
+            @Override
+            protected void onPreExecute() {
+                downloadFileProgress = new boolean[fileURL.length];
+                for(int i=0;i<downloadFileProgress.length;i++) downloadFileProgress[i] = false;
+                asyncDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                asyncDialog.setMessage("Downloading...");
+                asyncDialog.show();
+                super.onPreExecute();
+            }
+
+            @Override
+            protected void onPostExecute(Boolean result) {
+                asyncDialog.dismiss();
+                super.onPostExecute(result);
+                Toast.makeText(ctx, "file download " + result + "!!", Toast.LENGTH_SHORT).show();
+            }
+        }.execute(fileURL);
+
+        while (aTask.getStatus() != AsyncTask.Status.FINISHED) {
+            try {
+                Log.e(TAG, "waiting for get filesOnCloud....");
+                Thread.sleep(100); //0.1초 기다림
+            } catch (Exception e) {
+                Log.e(TAG, e.toString());
+            }
+        }
+    }
+
+
+    static String filesOnCloud[] = null;
+    static Long filesizeOnCloud[] = null;
+
+    private String[] getFilesOnCloud(final Context context, String url[]) {
+        AsyncTask aTask = new AsyncTask<String, Void, Boolean>() {
+            ProgressDialog asyncDialog = new ProgressDialog(context);
+            @Override
+            protected Boolean doInBackground(String... url) {
+                JSONObject jObj = JSONUtil.getJSONFromUrl(url[0]);
+                try {
+                    JSONArray arr = (JSONArray) jObj.get("files");
+                    filesOnCloud = new String[arr.length()];
+                    filesizeOnCloud = new Long[arr.length()];
+
+                    for (int i = 0; i < arr.length(); i++) {
+                        JSONObject j = (JSONObject) arr.get(i);
+                        filesOnCloud[i] = (String) j.get("name");
+                        filesizeOnCloud[i] = Long.parseLong((String) j.get("size"));
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, e.toString());
+                }
+                return true;
+            }
+
+            @Override
+            protected void onPreExecute() {
+                filesOnCloud = null;
+                asyncDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                asyncDialog.setMessage("Downloading...");
+                asyncDialog.show();
+                super.onPreExecute();
+            }
+
+            @Override
+            protected void onPostExecute(Boolean result) {
+                asyncDialog.dismiss();
+                super.onPostExecute(result);
+                Toast.makeText(context, "list download " + result + "!!", Toast.LENGTH_SHORT).show();
+            }
+
+        }.execute(url);
+
+        while (aTask.getStatus() != AsyncTask.Status.FINISHED) {
+            try {
+                Log.e(TAG, "waiting for get filesOnCloud....");
+                Thread.sleep(100); //0.1초 기다림
+            } catch (Exception e) {
+                Log.e(TAG, e.toString());
+            }
+        }
+        return filesOnCloud;
+    }
+
+
 }

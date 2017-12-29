@@ -108,15 +108,17 @@ public class CloudFileActivity extends AppCompatActivity {
                 googleMap.clear();
                 markers = new ArrayList<Marker>();
                 String _url = "http://180.69.217.73:8080/OneOOMT/filedown.jsp?name=" + fnames[position];
+                String urls[] = new String[1];
+                urls[0] = _url;
                 try {
-                    HttpDownloadUtility.downloadFile(_url, mediaStorageDir.getAbsolutePath());
+                    HttpDownloadUtility.downloadFileAsync(CloudFileActivity.this, urls, mediaStorageDir.getAbsolutePath());
                 }catch(Exception e) {
                     Log.e(TAG, e.toString());
                 }
 
                 File downfile = new File(mediaStorageDir, fnames[position]);
                 if(!downfile.exists()) {
-                    Toast.makeText(_ctx, "file download failed!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(_ctx, "file("+downfile.getName()+") download failed!", Toast.LENGTH_SHORT).show();
                     return;
                 }
 

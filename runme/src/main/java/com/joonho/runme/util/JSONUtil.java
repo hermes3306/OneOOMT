@@ -1,6 +1,10 @@
 package com.joonho.runme.util;
 
+import android.app.ProgressDialog;
+import android.content.Context;
+import android.os.AsyncTask;
 import android.util.Log;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -8,8 +12,12 @@ import org.json.JSONObject;
 import org.json.JSONStringer;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -70,5 +78,77 @@ public class JSONUtil {
         // return JSON String
         return jObj;
     }
+
+    public static void postJSON(String _url, JSONObject jsonObject) {
+        HttpURLConnection connection;
+        Log.e(TAG, "url:" + _url);
+        try {
+            URL url = new URL(_url);
+            connection = (HttpURLConnection)url.openConnection();
+            if(connection!=null) {
+                connection.setReadTimeout(15000 /* milliseconds */);
+                connection.setConnectTimeout(15000 /* milliseconds */);
+                connection.setRequestMethod("POST");
+                connection.setDoInput(true);
+                connection.setDoOutput(true);
+            } else return;
+
+            OutputStream os = connection.getOutputStream();
+            BufferedWriter writer = new BufferedWriter(
+                    new OutputStreamWriter(os, "UTF-8"));
+            writer.write(jsonObject.toString());
+            writer.flush();
+            writer.close();
+            os.close();
+            Log.e(TAG, "JSON Post OK!");
+        } catch (Exception e) {
+            Log.e(TAG, "JSON Post Error!");
+            Log.e(TAG,e.toString());
+            e.printStackTrace();
+            return;
+        }
+
+        StringBuffer sb = new StringBuffer();
+        try {
+            BufferedReader reader =
+                    new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            String line = null;
+            while ((line = reader.readLine()) != null) {
+                sb.append(line + "\n");
+            }
+            reader.close();
+            Log.e(TAG, "Result:" + sb.toString());
+        } catch (Exception e) {
+            Log.e(TAG, "Error:" + e.toString());
+        }
+    }
+
+    private void postAnJSONAsync(final Context context, final String url, JSONObject jobj) {
+        new AsyncTask<JSONObject,Void,Void>() {
+            ProgressDialog asyncDialog = new ProgressDialog(context);
+
+            @Override
+            protected Void doInBackground(JSONObject... jobj) {
+                postJSON(url,jobj[0]);
+                return null;
+            }
+
+            @Override
+            protected void onPreExecute() {
+                asyncDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                asyncDialog.setMessage("postJSON...");
+                asyncDialog.show();
+                super.onPreExecute();
+            }
+
+            @Override
+            protected void onPostExecute(Void result) {
+                asyncDialog.dismiss();
+                super.onPostExecute(result);
+            }
+
+        }.execute(jobj);
+    }
+
 
 }

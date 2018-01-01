@@ -37,7 +37,9 @@ import com.joonho.runme.util.ActivityStat;
 import com.joonho.runme.util.ActivityUtil;
 import com.joonho.runme.util.CalDistance;
 import com.joonho.runme.util.DirectoryUtil;
+import com.joonho.runme.util.HttpDBInsert;
 import com.joonho.runme.util.HttpDownloadUtility;
+import com.joonho.runme.util.HttpRequest;
 import com.joonho.runme.util.JSONUtil;
 import com.joonho.runme.util.MyActivity;
 import com.joonho.runme.util.MyNotifier;
@@ -111,6 +113,7 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
     private  int mode4 =  0;
     private  boolean mode_noti = false;
     private boolean mode_low_battery = true;
+    private boolean direct_db_update = true;
 
     private double paces[] = new double[1000]; //upto 1000 km
     private long   startime_paces[] = new long[1000]; // upto 1000 start time
@@ -679,6 +682,21 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
                     total_distance = total_distance + cur_dist;
                     if(cur_dist > 0.001f) {
                         mList.add(new MyActivity(cur_loc.getLatitude(), cur_loc.getLongitude(), cur_loc.getAltitude(), LocTimeStr(cur_loc)));
+
+
+                        if(direct_db_update) {
+                            String urlstr = "http://180.69.217.73/OneOOMT/insert.php?";
+                            urlstr += "latitude=" + cur_loc.getLatitude();
+                            urlstr += "&longitude=" + cur_loc.getLongitude();
+                            urlstr += "&altitude=" + cur_loc.getAltitude();
+                            urlstr += "&added_on=" + LocTimeStr(cur_loc);
+                            try {
+                                new HttpRequest().execute(new URL(urlstr));
+                                Log.e(TAG,"DB update... OK");
+                            } catch (Exception e) {
+                                Log.e(TAG, e.toString());
+                            }
+                        }
                     }
 
                     /* 10초단위로 시간 측정 및 거리 측정 */
@@ -828,7 +846,8 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
         switch(id) {
             case R.id.files_cloud:
                 String urls[] = new String[1];
-                urls[0] = "http://180.69.217.73:8080/OneOOMT/filelist.jsp";
+                //urls[0] = "http://180.69.217.73:8080/OneOOMT/filelist.jsp";
+                urls[0] =  "http://180.69.217.73/OneOOMT/filelist.php";
                 filesOnCloud = getFilesOnCloud(Main2Activity.this, urls);
 
                 if(filesOnCloud == null) {
@@ -869,36 +888,15 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
                 alert3.show();
                 return true;
 
-            case R.id.sync_cloud2mobile:
-                String urls2[] = new String[1];
-                urls2[0] = "http://180.69.217.73:8080/OneOOMT/filelist.jsp";
-                filesOnCloud = getFilesOnCloud(Main2Activity.this, urls2);
-                String fileURL[] = new String[filesOnCloud.length];
-
-                for(int i=0;i<fileURL.length;i++) fileURL[i] = "http://180.69.217.73:8080/OneOOMT/filedown.jsp?name="
-                        + filesOnCloud[i];
-                HttpDownloadUtility.downloadFileAsync(Main2Activity.this,fileURL,mediaStorageDir.getAbsolutePath());
-                return true;
-
             case R.id.sync_mobile2cloud:
+            case R.id.uploadall2:
+            case R.id.uploadall:
+                alertUploadServerChoice();
                 return true;
 
-            case R.id.clear_useless_mobile_activity:
-                File flist[] = mediaStorageDir.listFiles();
-                String filepath5[] = new String[flist.length];
-                for(int i=0;i<filepath5.length;i++) filepath5[i] = flist[i].getAbsolutePath();
-                DirectoryUtil.clearUserlessMobileActivities(Main2Activity.this,filepath5);
+            case R.id.clear_useless_cloud_activity:
                 return true;
-
-            case R.id.memory:
-                Intent memoryIntent = new Intent(Main2Activity.this, MemoryActivity.class);
-                //memoryIntent.putExtra("curloc", "curloc");
-                startActivity(memoryIntent);
-                return true;
-
-            case R.id.web:
-                Intent wintent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://180.69.217.73:8080/OneOOMT"));
-                startActivity(wintent);
+            case R.id.upload:
                 return true;
 
             case R.id.webupload:
@@ -906,64 +904,40 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
                 doHttpFileUpload3(Main2Activity.this, last_fname);
                 return true;
 
-            case R.id.uploadall2:
-                alertUploadServerChoice();
+            case R.id.dbupdate:
+                HttpDBInsert httpdbInsert = new HttpDBInsert();
+                httpdbInsert.setContext(Main2Activity.this);
+
+                MyActivity malist[] = new MyActivity[mList.size()];
+                for(int i=0;i<malist.length;i++) malist[i] = mList.get(i);
+
+                httpdbInsert.execute(malist);
                 return true;
 
-            case R.id.uploadall:
-                doHttpFileUploadAll(Main2Activity.this, null);
-                return true;
-
-            case R.id.map:
-                Intent intent = new Intent(Main2Activity.this, CurActivity.class);
-                intent.putExtra("locations",mList);
-
-                startActivity(intent);
-                return true;
-
-            case R.id.files_d:
-                ActivityUtil._default_ext = ".ser";
-                File list[] = ActivityUtil.getFiles();
-
-                if(list == null) {
-                    Toast.makeText(getApplicationContext(), "ERR: No Activities to show !", Toast.LENGTH_LONG).show();
-                    return false;
-                }
-
-                int msize = list.length;
-
-                final CharSequence items[] = new CharSequence[msize];
-                final String filepath[] = new String[msize];
-
-                for(int i=0;i<msize;i++) {
-                    long sz = list[i].length();
-                    String _sz=null;
-                    if(sz > 1024*1024) _sz = "" + sz / (1024 * 1024) + "MB";
-                    else if(sz > 1024) _sz = "" + sz / (1024) + "KB";
-                    else _sz = "" + sz + "B";
-                    items[i] = list[i].getName() + "(" + _sz + ")" ;
-
-                    filepath[i] = list[i].getAbsolutePath();
-                }
-                //final CharSequence items[] = {" A "," B "};
-
-                AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
-                //alertDialog.setIcon(R.drawable.window);
-                alertDialog.setTitle("Select an activity on the mobile("+msize+")");
-                alertDialog.setItems(items, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int index) {
-                        File afile = new File(filepath[index]);
-                        ActivityUtil.showActivityAlertDialog(Main2Activity.this, afile, index);
+            case R.id.dbupdateall:
+                try {
+                    JSONArray jsonArray = new JSONArray();
+                    for (int i = 0; i < mList.size(); i++) {
+                        JSONObject json = new JSONObject();
+                        json.put("lat", mList.get(i).latitude);
+                        json.put("lon", mList.get(i).longitude);
+                        json.put("alt", mList.get(i).altitude);
+                        json.put("add", mList.get(i).added_on);
+                        jsonArray.put(i, json);
                     }
-                });
-                alertDialog.setNegativeButton("Back",null);
-                AlertDialog alert = alertDialog.create();
-                alert.show();
+                    JSONObject jsonActivities = new JSONObject();
+                    jsonActivities.put("activities", jsonArray);
+
+                    Log.e(TAG,jsonActivities.toString());
+                    JSONUtil.postJSON("http://180.69.217.73/OneOOMT/jsonPost.php",jsonActivities );
+
+                }catch(Exception e) {
+                    Log.e(TAG,e.toString());
+                }
                 return true;
+
 
             case R.id.files_a:
-
                 ActivityUtil._default_ext = ".ser";
                 File list2[] = ActivityUtil.getFiles();
                 if(list2 == null) {
@@ -1007,28 +981,87 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
                 alert2.show();
                 return true;
 
-            case R.id.upgrade:
+            case R.id.files_d:
                 ActivityUtil._default_ext = ".ser";
-                File uplist[] = ActivityUtil.getFiles();
-                if(uplist == null) {
+                File list[] = ActivityUtil.getFiles();
+
+                if(list == null) {
                     Toast.makeText(getApplicationContext(), "ERR: No Activities to show !", Toast.LENGTH_LONG).show();
                     return false;
                 }
 
-                int upsize = uplist.length;
-                for(int i=0;i<upsize;i++) ActivityUtil.upgrade(uplist[i]);
+                int msize = list.length;
+
+                final CharSequence items[] = new CharSequence[msize];
+                final String filepath[] = new String[msize];
+
+                for(int i=0;i<msize;i++) {
+                    long sz = list[i].length();
+                    String _sz=null;
+                    if(sz > 1024*1024) _sz = "" + sz / (1024 * 1024) + "MB";
+                    else if(sz > 1024) _sz = "" + sz / (1024) + "KB";
+                    else _sz = "" + sz + "B";
+                    items[i] = list[i].getName() + "(" + _sz + ")" ;
+
+                    filepath[i] = list[i].getAbsolutePath();
+                }
+                //final CharSequence items[] = {" A "," B "};
+
+                AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+                //alertDialog.setIcon(R.drawable.window);
+                alertDialog.setTitle("Select an activity on the mobile("+msize+")");
+                alertDialog.setItems(items, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int index) {
+                        File afile = new File(filepath[index]);
+                        ActivityUtil.showActivityAlertDialog(Main2Activity.this, afile, index);
+                    }
+                });
+                alertDialog.setNegativeButton("Back",null);
+                AlertDialog alert = alertDialog.create();
+                alert.show();
+                return true;
+
+            case R.id.sync_cloud2mobile:
+                String urls2[] = new String[1];
+                urls2[0] = "http://180.69.217.73:8080/OneOOMT/filelist.jsp";
+                filesOnCloud = getFilesOnCloud(Main2Activity.this, urls2);
+                String fileURL[] = new String[filesOnCloud.length];
+
+                for(int i=0;i<fileURL.length;i++) fileURL[i] = "http://180.69.217.73:8080/OneOOMT/filedown.jsp?name="
+                        + filesOnCloud[i];
+                HttpDownloadUtility.downloadFileAsync(Main2Activity.this,fileURL,mediaStorageDir.getAbsolutePath());
+                return true;
+
+            case R.id.clear_useless_mobile_activity:
+                File flist[] = mediaStorageDir.listFiles();
+                String filepath5[] = new String[flist.length];
+                for(int i=0;i<filepath5.length;i++) filepath5[i] = flist[i].getAbsolutePath();
+                DirectoryUtil.clearUserlessMobileActivities(Main2Activity.this,filepath5);
+                return true;
+
+            case R.id.map:
+                Intent intent = new Intent(Main2Activity.this, CurActivity.class);
+                intent.putExtra("locations",mList);
+                startActivity(intent);
+                return true;
+
+
+            case R.id.lowbattery:
+                mode_low_battery = ! mode_low_battery;
+                doMyTimeTask(mode_low_battery?10000:1000);
+                Toast.makeText(Main2Activity.this,mode_low_battery?"Timer period - 10sec":"Timer period - 1sec", Toast.LENGTH_LONG).show();
+                return true;
+
+            case R.id.directdbupdate:
+                direct_db_update = ! direct_db_update;
+                Toast.makeText(Main2Activity.this, direct_db_update?"Direct DB update mode":"No DB update", Toast.LENGTH_LONG).show();
                 return true;
 
             case R.id.notify:
                 mode_noti = !mode_noti;
                 if(mode_noti) MyNotifier.go(Main2Activity.this, "100대명산알람설정", "알람설정이 켜졌습니다.");
                 else MyNotifier.go(Main2Activity.this, "100대명산알람설정", "알람설정이 껴졌습니다.");
-                return true;
-
-            case R.id.lowbattery:
-                mode_low_battery = ! mode_low_battery;
-                doMyTimeTask(mode_low_battery?10000:1000);
-                Toast.makeText(Main2Activity.this,mode_low_battery?"Timer period - 10sec":"Timer period - 1sec", Toast.LENGTH_SHORT).show();
                 return true;
 
             case R.id.weather:
@@ -1038,6 +1071,19 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
                     Toast.makeText(Main2Activity.this, cur_myweather.toString(), Toast.LENGTH_LONG).show();
                 }
                 return true;
+
+            case R.id.memory:
+                Intent memoryIntent = new Intent(Main2Activity.this, MemoryActivity.class);
+                //memoryIntent.putExtra("curloc", "curloc");
+                startActivity(memoryIntent);
+                return true;
+
+
+            case R.id.web:
+                Intent wintent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://180.69.217.73:8080/OneOOMT"));
+                startActivity(wintent);
+                return true;
+
         }
         return super.onOptionsItemSelected(item);
     }

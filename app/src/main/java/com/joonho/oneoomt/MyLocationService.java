@@ -36,9 +36,7 @@ public class MyLocationService extends Service {
     private static DBGateway dbgateway=new DBGateway();
     private static PropsDB pdb = new PropsDB();
     private Intent intent;
-
     private static final int storageopt = 0; //0: DB, 1: Memory
-
     private class LocationListener implements android.location.LocationListener {
         Location mLastLocation;
 
@@ -63,18 +61,14 @@ public class MyLocationService extends Service {
             }
 
             if(location.getProvider().equalsIgnoreCase(LocationManager.NETWORK_PROVIDER)) {
-
                 if(pdb.getProperty(getApplicationContext(), "NETWORK_Listener").equalsIgnoreCase("false")) {
                     Log.e(TAG, "**** NETWORK_PROVIDER based location discarded as NETWORK_Listener is false***");
                     return;
                 }
             }
 
-
             mLastLocation.set(location);
             dbgateway.addLoc(getApplicationContext(), location);
-
-
 
             try {
                 String toastlc = pdb.getProperty(getApplicationContext(), "Toast_LocationChanged");
@@ -127,14 +121,9 @@ public class MyLocationService extends Service {
 
     @Override
     public void onCreate() {
-
         Log.e(TAG, "onCreate");
-
         intent = new Intent(BROADCAST_ACTION);
-
         initializeLocationManager();
-
-
         try {
             mLocationManager.requestLocationUpdates(
                     LocationManager.GPS_PROVIDER,
@@ -236,6 +225,4 @@ public class MyLocationService extends Service {
         }
         return provider1.equals(provider2);
     }
-
-
 }

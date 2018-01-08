@@ -1,5 +1,6 @@
 package com.joonho.myway;
 
+import android.Manifest;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -9,6 +10,7 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.widget.Toast;
 import android.app.Service;
@@ -25,12 +27,6 @@ import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.google.android.gms.maps.CameraUpdate;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.CameraPosition;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MyLocationService extends Service {
 
@@ -53,7 +49,7 @@ public class MyLocationService extends Service {
         public void onLocationChanged(Location location) {
             Log.e(TAG, "onLocationChanged: " + location);
             if(!isBetterLocation(location, mLastLocation)) {
-                Toast.makeText(getApplicationContext(), "!isBetterLocation: " + location, Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "!isBetterLocation: " + location, Toast.LENGTH_LONG).show();
                 return;
             }
 
@@ -63,7 +59,7 @@ public class MyLocationService extends Service {
             //
 
             try {
-                Toast.makeText(getApplicationContext(), "onLocationChanged: " + location, Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "onLocationChanged: " + location, Toast.LENGTH_LONG).show();
 
                 Log.e(TAG, "**** Location:" + location);
                 Log.e(TAG, "**** Provider:" + location.getProvider());
@@ -158,6 +154,7 @@ public class MyLocationService extends Service {
 
     private void initializeLocationManager() {
         Log.e(TAG, "initializeLocationManager - LOCATION_INTERVAL: " + LOCATION_INTERVAL + " LOCATION_DISTANCE: " + LOCATION_DISTANCE);
+
         if (mLocationManager == null) {
             mLocationManager = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
         }

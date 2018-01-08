@@ -685,7 +685,7 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
 
 
                         if(direct_db_update) {
-                            String urlstr = "http://180.69.217.73/OneOOMT/insert.php?";
+                            String urlstr = "http://180.69.217.73:81/OneOOMT/insert.php?";
                             urlstr += "latitude=" + cur_loc.getLatitude();
                             urlstr += "&longitude=" + cur_loc.getLongitude();
                             urlstr += "&altitude=" + cur_loc.getAltitude();
@@ -847,7 +847,7 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
             case R.id.files_cloud:
                 String urls[] = new String[1];
                 //urls[0] = "http://180.69.217.73:8080/OneOOMT/filelist.jsp";
-                urls[0] =  "http://180.69.217.73/OneOOMT/filelist.php";
+                urls[0] =  "http://180.69.217.73:81/OneOOMT/filelist.php";
                 filesOnCloud = getFilesOnCloud(Main2Activity.this, urls);
 
                 if(filesOnCloud == null) {
@@ -929,7 +929,7 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
                     jsonActivities.put("activities", jsonArray);
 
                     Log.e(TAG,jsonActivities.toString());
-                    JSONUtil.postJSON("http://180.69.217.73/OneOOMT/jsonPost.php",jsonActivities );
+                    JSONUtil.postJSON("http://180.69.217.73:81/OneOOMT/jsonPost.php",jsonActivities );
 
                 }catch(Exception e) {
                     Log.e(TAG,e.toString());
@@ -1257,9 +1257,8 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
     }
 
     private void doHttpFileUploadAll(final Context context, String url) {
-        if(url==null) url = "http://180.69.217.73:9090/OneOOMT/upload";
+        if(url==null) url = "http://180.69.217.73:8080/OneOOMT/upload";
         final String _serverUrl = url;
-
         // Pop Up a Dialog
 
         new AsyncTask<Void,Void,Void>() {

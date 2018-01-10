@@ -1,24 +1,9 @@
 package com.joonho.myway;
 
-import android.Manifest;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Location;
-import android.location.LocationManager;
-import android.os.Bundle;
-import android.os.IBinder;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.util.Log;
-import android.widget.Toast;
-import android.app.Service;
-import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
@@ -27,19 +12,33 @@ import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.joonho.myway.util.Config;
+import com.joonho.myway.util.MyActivityUtil;
+import com.joonho.myway.util.StringUtil;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Date;
 
 public class MyLocationService extends Service {
 
     private static final String TAG = "MyLocationService";
-    public static final String BROADCAST_ACTION = "MyLocationService";
     private LocationManager mLocationManager = null;
     private static final int LOCATION_INTERVAL = 3000;
     private static final float LOCATION_DISTANCE = 10f;
     private static final int TWO_MINUTES = 1000 * 60 * 2;
-    private static final int storageopt = 0; //0: DB, 1: Memory
+
+    /* Global variables */
+    private ArrayList<MyActivity> mList = null;
 
     private class LocationListener implements android.location.LocationListener {
         Location mLastLocation;
+
+        public String LocTimeStr(Location loc) {
+            String added_on = StringUtil.DateToString(new Date(loc.getTime()), "yyyy년MM월dd일_HH시mm분ss초" );
+            return added_on;
+        }
+
         public LocationListener(String provider) {
             Log.e(TAG, "LocationListener " + provider);
             mLastLocation = new Location(provider);
@@ -54,16 +53,75 @@ public class MyLocationService extends Service {
             }
 
             mLastLocation.set(location);
-            //
-            // ACTION REQUIRED:::
-            //
+
+            if(mList==null) {
+                mList = new ArrayList<MyActivity>();
+            }
+
+            mList.add(new MyActivity(location.getLatitude(), location.getLongitude(), location.getAltitude(),LocTimeStr(location)));
+            if(Config._last_save_point == null) Config._last_save_point = new Date();
+
+            Date _date = new Date();
+            long _elapsed = _date.getTime() - Config._last_save_point.getTime();
+            boolean _save_activity = false;
+
+            switch(Config._save_interval) {
+                case Config._SAVE_INTERVAL_MININUTE:
+                    if(_elapsed >= Config._MINUTE) _save_activity = true;
+                    break;
+                case Config._SAVE_INTERVAL_10MINUTEES:
+                    if(_elapsed >= Config._10MINUTES) _save_activity = true;
+                    break;
+                case Config._SAVE_INTERVAL_30MINUTEES:
+                    if(_elapsed >= Config._30MINUTES) _save_activity = true;
+                    break;
+                case Config._SAVE_INTERVAL_HOUR:
+                    if(_elapsed >= Config._HOUR) _save_activity = true;
+                    break;
+                case Config._SAVE_INTERVAL_6HOURS:
+                    if(_elapsed >= Config._HOUR) _save_activity = true;
+                    break;
+                case Config._SAVE_INTERVAL_12HOURS:
+                    if(_elapsed >= Config._HOUR) _save_activity = true;
+                    break;
+                case Config._SAVE_INTERVAL_DAY:
+                    if(_elapsed >= Config._DAY) _save_activity = true;
+                    break;
+            }
+
+            if(_save_activity) {
+                String _fname = StringUtil.DateToString(_date,Config._filename_fmt) + Config._default_ext;
+                MyActivityUtil.serializeActivityIntoFile(mList, _fname );
+                Toast.makeText(getApplicationContext(), "saved: " + _fname, Toast.LENGTH_SHORT).show();
+
+                Config._last_save_point = _date;
+
+                if(Config._last_save_fname != null) {
+                    File _lastfile = new File(Config._last_save_fname);
+                    if(_lastfile.exists()) {
+                        MyActivity _firstAct_of_lastfile = MyActivityUtil.deserializeFirstActivity(_lastfile);
+                        if(MyActivityUtil.isSameActivity(_firstAct_of_lastfile, mList.get(0))) {
+                           if(Config._delete_file_with_same_start) _lastfile.delete();
+                            Toast.makeText(getApplicationContext(), "saved: " + _fname , Toast.LENGTH_SHORT).show();
+                            Log.e(TAG, "**** saved:" + _fname + "removed:" + Config._last_save_fname );
+                        } else {
+                            Toast.makeText(getApplicationContext(), "saved: " + _fname, Toast.LENGTH_SHORT).show();
+                            Log.e(TAG, "**** saved:" + _fname);
+                        }
+                    } else{
+                        Toast.makeText(getApplicationContext(), "saved: " + _fname, Toast.LENGTH_SHORT).show();
+                        Log.e(TAG, "**** saved:" + _fname);
+                    }
+                    Config._last_save_fname = _fname;
+                }
+            }
 
             try {
-                Toast.makeText(getApplicationContext(), "onLocationChanged: " + location, Toast.LENGTH_LONG).show();
-
+                //Toast.makeText(getApplicationContext(), "onLocationChanged("+mList.size()+"): " + location, Toast.LENGTH_LONG).show();
                 Log.e(TAG, "**** Location:" + location);
                 Log.e(TAG, "**** Provider:" + location.getProvider());
                 Log.e(TAG, "**** LocationManager.GPS_PROVIDER:" + LocationManager.GPS_PROVIDER);
+                Log.e(TAG, "**** mList.size():" + mList.size());
 
             }catch(Exception e) {
                 e.printStackTrace();
@@ -103,6 +161,7 @@ public class MyLocationService extends Service {
         return START_STICKY;
     }
 
+
     @Override
     public void onCreate() {
         Log.e(TAG, "onCreate");
@@ -114,6 +173,12 @@ public class MyLocationService extends Service {
                     LOCATION_DISTANCE,
                     mLocationListeners[0]
             );
+
+            Toast.makeText(getApplicationContext(),
+                    "GPS Update req: LOCATION INTERVAL" + LOCATION_INTERVAL +
+                            ", LOCATION_DISTANCE " + LOCATION_DISTANCE,
+                    Toast.LENGTH_LONG).show();
+
         } catch (java.lang.SecurityException ex) {
             Log.i(TAG, "fail to request location update, ignore", ex);
         } catch (IllegalArgumentException ex) {
@@ -127,6 +192,12 @@ public class MyLocationService extends Service {
                     LOCATION_DISTANCE,
                     mLocationListeners[1]
             );
+
+            Toast.makeText(getApplicationContext(),
+                    "NETWORK Update req: LOCATION INTERVAL" + LOCATION_INTERVAL +
+                            ", LOCATION_DISTANCE " + LOCATION_DISTANCE,
+                    Toast.LENGTH_LONG).show();
+
         } catch (java.lang.SecurityException ex) {
             Log.i(TAG, "fail to request location update, ignore", ex);
         } catch (IllegalArgumentException ex) {
@@ -153,6 +224,9 @@ public class MyLocationService extends Service {
     }
 
     private void initializeLocationManager() {
+        Toast.makeText(getApplicationContext(), "initializeLocationManager - LOCATION_INTERVAL: " + LOCATION_INTERVAL + " LOCATION_DISTANCE: " + LOCATION_DISTANCE,
+                Toast.LENGTH_LONG).show();
+
         Log.e(TAG, "initializeLocationManager - LOCATION_INTERVAL: " + LOCATION_INTERVAL + " LOCATION_DISTANCE: " + LOCATION_DISTANCE);
 
         if (mLocationManager == null) {

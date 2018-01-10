@@ -1,6 +1,7 @@
 package com.joonho.myway;
 
 import android.Manifest;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -8,6 +9,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -19,8 +21,15 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.joonho.myway.util.MyActivityUtil;
+
+import java.io.File;
+
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    private boolean  __svc_started = false;
+    private Intent   __svc_Intent = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,26 +110,64 @@ public class MainActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
+        if (id == R.id.nav_start) {
+            if(__svc_started) {
+                Toast.makeText(MainActivity.this, "SERVICE ALREADY STARTED", Toast.LENGTH_SHORT).show();
+                return true;
+            }
 
-        if (id == R.id.nav_camera) {
-
-            Toast.makeText(MainActivity.this,"START SERVICE", Toast.LENGTH_LONG).show();
-
+            Toast.makeText(MainActivity.this,"START SERVICE", Toast.LENGTH_SHORT).show();
             Intent myI = new Intent(this, MyLocationService.class);
             startService(myI);
+            __svc_started = true;
 
+        } else if (id == R.id.nav_list) {
+            File files_nav_list[] = MyActivityUtil.getFiles();
+            if(files_nav_list == null) {
+                Toast.makeText(getApplicationContext(), "ERR: No Activities to show !", Toast.LENGTH_SHORT).show();
+                return false;
+            }
 
+            int files_nav_list_size = files_nav_list.length;
+            final CharSequence items2[] = new CharSequence[files_nav_list_size];
+            final String filepath2[] = new String[files_nav_list_size];
 
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
+            for(int i=0;i<files_nav_list_size;i++) {
+                long sz = files_nav_list
+                        [i].length();
+                String _sz=null;
+                if(sz > 1024*1024) _sz = "" + sz / (1024 * 1024) + "MB";
+                else if(sz > 1024) _sz = "" + sz / (1024) + "KB";
+                else _sz = "" + sz + "B";
+                items2[i] = files_nav_list[i].getName() + "(" + _sz + ")" ;
+                filepath2[i] = files_nav_list[i].getAbsolutePath();
+            }
 
-        } else if (id == R.id.nav_slideshow) {
+            AlertDialog.Builder alertDialog2 = new AlertDialog.Builder(this);
+            alertDialog2.setTitle("Select an activity on the mobile("+files_nav_list_size+")");
+            alertDialog2.setItems(items2, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int index) {
+                    File afile = new File(filepath2[index]);
+                    Intent intent = new Intent(MainActivity.this, FileActivity.class);
+                    intent.putExtra("file", afile.getAbsolutePath());
+                    intent.putExtra("pos", index);
+                    startActivity(intent);
+                }
+            });
+            alertDialog2.setNegativeButton("Back",null);
+            AlertDialog alert2 = alertDialog2.create();
+            alert2.show();
+            return true;
+
+        } else if (id == R.id.nav_map) {
 
         } else if (id == R.id.nav_manage) {
+            MyActivityUtil.dododo();
+            return true;
+        } else if (id == R.id.nav_cloud_list) {
 
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
+        } else if (id == R.id.nav_cloud_sync) {
 
         }
 

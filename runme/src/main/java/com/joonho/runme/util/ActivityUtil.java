@@ -43,10 +43,12 @@ import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.text.Collator;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -227,24 +229,18 @@ public class ActivityUtil {
         }.execute();
     }
 
-    public static void serializeActivityIntoFile(ArrayList<MyActivity> list, String fileName) {
-        if(list== null) return;
-        if(fileName == null) return;
-
-        if(list.size()==0) return;
-        if(fileName.length() ==0 ) return;
+    public static void serializeActivityIntoFile(ArrayList<MyActivity> list, int start, int end, String fileName) {
+        if(start <0 || end >= list.size()) return;
 
         if(!mediaStorageDir.exists()) mediaStorageDir.mkdirs();
         File file = new File(mediaStorageDir, fileName);
-
-        Log.e(TAG, "ActivityFileName to be written: " + file.toString());
-
+        Log.e(TAG, "**** Activity file: " + file.toString());
         try {
             FileOutputStream fos = new FileOutputStream(file);
             BufferedOutputStream bos = new BufferedOutputStream(fos);
             ObjectOutputStream out = new ObjectOutputStream(bos);
 
-            for(int i=0;i<list.size();i++) {
+            for(int i=start;i<= end;i++) {
                 MyActivity ma = list.get(i);
                 out.writeObject(ma);
             }
@@ -254,6 +250,15 @@ public class ActivityUtil {
             Log.e(TAG, e.toString());
         }
     }
+
+    public static void serializeActivityIntoFile(ArrayList<MyActivity> list, String fileName) {
+        if(list== null) return;
+        if(fileName == null) return;
+        if(list.size()==0) return;
+        if(fileName.length() ==0 ) return;
+        serializeActivityIntoFile(list,0,list.size()-1,fileName);
+    }
+
 
     public static String serializeWithCurrentTime(ArrayList<MyActivity> list) {
 
@@ -310,6 +315,29 @@ public class ActivityUtil {
         return flist;
     }
 
+    public static File[] getFilesStartsWith(final String prefix) {
+        FilenameFilter fnf = new FilenameFilter() {
+            @Override
+            public boolean accept(File file, String s) {
+                return s.toLowerCase().startsWith(prefix);
+            }
+        };
+        File[] flist  = mediaStorageDir.listFiles(fnf);
+        Arrays.sort(flist, Collections.<File>reverseOrder());
+        return flist;
+    }
+
+    public static File[] getFilesEndsWith(final String postfix) {
+        FilenameFilter fnf = new FilenameFilter() {
+            @Override
+            public boolean accept(File file, String s) {
+                return s.toLowerCase().endsWith(postfix);
+            }
+        };
+        File[] flist  = mediaStorageDir.listFiles(fnf);
+        Arrays.sort(flist, Collections.<File>reverseOrder());
+        return flist;
+    }
 
     public static File getLastActivityFile() {
         File dir = mediaStorageDir;
@@ -789,6 +817,106 @@ public class ActivityUtil {
         }
         else { // pass
             Log.e(TAG, "" + f.getName() + " deserialize() success");
+        }
+    }
+
+    public static Date getActivityTime(MyActivity ma) {
+        if(ma==null) return null;
+        Date date = StringUtil.StringToDate(ma.added_on, "yyyy년MM월dd일_HH시mm분ss초");
+        return date;
+    }
+
+    public static final Comparator<MyActivity> ALPHA_COMPARATOR  = new Comparator<MyActivity>() {
+        private final Collator sCollator = Collator.getInstance();
+        public int compare(MyActivity object1, MyActivity object2) {
+            return sCollator.compare(object1.added_on, object2.added_on);
+        }
+    };
+
+
+    public static boolean isSameActivity(MyActivity a1, MyActivity a2) {
+        if(a1 == null || a2 == null) return false;
+        if(a1.latitude == a2.latitude && a1.longitude == a2.longitude &&
+                a1.added_on.equalsIgnoreCase(a2.added_on)) return true;
+        return false;
+    }
+
+    public static void dododo() {
+        File files[] = getFilesStartsWith("2018_01_11");
+        dododo(files);
+    }
+
+    public static void dododo(File files[]) {
+        Log.e(TAG, "dododo");
+        ArrayList<MyActivity> _all_list = new ArrayList<MyActivity>();
+
+        for(int i=0;i<files.length;i++) {
+            Log.e(TAG, "*** deserialize: " + files[i].getName());
+
+            if(files[i].getName().contains("(F)")) continue;
+
+            ArrayList<MyActivity> _list = deserializeFile(files[i]);
+            _all_list.addAll(_list);
+        }
+
+        Collections.sort(_all_list,ALPHA_COMPARATOR);
+        MyActivity pma = null;
+
+        for(int i=_all_list.size()-1;i>0;i--) {
+            MyActivity ma = _all_list.get(i);
+            if(i>0) pma = _all_list.get(i-1);
+            if(isSameActivity(ma, pma)) Log.e(TAG, "" + String.format("%04d",i) + ":" + ma.added_on + "," + ma.latitude + " [S]");
+            else  Log.e(TAG, "" + String.format("%04d",i) + ":" + ma.added_on + "," + ma.latitude + " [X]");
+            if(isSameActivity(ma, pma)) _all_list.remove(i);
+        }
+
+        String _cur_date = null;
+        int startpos = 0;
+
+        // By adding dummy Activity for tomorrow....
+        Date tomorrow = new Date ( new Date().getTime ( ) + (long) ( 1000 * 60 * 60 * 24 ) );
+        String _added_on = StringUtil.DateToString1(tomorrow, "yyyy년MM월dd일_HH시mm분ss초" );
+        _all_list.add(new MyActivity(-1,-1, -1,_added_on));   // dummy Activity
+
+        for(int i=0;i<_all_list.size();i++) {
+            MyActivity ma = _all_list.get(i);
+            Date _date = getActivityTime(ma);
+
+            if(i==0) _cur_date = StringUtil.DateToString1(_date,"yyyyMMdd");
+            else {
+                String t_str = StringUtil.DateToString1(_date,"yyyyMMdd");
+                if(_cur_date.equalsIgnoreCase(t_str)) {
+                    // pass
+                }else {
+                    // serialize the previous list;
+                    MyActivity _pma = _all_list.get(i-1);
+                    String _fname = StringUtil.DateToString1(getActivityTime(_pma), Config._filename_fmt) + "(F)" + Config._default_ext;
+                    Log.e(TAG,"*" + _cur_date);
+                    serializeActivityIntoFile(_all_list, startpos, i-1, _fname );
+                    Log.e(TAG,"**** " + _fname + "created successfully!" );
+                    Log.e(TAG,"**** " + "from:" + startpos);
+                    Log.e(TAG,"**** " + "to:" + (i-1));
+                    Log.e(TAG,"\n\n");
+
+                    _cur_date = StringUtil.DateToString1(_date,"yyyyMMdd");
+                    startpos=i;
+                }
+            }
+        }
+
+        if(Config._trash_after_dododo) {
+            for (int i = 0; i < files.length; i++) {
+                if(files[i].getName().contains("(F)")) continue;
+                File f = new File(mediaStorageDir, files[i].getName() + ".trash");
+                files[i].renameTo(f);
+                Log.e(TAG, "**** TRASH " + f .getName()+ "!");
+            }
+        } else {
+            for (int i = 0; i < files.length; i++) {
+                if(files[i].getName().contains("(F)")) continue;
+                files[i].delete();
+                Log.e(TAG, "**** DELETE " + files[i].getName() + " deleted!");
+            }
         }
     }
 

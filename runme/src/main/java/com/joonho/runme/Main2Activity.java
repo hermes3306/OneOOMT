@@ -936,6 +936,9 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
                 }
                 return true;
 
+            case R.id.dododo:
+                ActivityUtil.dododo();
+                return true;
 
             case R.id.files_a:
                 ActivityUtil._default_ext = ".ser";

@@ -75,6 +75,7 @@ public class StringUtil {
     }
 
 
+
     public static String Duration(Date start_date, Date end_date) {
         long endTime, startTime;
         startTime = start_date.getTime();

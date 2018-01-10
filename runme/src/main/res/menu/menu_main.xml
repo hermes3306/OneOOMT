@@ -37,6 +37,9 @@
     <item android:id="@+id/activity_group" android:title="Activities">
     <menu>
         <item
+            android:id="@+id/dododo"
+            android:title="DoDoDo..." />
+        <item
             android:id="@+id/files_a"
             android:title="Activities on Mobile" />
         <item

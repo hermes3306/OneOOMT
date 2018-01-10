@@ -637,7 +637,6 @@ public class ActFileActivity extends AppCompatActivity {
             throw e;
         }
     }
-
 }
 
 

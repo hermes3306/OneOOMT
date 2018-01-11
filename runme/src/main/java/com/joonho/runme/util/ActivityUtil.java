@@ -315,6 +315,19 @@ public class ActivityUtil {
         return flist;
     }
 
+    public static File[] getFilesStartsWithEndWith(final String prefix, final String postfix, boolean reverseorder) {
+        FilenameFilter fnf = new FilenameFilter() {
+            @Override
+            public boolean accept(File file, String s) {
+                return s.toLowerCase().startsWith(prefix) && s.toLowerCase().endsWith(postfix);
+            }
+        };
+        File[] flist  = mediaStorageDir.listFiles(fnf);
+        if(reverseorder) Arrays.sort(flist, Collections.<File>reverseOrder());
+        else Arrays.sort(flist);
+        return flist;
+    }
+
     public static File[] getFilesStartsWith(final String prefix) {
         FilenameFilter fnf = new FilenameFilter() {
             @Override
@@ -842,33 +855,101 @@ public class ActivityUtil {
     }
 
     public static void dododo() {
-        File files[] = getFilesStartsWith("2018_01_11");
-        dododo(files);
+        Date today = new Date();
+        Date day = today;
+        String dododo_str = StringUtil.DateToString1(today, "yyyy_MM_dd");
+        int cnt=0;
+
+        do {
+            Log.e(TAG, ">>>>>>>>>>>>>>>>>> " + String.format("%2d일전:",cnt)  + dododo_str + " >>>>>>>>   START ");
+            dododo(dododo_str);
+            day.setTime(day.getTime() - (1000 * 60 * 60 * 24));
+            dododo_str = StringUtil.DateToString1(day, "yyyy_MM_dd");
+            Log.e(TAG, ">>>>>>>>>>>>>>>>>> " + dododo_str + " >>>>>>>>   END \n\n\n");
+            cnt++;
+        } while(cnt < 60); // 2개월 동안
     }
 
-    public static void dododo(File files[]) {
+    public static void dododo_tmp() {
+        File dflist[] = getFilesStartsWithEndWith("201801",".ser",true);
+        for(int i=0;i<dflist.length;i++) dflist[i].delete();
+
+
+
+        dododo("2017_12_09");
+        dododo("2017_12_08");
+        dododo("2017_12_07");
+        dododo("2017_12_06");
+        dododo("2017_12_05");
+    }
+
+    public static void dododo(String day) {  // fmt: 2018_01_01
+        File files[] = getFilesStartsWithEndWith(day, ".ser", false);
+        ArrayList<String> fnamelist = dododo(files);
+        for(int i=0;i<files.length;i++) {
+            if(fnamelist.contains(files[i].getName() )) continue;
+            else {
+                Log.e(TAG, "*** removed : " + files[i].getName());
+                files[i].delete();
+            }
+        }
+        Log.e(TAG, "\n\n\n\n Done. ["+ day +"]");
+    }
+
+    public static void dododo_trash() {
+        File files[] = getFilesStartsWithEndWith("2018_01_11", ".ser", false);
+        File trash[] = getFilesStartsWithEndWith("2018_01_11", ".trash", false);
+
+        File allfile[] = new File[files.length + trash.length];
+        for(int i=0;i<files.length;i++) allfile[i] = files[i];
+
+        int j=0;
+        for(int i=files.length;i<allfile.length;i++)
+        {
+            allfile[i] = trash[j];
+            j++;
+        }
+
+        ArrayList<String> fnamelist = dododo(allfile);
+
+        for(int i=0;i<allfile.length;i++) {
+            if(fnamelist.contains(allfile[i].getName() )) continue;
+            else {
+                Log.e(TAG, "*** removed : " + allfile[i].getName());
+                allfile[i].delete();
+            }
+        }
+    }
+
+    public static ArrayList<String>  dododo(File files[]) {
         Log.e(TAG, "dododo");
         ArrayList<MyActivity> _all_list = new ArrayList<MyActivity>();
 
         for(int i=0;i<files.length;i++) {
             Log.e(TAG, "*** deserialize: " + files[i].getName());
-
-            if(files[i].getName().contains("(F)")) continue;
-
+            //if(files[i].getName().contains("(F)")) continue;
             ArrayList<MyActivity> _list = deserializeFile(files[i]);
             _all_list.addAll(_list);
+            Log.e(TAG, "*** # of _all_list:" + _all_list.size());
         }
 
         Collections.sort(_all_list,ALPHA_COMPARATOR);
         MyActivity pma = null;
 
+        int rmv_cnt = 0;
         for(int i=_all_list.size()-1;i>0;i--) {
             MyActivity ma = _all_list.get(i);
             if(i>0) pma = _all_list.get(i-1);
             if(isSameActivity(ma, pma)) Log.e(TAG, "" + String.format("%04d",i) + ":" + ma.added_on + "," + ma.latitude + " [S]");
             else  Log.e(TAG, "" + String.format("%04d",i) + ":" + ma.added_on + "," + ma.latitude + " [X]");
-            if(isSameActivity(ma, pma)) _all_list.remove(i);
+            if(isSameActivity(ma, pma)) {
+                _all_list.remove(i);
+                rmv_cnt++;
+            }
         }
+        Log.e(TAG, "**** # of Duplicates(removed): " + rmv_cnt);
+        Log.e(TAG, "**** # of Remains: " + _all_list.size());
+
 
         String _cur_date = null;
         int startpos = 0;
@@ -877,6 +958,9 @@ public class ActivityUtil {
         Date tomorrow = new Date ( new Date().getTime ( ) + (long) ( 1000 * 60 * 60 * 24 ) );
         String _added_on = StringUtil.DateToString1(tomorrow, "yyyy년MM월dd일_HH시mm분ss초" );
         _all_list.add(new MyActivity(-1,-1, -1,_added_on));   // dummy Activity
+
+
+        ArrayList <String> fnamelist = new ArrayList<>();
 
         for(int i=0;i<_all_list.size();i++) {
             MyActivity ma = _all_list.get(i);
@@ -893,33 +977,34 @@ public class ActivityUtil {
                     String _fname = StringUtil.DateToString1(getActivityTime(_pma), Config._filename_fmt) + "(F)" + Config._default_ext;
                     Log.e(TAG,"*" + _cur_date);
                     serializeActivityIntoFile(_all_list, startpos, i-1, _fname );
+                    fnamelist.add(_fname);
+
                     Log.e(TAG,"**** " + _fname + "created successfully!" );
                     Log.e(TAG,"**** " + "from:" + startpos);
                     Log.e(TAG,"**** " + "to:" + (i-1));
                     Log.e(TAG,"\n\n");
 
-                    _cur_date = StringUtil.DateToString1(_date,"yyyyMMdd");
+                    _cur_date = t_str;
                     startpos=i;
                 }
             }
         }
 
-        if(Config._trash_after_dododo) {
-            for (int i = 0; i < files.length; i++) {
-                if(files[i].getName().contains("(F)")) continue;
-                File f = new File(mediaStorageDir, files[i].getName() + ".trash");
-                files[i].renameTo(f);
-                Log.e(TAG, "**** TRASH " + f .getName()+ "!");
-            }
-        } else {
-            for (int i = 0; i < files.length; i++) {
-                if(files[i].getName().contains("(F)")) continue;
-                files[i].delete();
-                Log.e(TAG, "**** DELETE " + files[i].getName() + " deleted!");
-            }
-        }
+        return fnamelist;
+//        if(Config._trash_after_dododo) {
+//            for (int i = 0; i < files.length; i++) {
+//                if(files[i].getName().contains("(F)")) continue;
+//                File f = new File(mediaStorageDir, files[i].getName() + ".trash");
+//                files[i].renameTo(f);
+//                Log.e(TAG, "**** TRASH " + f .getName()+ "!");
+//            }
+//        } else {
+//            for (int i = 0; i < files.length; i++) {
+//                if(files[i].getName().contains("(F)")) continue;
+//                files[i].delete();
+//                Log.e(TAG, "**** DELETE " + files[i].getName() + " deleted!");
+//            }
+//        }
     }
-
-
 }
 

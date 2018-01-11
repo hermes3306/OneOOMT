@@ -11,7 +11,8 @@ public class Config {
 
     public static Date          _last_save_point                = null;
     public static String        _last_save_fname                = null;
-    public static String        _filename_fmt                   ="yyyyMMdd(E)HHmmss";
+    //public static String        _filename_fmt                   ="yyyyMMdd(E)HHmmss";
+    public static String        _filename_fmt                   ="yyyy_MM_dd_HH_mm_ss";
 
     public static boolean       _delete_file_with_same_start    = true;
     public static boolean       _trash_after_dododo             = true;

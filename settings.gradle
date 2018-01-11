@@ -1,1 +1,1 @@
-include ':app', ':runme'
+include ':app', ':runme', ':myway', ':myphoto'

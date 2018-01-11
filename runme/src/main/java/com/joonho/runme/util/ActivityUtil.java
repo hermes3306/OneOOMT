@@ -867,21 +867,9 @@ public class ActivityUtil {
             dododo_str = StringUtil.DateToString1(day, "yyyy_MM_dd");
             Log.e(TAG, ">>>>>>>>>>>>>>>>>> " + dododo_str + " >>>>>>>>   END \n\n\n");
             cnt++;
-        } while(cnt < 60); // 2개월 동안
+        } while(cnt < 2); // 2days check
     }
 
-    public static void dododo_tmp() {
-        File dflist[] = getFilesStartsWithEndWith("201801",".ser",true);
-        for(int i=0;i<dflist.length;i++) dflist[i].delete();
-
-
-
-        dododo("2017_12_09");
-        dododo("2017_12_08");
-        dododo("2017_12_07");
-        dododo("2017_12_06");
-        dododo("2017_12_05");
-    }
 
     public static void dododo(String day) {  // fmt: 2018_01_01
         File files[] = getFilesStartsWithEndWith(day, ".ser", false);
@@ -894,31 +882,6 @@ public class ActivityUtil {
             }
         }
         Log.e(TAG, "\n\n\n\n Done. ["+ day +"]");
-    }
-
-    public static void dododo_trash() {
-        File files[] = getFilesStartsWithEndWith("2018_01_11", ".ser", false);
-        File trash[] = getFilesStartsWithEndWith("2018_01_11", ".trash", false);
-
-        File allfile[] = new File[files.length + trash.length];
-        for(int i=0;i<files.length;i++) allfile[i] = files[i];
-
-        int j=0;
-        for(int i=files.length;i<allfile.length;i++)
-        {
-            allfile[i] = trash[j];
-            j++;
-        }
-
-        ArrayList<String> fnamelist = dododo(allfile);
-
-        for(int i=0;i<allfile.length;i++) {
-            if(fnamelist.contains(allfile[i].getName() )) continue;
-            else {
-                Log.e(TAG, "*** removed : " + allfile[i].getName());
-                allfile[i].delete();
-            }
-        }
     }
 
     public static ArrayList<String>  dododo(File files[]) {
@@ -989,22 +952,7 @@ public class ActivityUtil {
                 }
             }
         }
-
         return fnamelist;
-//        if(Config._trash_after_dododo) {
-//            for (int i = 0; i < files.length; i++) {
-//                if(files[i].getName().contains("(F)")) continue;
-//                File f = new File(mediaStorageDir, files[i].getName() + ".trash");
-//                files[i].renameTo(f);
-//                Log.e(TAG, "**** TRASH " + f .getName()+ "!");
-//            }
-//        } else {
-//            for (int i = 0; i < files.length; i++) {
-//                if(files[i].getName().contains("(F)")) continue;
-//                files[i].delete();
-//                Log.e(TAG, "**** DELETE " + files[i].getName() + " deleted!");
-//            }
-//        }
     }
 }
 

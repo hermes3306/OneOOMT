@@ -16,7 +16,7 @@ public class Config {
     public static boolean       _delete_file_with_same_start    = true;
     public static boolean       _trash_after_dododo             = false;
 
-    public static int           _save_interval                  = 0;
+    public static int           _save_interval                  = 3;
     public static final int     _SAVE_INTERVAL_MININUTE         = 0;
     public static final int     _SAVE_INTERVAL_10MINUTEES       = 1;
     public static final int     _SAVE_INTERVAL_30MINUTEES       = 2;

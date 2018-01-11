@@ -100,174 +100,6 @@ public class MyActivityUtil {
         }
     };
 
-    public static void dododo_jason() {
-        Log.e(TAG, "dododo_jason");
-
-        File files[] = getFiles(".ser2",true);
-        ArrayList<MyActivity> _all_list = new ArrayList<MyActivity>();
-
-        for(int i=0;i<files.length;i++) {
-            Log.e(TAG, "*** deserialize: " + files[i].getName());
-            ArrayList<MyActivity> _list = deserializeActivity(files[i]);
-            _all_list.addAll(_list);
-        }
-
-        Collections.sort(_all_list,ALPHA_COMPARATOR);
-        MyActivity pma = null;
-
-//        for(int i=_all_list.size()-1;i>0;i--) {
-//            MyActivity ma = _all_list.get(i);
-//            if(i>0) pma = _all_list.get(i-1);
-//            if(isSameActivity(ma, pma)) Log.e(TAG, "" + String.format("%04d",i) + ":" + ma.added_on + "," + ma.latitude + " [S]");
-//            else  Log.e(TAG, "" + String.format("%04d",i) + ":" + ma.added_on + "," + ma.latitude + " [X]");
-//            if(isSameActivity(ma, pma)) _all_list.remove(i);
-//        }
-
-        for(int i=_all_list.size()-1;i>0;i--) {
-            MyActivity ma = _all_list.get(i);
-            if(i>0) pma = _all_list.get(i-1);
-            if(isSameActivity(ma, pma)) Log.e(TAG, "" + String.format("%04d",i) + ":" + ma.added_on + "," + ma.latitude + " [S]");
-            else  Log.e(TAG, "" + String.format("%04d",i) + ":" + ma.added_on + "," + ma.latitude + " [X]");
-            if(isSameActivity(ma, pma)) _all_list.remove(i);
-        }
-
-        String _cur_date = null;
-        int startpos = 0;
-
-        // By adding dummy Activity for tomorrow....
-        Date tomorrow = new Date ( new Date().getTime ( ) + (long) ( 1000 * 60 * 60 * 24 ) );
-        String _added_on = StringUtil.DateToString(tomorrow, "yyyy년MM월dd일_HH시mm분ss초" );
-        _all_list.add(new MyActivity(-1,-1, -1,_added_on));   // dummy Activity
-
-        for(int i=0;i<_all_list.size();i++) {
-            MyActivity ma = _all_list.get(i);
-            Date _date = getActivityTime(ma);
-
-            if(i==0) _cur_date = StringUtil.DateToString(_date,"yyyyMMdd");
-            else {
-                String t_str = StringUtil.DateToString(_date,"yyyyMMdd");
-                if(_cur_date.equalsIgnoreCase(t_str)) {
-                    // pass
-                }else {
-                    // serialize the previous list;
-                    MyActivity _pma = _all_list.get(i-1);
-                    String _fname = StringUtil.DateToString(getActivityTime(_pma), Config._filename_fmt) + "(F)" + ".json";
-                    Log.e(TAG,"*" + _cur_date);
-
-                    serializeActivityIntoJsonFile(_all_list, startpos, i-1, _fname );
-
-                    Log.e(TAG,"**** " + _fname + "created successfully!" );
-                    Log.e(TAG,"**** " + "from:" + startpos);
-                    Log.e(TAG,"**** " + "to:" + (i-1));
-                    Log.e(TAG,"\n\n");
-
-                    _cur_date = StringUtil.DateToString(_date,"yyyyMMdd");
-                    startpos=i;
-                }
-            }
-        }
-
-        if(Config._trash_after_dododo) {
-            for (int i = 0; i < files.length; i++) {
-                if(files[i].getName().contains("(F)")) continue;
-                File f = new File(mediaStorageDir, files[i].getName() + ".trash");
-                files[i].renameTo(f);
-                Log.e(TAG, "**** TRASH " + f .getName()+ "!");
-            }
-        } else {
-            for (int i = 0; i < files.length; i++) {
-                if(files[i].getName().contains("(F)")) continue;
-                files[i].delete();
-                Log.e(TAG, "**** DELETE " + files[i].getName() + " deleted!");
-            }
-        }
-    }
-
-
-    public static void dododo() {
-        Log.e(TAG, "dododo");
-
-        File files[] = getFiles(".ser2",true);
-        ArrayList<MyActivity> _all_list = new ArrayList<MyActivity>();
-
-        for(int i=0;i<files.length;i++) {
-            Log.e(TAG, "*** deserialize: " + files[i].getName());
-            ArrayList<MyActivity> _list = deserializeActivity(files[i]);
-            _all_list.addAll(_list);
-        }
-
-        Collections.sort(_all_list,ALPHA_COMPARATOR);
-        MyActivity pma = null;
-
-//        for(int i=_all_list.size()-1;i>0;i--) {
-//            MyActivity ma = _all_list.get(i);
-//            if(i>0) pma = _all_list.get(i-1);
-//            if(isSameActivity(ma, pma)) Log.e(TAG, "" + String.format("%04d",i) + ":" + ma.added_on + "," + ma.latitude + " [S]");
-//            else  Log.e(TAG, "" + String.format("%04d",i) + ":" + ma.added_on + "," + ma.latitude + " [X]");
-//            if(isSameActivity(ma, pma)) _all_list.remove(i);
-//        }
-
-        for(int i=_all_list.size()-1;i>0;i--) {
-            MyActivity ma = _all_list.get(i);
-            if(i>0) pma = _all_list.get(i-1);
-            if(isSameActivity(ma, pma)) Log.e(TAG, "" + String.format("%04d",i) + ":" + ma.added_on + "," + ma.latitude + " [S]");
-            else  Log.e(TAG, "" + String.format("%04d",i) + ":" + ma.added_on + "," + ma.latitude + " [X]");
-            if(isSameActivity(ma, pma)) _all_list.remove(i);
-        }
-
-        String _cur_date = null;
-        int startpos = 0;
-
-        // By adding dummy Activity for tomorrow....
-        Date tomorrow = new Date ( new Date().getTime ( ) + (long) ( 1000 * 60 * 60 * 24 ) );
-        String _added_on = StringUtil.DateToString(tomorrow, "yyyy년MM월dd일_HH시mm분ss초" );
-        _all_list.add(new MyActivity(-1,-1, -1,_added_on));   // dummy Activity
-
-        for(int i=0;i<_all_list.size();i++) {
-            MyActivity ma = _all_list.get(i);
-            Date _date = getActivityTime(ma);
-
-            if(i==0) _cur_date = StringUtil.DateToString(_date,"yyyyMMdd");
-            else {
-                String t_str = StringUtil.DateToString(_date,"yyyyMMdd");
-                if(_cur_date.equalsIgnoreCase(t_str)) {
-                    // pass
-                }else {
-                    // serialize the previous list;
-                    MyActivity _pma = _all_list.get(i-1);
-                    String _fname = StringUtil.DateToString(getActivityTime(_pma), Config._filename_fmt) + "(F)" + Config._default_ext;
-                    Log.e(TAG,"*" + _cur_date);
-                    serializeActivityIntoFile(_all_list, startpos, i-1, _fname );
-                    Log.e(TAG,"**** " + _fname + "created successfully!" );
-                    Log.e(TAG,"**** " + "from:" + startpos);
-                    Log.e(TAG,"**** " + "to:" + (i-1));
-                    Log.e(TAG,"\n\n");
-
-                    _cur_date = StringUtil.DateToString(_date,"yyyyMMdd");
-                    startpos=i;
-                }
-            }
-        }
-
-        if(Config._trash_after_dododo) {
-            for (int i = 0; i < files.length; i++) {
-                if(files[i].getName().contains("(F)")) continue;
-                File f = new File(mediaStorageDir, files[i].getName() + ".trash");
-                files[i].renameTo(f);
-                Log.e(TAG, "**** TRASH " + f .getName()+ "!");
-            }
-        } else {
-            for (int i = 0; i < files.length; i++) {
-                if(files[i].getName().contains("(F)")) continue;
-                files[i].delete();
-                Log.e(TAG, "**** DELETE " + files[i].getName() + " deleted!");
-            }
-        }
-        if(true) dododo_jason();
-    }
-
-
-
     public static void serializeActivityIntoJsonFile(ArrayList<MyActivity> list, int start, int end, String fileName) {
         if(start <0 || end >= list.size()) return;
         if(!mediaStorageDir.exists()) mediaStorageDir.mkdirs();
@@ -444,23 +276,6 @@ public class MyActivityUtil {
             Log.e(TAG, "No Addresses found !!");
         }else {
             addinfo = addresses.get(0).getAddressLine(0).toString();
-//
-//                Log.e(TAG + i + ":getAdminArea=", ""+addresses.get(i).getAdminArea());
-//                Log.e(TAG + i + ":getSubAdminArea=", ""+addresses.get(i).getSubAdminArea());
-//                Log.e(TAG + i + ":getSubLocality=", ""+addresses.get(i).getSubLocality());
-//                Log.e(TAG + i + ":getSubThoroughfare=", ""+addresses.get(i).getSubThoroughfare());
-//                Log.e(TAG + i + ":getFeatureName=", ""+addresses.get(i).getFeatureName());
-//                Log.e(TAG + i + ":getLocality=", ""+addresses.get(i).getLocality());
-//                Log.e(TAG + i + ":getPhone=", ""+addresses.get(i).getPhone());
-//                Log.e(TAG + i + ":getPostalCode=", ""+addresses.get(i).getPostalCode());
-//                Log.e(TAG + i + ":getPremises=", ""+addresses.get(i).getPremises());
-//                Log.e(TAG + i + ":getUrl=", ""+addresses.get(i).getUrl());
-//                Log.e(TAG + i + ":getAddressLine(0)=", ""+addresses.get(i).getAddressLine(0));
-//                Log.e(TAG + i + ":getAddressLine(1)=", ""+addresses.get(i).getAddressLine(1));
-//                Log.e(TAG + i + ":getAddressLine(2)=", ""+addresses.get(i).getAddressLine(2));
-//                Log.e(TAG + i + ":getAddressLine(3)=", ""+addresses.get(i).getAddressLine(3));
-//                Log.e(TAG + i + ":getThoroughfare)=", ""+addresses.get(i).getThoroughfare());
-//            }
         }
         return addinfo;
     }
@@ -528,6 +343,121 @@ public class MyActivityUtil {
         if(list.size()==0) return null;
         Date date = StringUtil.StringToDate(list.get(list.size()-1).added_on, "yyyy년MM월dd일_HH시mm분ss초");
         return date;
+    }
+
+
+    public static void dododo() {
+        Date today = new Date();
+        Date day = today;
+        String dododo_str = StringUtil.DateToString(today, "yyyyMMdd");
+        int cnt=0;
+
+        do {
+            Log.e(TAG, ">>>>>>>>>>>>>>>>>> " + String.format("%2d일전:",cnt)  + dododo_str + " >>>>>>>>   START ");
+            dododo(dododo_str);
+            day.setTime(day.getTime() - (1000 * 60 * 60 * 24));
+            dododo_str = StringUtil.DateToString(day, "yyyyMMdd");
+            Log.e(TAG, ">>>>>>>>>>>>>>>>>> " + dododo_str + " >>>>>>>>   END \n\n\n");
+            cnt++;
+        } while(cnt < 2); // 2days check
+    }
+
+    public static File[] getFilesStartsWithEndWith(final String prefix, final String postfix, boolean reverseorder) {
+        FilenameFilter fnf = new FilenameFilter() {
+            @Override
+            public boolean accept(File file, String s) {
+                return s.toLowerCase().startsWith(prefix) && s.toLowerCase().endsWith(postfix);
+            }
+        };
+        File[] flist  = mediaStorageDir.listFiles(fnf);
+        if(reverseorder) Arrays.sort(flist, Collections.<File>reverseOrder());
+        else Arrays.sort(flist);
+        return flist;
+    }
+
+
+    public static void dododo(String day) {  // fmt: 20180101
+        File files[] = getFilesStartsWithEndWith(day, ".ser2", false);
+        ArrayList<String> fnamelist = dododo(files);
+        for(int i=0;i<files.length;i++) {
+            if(fnamelist.contains(files[i].getName() )) continue;
+            else {
+                Log.e(TAG, "*** removed : " + files[i].getName());
+                files[i].delete();
+            }
+        }
+        Log.e(TAG, "\n\n\n\n Done. ["+ day +"]");
+    }
+
+    public static ArrayList<String>  dododo(File files[]) {
+        Log.e(TAG, "dododo");
+        ArrayList<MyActivity> _all_list = new ArrayList<MyActivity>();
+
+        for(int i=0;i<files.length;i++) {
+            Log.e(TAG, "*** deserialize: " + files[i].getName());
+            //if(files[i].getName().contains("(F)")) continue;
+            ArrayList<MyActivity> _list = deserializeActivity(files[i]);
+            _all_list.addAll(_list);
+            Log.e(TAG, "*** # of _all_list:" + _all_list.size());
+        }
+
+        Collections.sort(_all_list,ALPHA_COMPARATOR);
+        MyActivity pma = null;
+
+        int rmv_cnt = 0;
+        for(int i=_all_list.size()-1;i>0;i--) {
+            MyActivity ma = _all_list.get(i);
+            if(i>0) pma = _all_list.get(i-1);
+            if(isSameActivity(ma, pma)) Log.e(TAG, "" + String.format("%04d",i) + ":" + ma.added_on + "," + ma.latitude + " [S]");
+            else  Log.e(TAG, "" + String.format("%04d",i) + ":" + ma.added_on + "," + ma.latitude + " [X]");
+            if(isSameActivity(ma, pma)) {
+                _all_list.remove(i);
+                rmv_cnt++;
+            }
+        }
+        Log.e(TAG, "**** # of Duplicates(removed): " + rmv_cnt);
+        Log.e(TAG, "**** # of Remains: " + _all_list.size());
+
+
+        String _cur_date = null;
+        int startpos = 0;
+
+        // By adding dummy Activity for tomorrow....
+        Date tomorrow = new Date ( new Date().getTime ( ) + (long) ( 1000 * 60 * 60 * 24 ) );
+        String _added_on = StringUtil.DateToString(tomorrow, "yyyy년MM월dd일_HH시mm분ss초" );
+        _all_list.add(new MyActivity(-1,-1, -1,_added_on));   // dummy Activity
+
+
+        ArrayList <String> fnamelist = new ArrayList<>();
+
+        for(int i=0;i<_all_list.size();i++) {
+            MyActivity ma = _all_list.get(i);
+            Date _date = getActivityTime(ma);
+
+            if(i==0) _cur_date = StringUtil.DateToString(_date,"yyyyMMdd");
+            else {
+                String t_str = StringUtil.DateToString(_date,"yyyyMMdd");
+                if(_cur_date.equalsIgnoreCase(t_str)) {
+                    // pass
+                }else {
+                    // serialize the previous list;
+                    MyActivity _pma = _all_list.get(i-1);
+                    String _fname = StringUtil.DateToString(getActivityTime(_pma), Config._filename_fmt) + "(F)" + Config._default_ext;
+                    Log.e(TAG,"*" + _cur_date);
+                    serializeActivityIntoFile(_all_list, startpos, i-1, _fname );
+                    fnamelist.add(_fname);
+
+                    Log.e(TAG,"**** " + _fname + "created successfully!" );
+                    Log.e(TAG,"**** " + "from:" + startpos);
+                    Log.e(TAG,"**** " + "to:" + (i-1));
+                    Log.e(TAG,"\n\n");
+
+                    _cur_date = t_str;
+                    startpos=i;
+                }
+            }
+        }
+        return fnamelist;
     }
 
 }

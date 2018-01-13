@@ -47,6 +47,10 @@ public class MyActivityUtil {
         backupDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "OneOOMT" + backupdir);
     }
 
+    public static File getMediaStorageDirectory() {
+        return mediaStorageDir;
+    }
+
     public static File[] getFilesStartsWith(final String prefix, boolean reverserorder) {
         FilenameFilter fnf = new FilenameFilter() {
             @Override

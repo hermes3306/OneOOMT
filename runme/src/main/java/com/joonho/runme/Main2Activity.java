@@ -113,7 +113,7 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
     private  int mode4 =  0;
     private  boolean mode_noti = false;
     private boolean mode_low_battery = true;
-    private boolean direct_db_update = true;
+    private boolean direct_db_update = false;
 
     private double paces[] = new double[1000]; //upto 1000 km
     private long   startime_paces[] = new long[1000]; // upto 1000 start time

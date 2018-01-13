@@ -19,24 +19,17 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
-
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <service
-            android:name=".MyLocationService"
-            android:enabled="true"
-            android:exported="true"
-            android:process=":my_Locataionservice"
-            android:stopWithTask="false" />
+        <service android:name=".MyLocationService"/>
 
         <activity android:name=".FileActivity"></activity>
     </application>

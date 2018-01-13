@@ -1,15 +1,20 @@
 package com.joonho.myway;
 
 import android.Manifest;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -21,15 +26,31 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.joonho.myway.util.Config;
 import com.joonho.myway.util.MyActivityUtil;
 
 import java.io.File;
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    private boolean  __svc_started = false;
-    private Intent   __svc_Intent = null;
+    private boolean     __svc_started = false;
+    private Intent      __svc_Intent = null;
+    MyLocationService   mMyLocationService;
+
+    ServiceConnection conn = new ServiceConnection() {
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            MyLocationService.MyBinder mb = (MyLocationService.MyBinder) service;
+            mMyLocationService = mb.getService();
+            __svc_started = true;
+        }
+
+        public void onServiceDisconnected(ComponentName name) {
+            __svc_started = false;
+        }
+    };
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -118,7 +139,7 @@ public class MainActivity extends AppCompatActivity
 
             Toast.makeText(MainActivity.this,"START SERVICE", Toast.LENGTH_SHORT).show();
             Intent myI = new Intent(this, MyLocationService.class);
-            startService(myI);
+            bindService(myI,conn, Context.BIND_AUTO_CREATE);
             __svc_started = true;
 
         } else if (id == R.id.nav_list) {
@@ -161,6 +182,14 @@ public class MainActivity extends AppCompatActivity
             return true;
 
         } else if (id == R.id.nav_map) {
+            ArrayList<MyActivity> mlist = mMyLocationService.getMyAcitivityList();
+            String fname = Config.get_filename();
+            MyActivityUtil.serializeActivityIntoFile(mlist, fname);
+            Intent intent = new Intent(MainActivity.this, FileActivity.class);
+            intent.putExtra("file", Config.getAbsolutePath(fname));
+            intent.putExtra("pos", 0);
+            startActivity(intent);
+            return true;
 
         } else if (id == R.id.nav_manage) {
             MyActivityUtil.dododo();

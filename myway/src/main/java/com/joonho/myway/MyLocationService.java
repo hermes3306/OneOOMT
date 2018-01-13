@@ -6,8 +6,10 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.widget.Toast;
@@ -30,6 +32,22 @@ public class MyLocationService extends Service {
 
     /* Global variables */
     private ArrayList<MyActivity> mList = null;
+
+    public ArrayList<MyActivity> getMyAcitivityList() {
+        return mList;
+    }
+
+    IBinder mBinder = new MyBinder();
+    class MyBinder extends Binder {
+        MyLocationService getService() {
+            return MyLocationService.this;
+        }
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        return mBinder;
+    }
 
     private class LocationListener implements android.location.LocationListener {
         Location mLastLocation;
@@ -145,14 +163,11 @@ public class MyLocationService extends Service {
     }
 
     LocationListener[] mLocationListeners = new LocationListener[] {
-            new LocationListener(LocationManager.GPS_PROVIDER),
-            new LocationListener(LocationManager.NETWORK_PROVIDER)
+            new LocationListener(LocationManager.GPS_PROVIDER)
+            //,new LocationListener(LocationManager.NETWORK_PROVIDER)
     };
 
-    @Override
-    public IBinder onBind(Intent arg0) {
-        return null;
-    }
+
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -165,6 +180,7 @@ public class MyLocationService extends Service {
     @Override
     public void onCreate() {
         Log.e(TAG, "onCreate");
+        super.onCreate();
         initializeLocationManager();
         try {
             mLocationManager.requestLocationUpdates(
@@ -185,6 +201,7 @@ public class MyLocationService extends Service {
             Log.d(TAG, "gps provider does not exist " + ex.getMessage());
         }
 
+        /*
         try {
             mLocationManager.requestLocationUpdates(
                     LocationManager.NETWORK_PROVIDER,
@@ -203,6 +220,7 @@ public class MyLocationService extends Service {
         } catch (IllegalArgumentException ex) {
             Log.d(TAG, "network provider does not exist, " + ex.getMessage());
         }
+        */
     }
 
     @Override

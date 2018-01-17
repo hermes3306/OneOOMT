@@ -26,6 +26,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.MapsInitializer;
+import com.google.android.gms.maps.OnMapReadyCallback;
 import com.joonho.myway.util.Config;
 import com.joonho.myway.util.MyActivityUtil;
 
@@ -36,6 +40,7 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     public static String TAG = "MainActivity";
+
     private boolean     __svc_started = false;
     private Intent      __svc_Intent = null;
     MyLocationService   mMyLocationService;
@@ -83,22 +88,33 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        // Google Map Display
+        final MapView mMapView = (MapView) findViewById(R.id.mapView2);
+        MapsInitializer.initialize(this);
+        mMapView.onCreate(savedInstanceState);  // check required ....
+        mMapView.onResume();
+        mMapView.getMapAsync(new OnMapReadyCallback() {
+            @Override
+            public void onMapReady(final GoogleMap googleMap) {
+
+
+            }
+        });
+
     }
 
     @Override
     protected void onStart() {
-
         super.onStart();
         if(__svc_started) {
             Toast.makeText(MainActivity.this, "SERVICE ALREADY STARTED", Toast.LENGTH_SHORT).show();
             return;
         }
-
         Toast.makeText(MainActivity.this,"START SERVICE", Toast.LENGTH_SHORT).show();
         Intent myI = new Intent(this, MyLocationService.class);
         bindService(myI, conn, Context.BIND_AUTO_CREATE);
         __svc_started = true;
-
     }
 
     @Override

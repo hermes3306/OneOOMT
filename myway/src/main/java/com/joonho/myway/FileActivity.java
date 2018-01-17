@@ -1,10 +1,13 @@
 package com.joonho.myway;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
+import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
@@ -68,6 +71,7 @@ public class FileActivity extends AppCompatActivity {
     public static boolean nomarker = true;
     public static boolean notrack = false;
     public static boolean satellite = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

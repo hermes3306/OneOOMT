@@ -35,6 +35,7 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+    public static String TAG = "MainActivity";
     private boolean     __svc_started = false;
     private Intent      __svc_Intent = null;
     MyLocationService   mMyLocationService;
@@ -74,15 +75,6 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -91,7 +83,28 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+    }
 
+    @Override
+    protected void onStart() {
+
+        super.onStart();
+        if(__svc_started) {
+            Toast.makeText(MainActivity.this, "SERVICE ALREADY STARTED", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Toast.makeText(MainActivity.this,"START SERVICE", Toast.LENGTH_SHORT).show();
+        Intent myI = new Intent(this, MyLocationService.class);
+        bindService(myI, conn, Context.BIND_AUTO_CREATE);
+        __svc_started = true;
+
+    }
+
+    @Override
+    protected void onStop() {
+        Toast.makeText(MainActivity.this,"onStop()", Toast.LENGTH_SHORT).show();
+        super.onStop();
     }
 
     @Override
@@ -100,7 +113,8 @@ public class MainActivity extends AppCompatActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            super.onBackPressed();
+            Log.e(TAG,"------- onBackPressed() called");
+            //super.onBackPressed();
         }
     }
 

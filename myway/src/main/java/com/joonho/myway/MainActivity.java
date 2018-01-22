@@ -7,7 +7,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.design.widget.FloatingActionButton;
@@ -25,6 +27,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -38,6 +41,8 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.joonho.myway.util.CalBearing;
 import com.joonho.myway.util.Config;
 import com.joonho.myway.util.MyActivityUtil;
@@ -50,16 +55,22 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener {
 
-    public static String TAG = "MainActivity";
-    private boolean     __svc_started = false;
-    private Intent      __svc_Intent = null;
-    MyLocationService   mMyLocationService;
+    public static String    TAG                     = "MainActivity";
+    private boolean         __svc_started           = false;
+    private Intent          __svc_Intent            = null;
+    MyLocationService       mMyLocationService;
 
-    TextView tv_status = null;
-    private GoogleMap mMap;
-    private Marker mMarker=null;
+
+    private GoogleMap       mMap;
+    private Marker          mMarker                 = null;
+    private Polyline        mPolyline               = null;
+    TextView                tv_status               = null;
+    Button                  bt_track                = null;
+    Button                  bt_current              = null;
+    Button                  bt_walking              = null;
+    Button                  bt_memo                 = null;
 
 
     ServiceConnection conn = new ServiceConnection() {
@@ -119,8 +130,12 @@ public class MainActivity extends AppCompatActivity
         });
 
         /* MAIN */
-        tv_status = findViewById(R.id.tv_status);
-        tv_status.setText(new Date().toString());
+        tv_status   = findViewById(R.id.tv_status);
+        bt_current  = findViewById(R.id.bt_current);
+        bt_memo     = findViewById(R.id.bt_memo);
+        bt_track    = findViewById(R.id.bt_track);
+        bt_walking  = findViewById(R.id.bt_walking);
+
         doMyTimeTask();
 
     }
@@ -142,6 +157,11 @@ public class MainActivity extends AppCompatActivity
     protected void onStop() {
         //Toast.makeText(MainActivity.this,"onStop()", Toast.LENGTH_SHORT).show();
         super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
     }
 
     @Override
@@ -277,6 +297,10 @@ public class MainActivity extends AppCompatActivity
                         return;
                     }
                     LatLng curloc = new LatLng(ma.latitude,ma.longitude);
+                    if(curloc.equals(preloc)) return;
+
+                    drawMarker(ma);
+                    Config._myzoom = mMap.getCameraPosition().zoom;
 
                     if(Config._driving_mode) {
                         double mbearing = 0;
@@ -294,9 +318,8 @@ public class MainActivity extends AppCompatActivity
                         mMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
                         //mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
                     }
-                    if(curloc != preloc) preloc = curloc;
+                    preloc = curloc;
                     setStatus("new("+ma.latitude + "," +  ma.longitude+")");
-                    drawMarker(curloc, StringUtil.DateToString(new Date(), "hh:mm:ss"));
 
                 }
             });
@@ -307,18 +330,108 @@ public class MainActivity extends AppCompatActivity
         tv_status.setText(StringUtil.DateToString(new Date(), "hh:mm:ss") + "-" + str);
     }
 
-    public void drawMarker(LatLng l, String title) {
+    public String LocTimeStr(Location loc) {
+        String added_on = StringUtil.DateToString(new Date(loc.getTime()), "yyyy년MM월dd일_HH시mm분ss초" );
+        return added_on;
+    }
+
+    public static boolean _showtrack=true;
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.bt_current:
+                Location loc = mMyLocationService.getLocation();
+                if(loc!=null) curloc = new LatLng(loc.getLatitude(), loc.getLongitude());
+                MyActivity ma = new MyActivity(loc.getLatitude(), loc.getLongitude(), loc.getAltitude(), LocTimeStr(loc));
+                drawMarker(ma);
+                if(_showtrack) {
+                    drawTrack(mMyLocationService.getMyAcitivityList(),Color.CYAN,15);
+                    mPolyline.setVisible(true);
+                }
+                break;
+
+            case R.id.bt_track:
+                if(_showtrack) {
+                    drawTrack(mMyLocationService.getMyAcitivityList(),Color.CYAN,15);
+                    mPolyline.setVisible(true);
+                    _showtrack=false;
+                }else {
+                    mPolyline.setVisible(false);
+                    _showtrack=true;
+                }
+                break;
+
+            case R.id.bt_memo:
+            case R.id.bt_walking:
+                Location walkloc = mMyLocationService.getLocation();
+                LatLng   ll  = new LatLng(walkloc.getLatitude(),walkloc.getLongitude());
+                double mbearing = 0;
+                MyActivity ma2 = mMyLocationService.getLastLocation();
+                MyActivity ma1 = mMyLocationService.getLastLastLocation();
+                if(ma1 !=null && ma2 != null) {
+                    CalBearing cb = new CalBearing(ma1.latitude, ma1.longitude, ma2.latitude, ma2.longitude);
+                    mbearing = cb.getBearing();
+                }
+                CameraPosition currentPlace = new CameraPosition.Builder()
+                        .target(ll)
+                        .bearing((float)mbearing).zoom(Config._myzoom).build();
+                mMap.moveCamera(CameraUpdateFactory.newCameraPosition(currentPlace));
+                if(_showtrack) {
+                    drawTrack(mMyLocationService.getMyAcitivityList(),Color.CYAN,15);
+                    mPolyline.setVisible(true);
+                }
+        }
+    }
+
+
+    /* Map functions */
+    public void drawMarker(LatLng l, String head, String body) {
         if(mMarker==null) {
             MarkerOptions opt = new MarkerOptions()
                     .position(l)
-                    .title(title)
-                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
-                    .draggable(true).visible(true).snippet("0");
+                    .title(head)
+                    .icon(BitmapDescriptorFactory.defaultMarker(Config._marker_color))
+                    .draggable(true).visible(true).snippet(body);
             mMarker = mMap.addMarker(opt);
+            CameraPosition cameraPosition = new CameraPosition.Builder().target(l).zoom(Config._myzoom).build();
+            mMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
         } else {
             mMarker.setPosition(l);
-            mMarker.setTitle(title);
+            mMarker.setTitle(head);
+            mMarker.setSnippet(body);
         }
-        mMarker.showInfoWindow();
     }
+
+    public void drawMarker(MyActivity ma) {
+        String _head = StringUtil.DateToString(new Date(), "hh:mm:ss");
+        String _body = MyActivityUtil.getAddress(getApplicationContext(),ma);
+        LatLng l = new LatLng(ma.latitude,ma.longitude);
+        drawMarker(l,_head,_body);
+    }
+
+    public void drawTrack(ArrayList<MyActivity> list, int color, int width ) {
+        if(list==null) return;
+        ArrayList<LatLng> l = new ArrayList<>();
+        for(int i=0; i<list.size();i++) {
+            l.add(new LatLng(list.get(i).latitude, list.get(i).longitude));
+        }
+
+        if(mPolyline==null) {
+
+            PolylineOptions plo = new PolylineOptions();
+            plo.color(color);
+            mPolyline = mMap.addPolyline(plo);
+            mPolyline.setPoints(l);
+            mPolyline.setWidth(width);
+        }else {
+            mPolyline.setColor(color);
+            mPolyline.setPoints(l);
+            mPolyline.setWidth(width);
+        }
+    }
+
+
+
+
+
 }

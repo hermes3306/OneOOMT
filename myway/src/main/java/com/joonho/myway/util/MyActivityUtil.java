@@ -301,6 +301,9 @@ public class MyActivityUtil {
             addinfoDong = addresses.get(0).getThoroughfare() +
                     (addresses.get(0).getPremises()==null?"":" " + addresses.get(0).getPremises());
         }
+        if(addinfoDong.contains("null")) {
+            addinfoDong = addresses.get(0).getAddressLine(0).toString();
+        }
         return addinfoDong;
     }
 

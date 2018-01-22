@@ -1,5 +1,6 @@
 package com.joonho.myway;
 
+import android.Manifest;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -26,13 +27,12 @@ public class MyLocationService extends Service {
 
     private static final String TAG = "MyLocationService";
     private LocationManager mLocationManager = null;
-    private static final int LOCATION_INTERVAL       = 5000;     //  5 초
-    private static final float LOCATION_DISTANCE     = 20f;     // 20 미터
-    private static final int TWO_MINUTES              = 1000 * 60 * 2;
+    private static final int    LOCATION_INTERVAL       = Config._location_interval;
+    private static final float  LOCATION_DISTANCE       = 10f;     // 20 미터
+    private static final int    TWO_MINUTES             = 1000 * 60 * 2;
 
     /* Global variables */
     private ArrayList<MyActivity> mList = null;
-
     public ArrayList<MyActivity> getMyAcitivityList() {
         return mList;
     }
@@ -41,6 +41,12 @@ public class MyLocationService extends Service {
         if(mList==null) return null;
         if(mList.size()==0) return null;
         return mList.get(mList.size()-1);
+    }
+
+    public MyActivity getLastLastLocation() {
+        if(mList==null) return null;
+        if(mList.size()<=1) return null;
+        return mList.get(mList.size()-2);
     }
 
     IBinder mBinder = new MyBinder();
@@ -116,7 +122,7 @@ public class MyLocationService extends Service {
             if(_save_activity) {
                 String _fname = StringUtil.DateToString(_date,Config._filename_fmt) + Config._default_ext;
                 MyActivityUtil.serializeActivityIntoFile(mList, _fname );
-                Toast.makeText(getApplicationContext(), "saved: " + _fname, Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getApplicationContext(), "saved: " + _fname, Toast.LENGTH_SHORT).show();
 
                 Config._last_save_point = _date;
 
@@ -126,29 +132,18 @@ public class MyLocationService extends Service {
                         MyActivity _firstAct_of_lastfile = MyActivityUtil.deserializeFirstActivity(_lastfile);
                         if(MyActivityUtil.isSameActivity(_firstAct_of_lastfile, mList.get(0))) {
                            if(Config._delete_file_with_same_start) _lastfile.delete();
-                            Toast.makeText(getApplicationContext(), "saved: " + _fname , Toast.LENGTH_SHORT).show();
+                            //Toast.makeText(getApplicationContext(), "saved: " + _fname , Toast.LENGTH_SHORT).show();
                             Log.e(TAG, "**** saved:" + _fname + "removed:" + Config._last_save_fname );
                         } else {
-                            Toast.makeText(getApplicationContext(), "saved: " + _fname, Toast.LENGTH_SHORT).show();
+                            //Toast.makeText(getApplicationContext(), "saved: " + _fname, Toast.LENGTH_SHORT).show();
                             Log.e(TAG, "**** saved:" + _fname);
                         }
                     } else{
-                        Toast.makeText(getApplicationContext(), "saved: " + _fname, Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(getApplicationContext(), "saved: " + _fname, Toast.LENGTH_SHORT).show();
                         Log.e(TAG, "**** saved:" + _fname);
                     }
                     Config._last_save_fname = _fname;
                 }
-            }
-
-            try {
-                //Toast.makeText(getApplicationContext(), "onLocationChanged("+mList.size()+"): " + location, Toast.LENGTH_LONG).show();
-                Log.e(TAG, "**** Location:" + location);
-                Log.e(TAG, "**** Provider:" + location.getProvider());
-                Log.e(TAG, "**** LocationManager.GPS_PROVIDER:" + LocationManager.GPS_PROVIDER);
-                Log.e(TAG, "**** mList.size():" + mList.size());
-
-            }catch(Exception e) {
-                e.printStackTrace();
             }
         }
 
@@ -195,12 +190,6 @@ public class MyLocationService extends Service {
                     LOCATION_DISTANCE,  // 미터
                     mLocationListeners[0]
             );
-
-            Toast.makeText(getApplicationContext(),
-                    "GPS Update req: LOCATION INTERVAL" + LOCATION_INTERVAL +
-                            ", LOCATION_DISTANCE " + LOCATION_DISTANCE,
-                    Toast.LENGTH_LONG).show();
-
         } catch (java.lang.SecurityException ex) {
             Log.i(TAG, "fail to request location update, ignore", ex);
         } catch (IllegalArgumentException ex) {
@@ -248,11 +237,6 @@ public class MyLocationService extends Service {
     }
 
     private void initializeLocationManager() {
-        Toast.makeText(getApplicationContext(), "initializeLocationManager - LOCATION_INTERVAL: " + LOCATION_INTERVAL + " LOCATION_DISTANCE: " + LOCATION_DISTANCE,
-                Toast.LENGTH_LONG).show();
-
-        Log.e(TAG, "initializeLocationManager - LOCATION_INTERVAL: " + LOCATION_INTERVAL + " LOCATION_DISTANCE: " + LOCATION_DISTANCE);
-
         if (mLocationManager == null) {
             mLocationManager = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
         }
@@ -306,5 +290,32 @@ public class MyLocationService extends Service {
             return provider2 == null;
         }
         return provider1.equals(provider2);
+    }
+
+    /* Laboratory Program */
+    public String LocTimeStr(Location loc) {
+        String added_on = StringUtil.DateToString(new Date(loc.getTime()), "yyyy년MM월dd일_HH시mm분ss초" );
+        return added_on;
+    }
+
+    public Location getLocation() {
+        String locationProvider =  mLocationManager.GPS_PROVIDER;
+        try {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                Log.e(TAG, "no Permission"); // but never occur!
+                return null;
+            }
+
+            Location lastKnownLocation = mLocationManager.getLastKnownLocation(locationProvider);
+            if (lastKnownLocation != null) {
+                Location location = lastKnownLocation;
+                mList.add(new MyActivity(location.getLatitude(), location.getLongitude(), location.getAltitude(),LocTimeStr(location)));
+                return location;
+            }
+        }catch(Exception e) {
+            e.printStackTrace();
+            Log.e(TAG, e.toString());
+        }
+        return null;
     }
 }

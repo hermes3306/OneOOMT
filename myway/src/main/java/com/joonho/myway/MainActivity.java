@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.design.widget.FloatingActionButton;
@@ -24,26 +25,42 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.joonho.myway.util.CalBearing;
 import com.joonho.myway.util.Config;
 import com.joonho.myway.util.MyActivityUtil;
+import com.joonho.myway.util.StringUtil;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     public static String TAG = "MainActivity";
-
     private boolean     __svc_started = false;
     private Intent      __svc_Intent = null;
     MyLocationService   mMyLocationService;
+
+    TextView tv_status = null;
+    private GoogleMap mMap;
+    private Marker mMarker=null;
+
 
     ServiceConnection conn = new ServiceConnection() {
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -97,10 +114,14 @@ public class MainActivity extends AppCompatActivity
         mMapView.getMapAsync(new OnMapReadyCallback() {
             @Override
             public void onMapReady(final GoogleMap googleMap) {
-
-
+                mMap = googleMap;
             }
         });
+
+        /* MAIN */
+        tv_status = findViewById(R.id.tv_status);
+        tv_status.setText(new Date().toString());
+        doMyTimeTask();
 
     }
 
@@ -108,10 +129,10 @@ public class MainActivity extends AppCompatActivity
     protected void onStart() {
         super.onStart();
         if(__svc_started) {
-            Toast.makeText(MainActivity.this, "SERVICE ALREADY STARTED", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(MainActivity.this, "SERVICE ALREADY STARTED", Toast.LENGTH_SHORT).show();
             return;
         }
-        Toast.makeText(MainActivity.this,"START SERVICE", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(MainActivity.this,"START SERVICE", Toast.LENGTH_SHORT).show();
         Intent myI = new Intent(this, MyLocationService.class);
         bindService(myI, conn, Context.BIND_AUTO_CREATE);
         __svc_started = true;
@@ -119,7 +140,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onStop() {
-        Toast.makeText(MainActivity.this,"onStop()", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(MainActivity.this,"onStop()", Toast.LENGTH_SHORT).show();
         super.onStop();
     }
 
@@ -129,7 +150,7 @@ public class MainActivity extends AppCompatActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            Log.e(TAG,"------- onBackPressed() called");
+            //Log.e(TAG,"------- onBackPressed() called");
             //super.onBackPressed();
         }
     }
@@ -233,5 +254,71 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    public void doMyTimeTask() {
+        TimerTask mTask =new MyTimerTask();
+        Timer mTimer = new Timer();
+        mTimer.schedule(mTask, Config._timer_delay, Config._timer_period);
+    }
+
+    public static LatLng curloc=null, preloc=null;
+
+    public class MyTimerTask extends java.util.TimerTask{
+        public void run() {
+            if(__svc_started != true) return;
+
+            long start = System.currentTimeMillis();
+            MainActivity.this.runOnUiThread(new Runnable() {
+                public void run() {
+                    MyActivity ma = mMyLocationService.getLastLocation();
+                    if(ma==null) {
+                        setStatus("no locations");
+                        return;
+                    }
+                    LatLng curloc = new LatLng(ma.latitude,ma.longitude);
+
+                    if(Config._driving_mode) {
+                        double mbearing = 0;
+                        if(preloc !=null && preloc != curloc) {
+                            CalBearing cb = new CalBearing(preloc.latitude, preloc.longitude, curloc.latitude, curloc.longitude);
+                            mbearing = cb.getBearing();
+                        }
+                        CameraPosition currentPlace = new CameraPosition.Builder()
+                                .target(curloc)
+                                .bearing((float)mbearing).zoom(Config._myzoom).build();
+                        mMap.moveCamera(CameraUpdateFactory.newCameraPosition(currentPlace));
+                        //mMap.animateCamera(CameraUpdateFactory.newCameraPosition(currentPlace));
+                    } else {
+                        CameraPosition cameraPosition = new CameraPosition.Builder().target(curloc).zoom(Config._myzoom).build();
+                        mMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+                        //mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+                    }
+                    if(curloc != preloc) preloc = curloc;
+                    setStatus("new("+ma.latitude + "," +  ma.longitude+")");
+                    drawMarker(curloc, StringUtil.DateToString(new Date(), "hh:mm:ss"));
+
+                }
+            });
+        } /* end of run() */
+    } /* end of MyTimerTask */
+
+    public void setStatus(String str) {
+        tv_status.setText(StringUtil.DateToString(new Date(), "hh:mm:ss") + "-" + str);
+    }
+
+    public void drawMarker(LatLng l, String title) {
+        if(mMarker==null) {
+            MarkerOptions opt = new MarkerOptions()
+                    .position(l)
+                    .title(title)
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
+                    .draggable(true).visible(true).snippet("0");
+            mMarker = mMap.addMarker(opt);
+        } else {
+            mMarker.setPosition(l);
+            mMarker.setTitle(title);
+        }
+        mMarker.showInfoWindow();
     }
 }

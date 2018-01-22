@@ -36,6 +36,11 @@ public class Config {
     public static final long    _12HOURS                        = _HOUR * 12;
     public static final long    _DAY                            = _HOUR * 24;
 
+    public static final long    _timer_period                     = 5000; // 10 sec
+    public static final long    _timer_delay                      = 5000; // 5 sec
+    public static boolean       _driving_mode                       = false;
+    public static float         _myzoom                              =14f;
+
     public static String get_filename() {
         return StringUtil.DateToString(new Date(), _filename_fmt) + _default_ext;
     }

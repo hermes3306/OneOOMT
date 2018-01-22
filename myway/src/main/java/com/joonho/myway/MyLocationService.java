@@ -26,15 +26,21 @@ public class MyLocationService extends Service {
 
     private static final String TAG = "MyLocationService";
     private LocationManager mLocationManager = null;
-    private static final int LOCATION_INTERVAL = 3000;
-    private static final float LOCATION_DISTANCE = 10f;
-    private static final int TWO_MINUTES = 1000 * 60 * 2;
+    private static final int LOCATION_INTERVAL       = 5000;     //  5 초
+    private static final float LOCATION_DISTANCE     = 20f;     // 20 미터
+    private static final int TWO_MINUTES              = 1000 * 60 * 2;
 
     /* Global variables */
     private ArrayList<MyActivity> mList = null;
 
     public ArrayList<MyActivity> getMyAcitivityList() {
         return mList;
+    }
+
+    public MyActivity getLastLocation() {
+        if(mList==null) return null;
+        if(mList.size()==0) return null;
+        return mList.get(mList.size()-1);
     }
 
     IBinder mBinder = new MyBinder();
@@ -185,8 +191,8 @@ public class MyLocationService extends Service {
         try {
             mLocationManager.requestLocationUpdates(
                     LocationManager.GPS_PROVIDER,
-                    LOCATION_INTERVAL,
-                    LOCATION_DISTANCE,
+                    LOCATION_INTERVAL,  // 밀리세컨
+                    LOCATION_DISTANCE,  // 미터
                     mLocationListeners[0]
             );
 

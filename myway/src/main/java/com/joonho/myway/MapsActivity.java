@@ -130,20 +130,18 @@ public class MapsActivity extends AppCompatActivity
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-
         mMap.setOnMyLocationButtonClickListener(this);
         mMap.setOnMyLocationClickListener(this);
+        enableMyLocation();
+
         mMap.getUiSettings().setZoomControlsEnabled(true);
-        //mMap.getUiSettings().setIndoorLevelPickerEnabled(true);
         mMap.getUiSettings().setMapToolbarEnabled(true);
-        //mMap.setTrafficEnabled(true);
 
         tv_status   = findViewById(R.id.tv_status);
         bt_current  = findViewById(R.id.bt_current);
         bt_memo     = findViewById(R.id.bt_memo);
         bt_track    = findViewById(R.id.bt_track);
         bt_walking  = findViewById(R.id.bt_walking);
-        //doMyTimeTask();
     }
 
 
@@ -247,13 +245,6 @@ public class MapsActivity extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
-        } else {
-            //Log.e(TAG,"------- onBackPressed() called");
-            //super.onBackPressed();
-        }
     }
 
     @Override
@@ -313,12 +304,12 @@ public class MapsActivity extends AppCompatActivity
                         CameraPosition currentPlace = new CameraPosition.Builder()
                                 .target(curloc)
                                 .bearing((float)mbearing).zoom(Config._myzoom).build();
-                        mMap.moveCamera(CameraUpdateFactory.newCameraPosition(currentPlace));
-                        //mMap.animateCamera(CameraUpdateFactory.newCameraPosition(currentPlace));
+                        //mMap.moveCamera(CameraUpdateFactory.newCameraPosition(currentPlace));
+                        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(currentPlace));
                     } else {
                         CameraPosition cameraPosition = new CameraPosition.Builder().target(curloc).zoom(Config._myzoom).build();
-                        mMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-                        //mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+                        //mMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+                        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
                     }
                     preloc = curloc;
                     setStatus("new("+ma.latitude + "," +  ma.longitude+")");

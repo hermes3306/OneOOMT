@@ -293,7 +293,7 @@ public class MainActivity extends AppCompatActivity
                 public void run() {
                     MyActivity ma = mMyLocationService.getLastLocation();
                     if(ma==null) {
-                        setStatus("no locations");
+                        setStatus("No GPS");
                         return;
                     }
                     LatLng curloc = new LatLng(ma.latitude,ma.longitude);
@@ -342,8 +342,13 @@ public class MainActivity extends AppCompatActivity
             case R.id.bt_current:
                 Location loc = mMyLocationService.getLocation();
                 if(loc!=null) curloc = new LatLng(loc.getLatitude(), loc.getLongitude());
+                else {
+                    setStatus("No GPS");
+                    return;
+                }
                 MyActivity ma = new MyActivity(loc.getLatitude(), loc.getLongitude(), loc.getAltitude(), LocTimeStr(loc));
                 drawMarker(ma);
+
                 if(_showtrack) {
                     drawTrack(mMyLocationService.getMyAcitivityList(),Color.CYAN,15);
                     mPolyline.setVisible(true);
@@ -353,10 +358,10 @@ public class MainActivity extends AppCompatActivity
             case R.id.bt_track:
                 if(_showtrack) {
                     drawTrack(mMyLocationService.getMyAcitivityList(),Color.CYAN,15);
-                    mPolyline.setVisible(true);
+                    if(mPolyline!=null) mPolyline.setVisible(true);
                     _showtrack=false;
                 }else {
-                    mPolyline.setVisible(false);
+                    if(mPolyline!=null) mPolyline.setVisible(false);
                     _showtrack=true;
                 }
                 break;

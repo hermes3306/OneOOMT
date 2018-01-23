@@ -29,6 +29,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -59,9 +60,9 @@ import java.util.TimerTask;
 public class MainActivity extends AppCompatActivity
         implements
         NavigationView.OnNavigationItemSelectedListener,
-        View.OnClickListener,
-        GoogleMap.OnMyLocationButtonClickListener,
-        GoogleMap.OnMyLocationClickListener {
+        View.OnClickListener
+        /*,GoogleMap.OnMyLocationButtonClickListener,
+        GoogleMap.OnMyLocationClickListener*/ {
 
     public static String    TAG                     = "MainActivity";
     private boolean         __svc_started           = false;
@@ -77,6 +78,9 @@ public class MainActivity extends AppCompatActivity
     Button                  bt_current              = null;
     Button                  bt_walking              = null;
     Button                  bt_memo                 = null;
+    ImageButton             bt_dododo               = null;
+    ImageButton             bt_camera               = null;
+    ImageButton             bt_list                 = null;
 
 
     ServiceConnection conn = new ServiceConnection() {
@@ -132,14 +136,14 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onMapReady(final GoogleMap googleMap) {
                 mMap = googleMap;
-                        /* MAIN */
+                /*
                 if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION)
                         == PackageManager.PERMISSION_GRANTED) {
                     mMap.setMyLocationEnabled(true);
                 } else {
                     setStatus("No Priv.");
                     // Show rationale and request permission.
-                }
+                }*/
             }
         });
 
@@ -148,6 +152,10 @@ public class MainActivity extends AppCompatActivity
         bt_memo     = findViewById(R.id.bt_memo);
         bt_track    = findViewById(R.id.bt_track);
         bt_walking  = findViewById(R.id.bt_walking);
+
+        bt_list     = findViewById(R.id.bt_list);
+        bt_camera   = findViewById(R.id.bt_camera);
+        bt_dododo   = findViewById(R.id.bt_dododo);
 
         doMyTimeTask();
 
@@ -297,6 +305,7 @@ public class MainActivity extends AppCompatActivity
 
     public static LatLng curloc=null, preloc=null;
 
+    /*
     @Override
     public boolean onMyLocationButtonClick() {
         Toast.makeText(this, "MyLocation button clicked", Toast.LENGTH_SHORT).show();
@@ -309,6 +318,7 @@ public class MainActivity extends AppCompatActivity
         Toast.makeText(this, "Current location:\n" + location, Toast.LENGTH_LONG).show();
         Log.e(TAG,"...");
     }
+    */
 
     public class MyTimerTask extends java.util.TimerTask{
         public void run() {
@@ -420,12 +430,11 @@ public class MainActivity extends AppCompatActivity
                     drawTrack(mMyLocationService.getMyAcitivityList(),Color.CYAN,15);
                     mPolyline.setVisible(true);
                 }
+                break;
         }
     }
 
-
     /* Map functions */
-
     public void drawMarker(LatLng l, String head, String body) {
         if(mMarker==null) {
             MarkerOptions opt = new MarkerOptions()

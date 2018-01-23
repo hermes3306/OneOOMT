@@ -126,10 +126,17 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onMapReady(final GoogleMap googleMap) {
                 mMap = googleMap;
+                        /* MAIN */
+                if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+                        == PackageManager.PERMISSION_GRANTED) {
+                    mMap.setMyLocationEnabled(true);
+                } else {
+                    setStatus("No Priv.");
+                    // Show rationale and request permission.
+                }
             }
         });
 
-        /* MAIN */
         tv_status   = findViewById(R.id.tv_status);
         bt_current  = findViewById(R.id.bt_current);
         bt_memo     = findViewById(R.id.bt_memo);
@@ -320,7 +327,6 @@ public class MainActivity extends AppCompatActivity
                     }
                     preloc = curloc;
                     setStatus("new("+ma.latitude + "," +  ma.longitude+")");
-
                 }
             });
         } /* end of run() */
@@ -359,16 +365,24 @@ public class MainActivity extends AppCompatActivity
                 if(_showtrack) {
                     drawTrack(mMyLocationService.getMyAcitivityList(),Color.CYAN,15);
                     if(mPolyline!=null) mPolyline.setVisible(true);
+                    else setStatus("No Track");
                     _showtrack=false;
                 }else {
                     if(mPolyline!=null) mPolyline.setVisible(false);
+                    else setStatus("No Track");
                     _showtrack=true;
                 }
                 break;
 
             case R.id.bt_memo:
+                setStatus("Not Impl.");
+                break;
             case R.id.bt_walking:
                 Location walkloc = mMyLocationService.getLocation();
+                if(walkloc==null) {
+                    setStatus("No GPS");
+                    return;
+                }
                 LatLng   ll  = new LatLng(walkloc.getLatitude(),walkloc.getLongitude());
                 double mbearing = 0;
                 MyActivity ma2 = mMyLocationService.getLastLocation();
@@ -422,7 +436,6 @@ public class MainActivity extends AppCompatActivity
         }
 
         if(mPolyline==null) {
-
             PolylineOptions plo = new PolylineOptions();
             plo.color(color);
             mPolyline = mMap.addPolyline(plo);
@@ -434,9 +447,4 @@ public class MainActivity extends AppCompatActivity
             mPolyline.setWidth(width);
         }
     }
-
-
-
-
-
 }

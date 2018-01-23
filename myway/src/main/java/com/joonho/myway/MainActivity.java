@@ -12,6 +12,7 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
@@ -43,6 +44,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.joonho.myway.test.MapsActivity;
 import com.joonho.myway.util.CalBearing;
 import com.joonho.myway.util.Config;
 import com.joonho.myway.util.MyActivityUtil;
@@ -55,7 +57,11 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener {
+        implements
+        NavigationView.OnNavigationItemSelectedListener,
+        View.OnClickListener,
+        GoogleMap.OnMyLocationButtonClickListener,
+        GoogleMap.OnMyLocationClickListener {
 
     public static String    TAG                     = "MainActivity";
     private boolean         __svc_started           = false;
@@ -291,6 +297,19 @@ public class MainActivity extends AppCompatActivity
 
     public static LatLng curloc=null, preloc=null;
 
+    @Override
+    public boolean onMyLocationButtonClick() {
+        Toast.makeText(this, "MyLocation button clicked", Toast.LENGTH_SHORT).show();
+        Log.e(TAG,"...");
+        return false;
+    }
+
+    @Override
+    public void onMyLocationClick(@NonNull Location location) {
+        Toast.makeText(this, "Current location:\n" + location, Toast.LENGTH_LONG).show();
+        Log.e(TAG,"...");
+    }
+
     public class MyTimerTask extends java.util.TimerTask{
         public void run() {
             if(__svc_started != true) return;
@@ -376,6 +395,8 @@ public class MainActivity extends AppCompatActivity
 
             case R.id.bt_memo:
                 setStatus("Not Impl.");
+                Intent myintent = new Intent(MainActivity.this, MapsActivity.class);
+                startActivity(myintent);
                 break;
             case R.id.bt_walking:
                 Location walkloc = mMyLocationService.getLocation();
@@ -404,6 +425,7 @@ public class MainActivity extends AppCompatActivity
 
 
     /* Map functions */
+
     public void drawMarker(LatLng l, String head, String body) {
         if(mMarker==null) {
             MarkerOptions opt = new MarkerOptions()

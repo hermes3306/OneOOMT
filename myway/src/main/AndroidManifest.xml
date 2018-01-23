@@ -14,15 +14,14 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
         <activity
             android:name=".MainActivity"
-            android:screenOrientation="portrait"
             android:label="@string/app_name"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -30,9 +29,12 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".MyLocationService"/>
+        <service android:name=".MyLocationService" />
 
-        <activity android:name=".FileActivity"></activity>
+        <activity android:name=".FileActivity" />
+        <activity
+            android:name=".test.MapsActivity"
+            android:label="@string/title_activity_maps"></activity>
     </application>
 
 </manifest>

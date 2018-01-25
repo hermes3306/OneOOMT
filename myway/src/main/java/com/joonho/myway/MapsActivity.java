@@ -136,6 +136,7 @@ public class MapsActivity extends AppCompatActivity
 
         mMap.getUiSettings().setZoomControlsEnabled(true);
         mMap.getUiSettings().setMapToolbarEnabled(true);
+        mMap.getUiSettings().setCompassEnabled(true);
 
         tv_status   = findViewById(R.id.tv_status);
         bt_current  = findViewById(R.id.bt_current);
@@ -160,27 +161,33 @@ public class MapsActivity extends AppCompatActivity
         }
     }
 
-    @Override
-    public boolean onMyLocationButtonClick() {
-        Location loc = mMap.getMyLocation();
-        if(loc!=null) curloc = new LatLng(loc.getLatitude(), loc.getLongitude());
-        else {
+    public void addLoc(Location loc) {
+        if(loc==null) {
             setStatus("No GPS");
-            return false;
+            return;
         }
+
+        curloc = new LatLng(loc.getLatitude(), loc.getLongitude());
+        setStatus(loc.toString());
+
         MyActivity ma = new MyActivity(loc.getLatitude(), loc.getLongitude(), loc.getAltitude(), LocTimeStr(loc));
         drawMarker(ma);
         if(_showtrack) {
             drawTrack(mMyLocationService.getMyAcitivityList(), Color.CYAN,15);
             if(mPolyline!=null) mPolyline.setVisible(true);
         }
-        // Return false so that we don't consume the event and the default behavior still occurs
-        // (the camera animates to the user's current position).
+    }
+
+    @Override
+    public boolean onMyLocationButtonClick() {
+        Location loc = mMap.getMyLocation();
+        addLoc(loc);
         return false;
     }
 
     @Override
     public void onMyLocationClick(@NonNull Location location) {
+        addLoc(location);
         Toast.makeText(this, "Current location:\n" + location, Toast.LENGTH_LONG).show();
     }
 
@@ -223,10 +230,12 @@ public class MapsActivity extends AppCompatActivity
     protected void onStart() {
         super.onStart();
         if(__svc_started) {
-            //Toast.makeText(MainActivity.this, "SERVICE ALREADY STARTED", Toast.LENGTH_SHORT).show();
+            Toast.makeText(MapsActivity.this, "SERVICE ALREADY STARTED", Toast.LENGTH_SHORT).show();
             return;
         }
-        //Toast.makeText(MainActivity.this,"START SERVICE", Toast.LENGTH_SHORT).show();
+
+        Toast.makeText(MapsActivity.this,"SERVICE STARTED", Toast.LENGTH_SHORT).show();
+
         Intent myI = new Intent(this, MyLocationService.class);
         bindService(myI, conn, Context.BIND_AUTO_CREATE);
         __svc_started = true;
@@ -240,7 +249,7 @@ public class MapsActivity extends AppCompatActivity
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
+        //super.onDestroy();
     }
 
     @Override

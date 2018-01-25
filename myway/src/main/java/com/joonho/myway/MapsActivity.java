@@ -153,11 +153,14 @@ public class MapsActivity extends AppCompatActivity
     public void onMapClick(LatLng point) {
         setStatus(point.toString());
         mMap.animateCamera(CameraUpdateFactory.newLatLng(point));
+        if(curloc==null) return;
         CalDistance cd = new CalDistance(curloc.latitude, curloc.longitude, point.latitude, point.longitude);
         String addr = MyActivityUtil.getAddress(getApplicationContext(), point);
         String head = String.format("%.5f",point.latitude) + "," + String.format("%.5f",point.longitude);
-               head += "  " + String.format("%.0f",cd.getDistance()) + "m";
-        drawMarker(point,head, addr );
+        if(cd.getDistance() > 1000f) head += "  " + String.format("%.1f",cd.getDistance()/1000) + "km";
+        else head += "  " + String.format("%.0f",cd.getDistance()) + "m";
+        drawMarker(point,head,addr);
+        mMarker.showInfoWindow();
     }
 
 

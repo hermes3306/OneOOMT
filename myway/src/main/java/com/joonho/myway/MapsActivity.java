@@ -41,6 +41,7 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.joonho.myway.test.PermissionUtils;
 import com.joonho.myway.util.CalBearing;
+import com.joonho.myway.util.CalDistance;
 import com.joonho.myway.util.Config;
 import com.joonho.myway.util.MyActivityUtil;
 import com.joonho.myway.util.StringUtil;
@@ -57,6 +58,7 @@ public class MapsActivity extends AppCompatActivity
         View.OnClickListener,
         GoogleMap.OnMyLocationButtonClickListener,
         GoogleMap.OnMyLocationClickListener,
+        GoogleMap.OnMapClickListener,
         ActivityCompat.OnRequestPermissionsResultCallback {
 
 
@@ -138,11 +140,24 @@ public class MapsActivity extends AppCompatActivity
         mMap.getUiSettings().setMapToolbarEnabled(true);
         mMap.getUiSettings().setCompassEnabled(true);
 
+        mMap.setOnMapClickListener(this);
+
         tv_status   = findViewById(R.id.tv_status);
         bt_current  = findViewById(R.id.bt_current);
         bt_memo     = findViewById(R.id.bt_memo);
         bt_track    = findViewById(R.id.bt_track);
         bt_walking  = findViewById(R.id.bt_walking);
+    }
+
+    @Override
+    public void onMapClick(LatLng point) {
+        setStatus(point.toString());
+        mMap.animateCamera(CameraUpdateFactory.newLatLng(point));
+        CalDistance cd = new CalDistance(curloc.latitude, curloc.longitude, point.latitude, point.longitude);
+        String addr = MyActivityUtil.getAddress(getApplicationContext(), point);
+        String head = String.format("%.5f",point.latitude) + "," + String.format("%.5f",point.longitude);
+               head += "  " + String.format("%.0f",cd.getDistance()) + "m";
+        drawMarker(point,head, addr );
     }
 
 

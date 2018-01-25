@@ -6,6 +6,7 @@ import android.location.Geocoder;
 import android.os.Environment;
 import android.util.Log;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.joonho.myway.MyActivity;
 
 import org.json.JSONArray;
@@ -265,11 +266,11 @@ public class MyActivityUtil {
         return date_str;
     }
 
-    public static String getAddress(final Context _ctx, MyActivity ma) {
+    public static String getAddress(final Context _ctx, LatLng ll) {
         Geocoder geocoder = new Geocoder(_ctx, Locale.getDefault());
         List<Address> addresses = null;
         try {
-            addresses = geocoder.getFromLocation(ma.latitude, ma.longitude,1);
+            addresses = geocoder.getFromLocation(ll.latitude, ll.longitude,1);
         }catch(Exception e) {
             e.printStackTrace();
             Log.e(TAG, e.toString());
@@ -282,6 +283,11 @@ public class MyActivityUtil {
             addinfo = addresses.get(0).getAddressLine(0).toString();
         }
         return addinfo;
+    }
+
+    public static String getAddress(final Context _ctx, MyActivity ma) {
+        LatLng ll = new LatLng(ma.latitude, ma.longitude);
+        return getAddress(_ctx, ll);
     }
 
     public static String getAddressDong(final Context _ctx, MyActivity ma) {

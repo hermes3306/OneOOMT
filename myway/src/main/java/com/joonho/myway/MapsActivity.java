@@ -21,6 +21,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Html;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -151,14 +152,20 @@ public class MapsActivity extends AppCompatActivity
 
     @Override
     public void onMapClick(LatLng point) {
+        if(point==null) return;
         setStatus(point.toString());
         mMap.animateCamera(CameraUpdateFactory.newLatLng(point));
-        if(curloc==null) return;
-        CalDistance cd = new CalDistance(curloc.latitude, curloc.longitude, point.latitude, point.longitude);
+        CalDistance cd=null;
+        if(curloc!=null) cd = new CalDistance(curloc.latitude, curloc.longitude, point.latitude, point.longitude);
+
         String addr = MyActivityUtil.getAddress(getApplicationContext(), point);
         String head = String.format("%.5f",point.latitude) + "," + String.format("%.5f",point.longitude);
-        if(cd.getDistance() > 1000f) head += "  " + String.format("%.1f",cd.getDistance()/1000) + "km";
-        else head += "  " + String.format("%.0f",cd.getDistance()) + "m";
+
+        if(cd !=null) {
+            if (cd.getDistance() > 1000f)
+                head += String.format("%.1f", cd.getDistance() / 1000) + "km";
+            else head += String.format("%.0f", cd.getDistance()) + "m";
+        }
         drawMarker(point,head,addr);
         mMarker.showInfoWindow();
     }
@@ -184,16 +191,22 @@ public class MapsActivity extends AppCompatActivity
             setStatus("No GPS");
             return;
         }
+        mMyLocationService.addLocation(loc);
 
-        curloc = new LatLng(loc.getLatitude(), loc.getLongitude());
-        setStatus(loc.toString());
+        //CalDistance cd = new CalDistance(curloc.latitude, curloc.longitude, point.latitude, point.longitude);
+        LatLng point = new LatLng(loc.getLatitude(), loc.getLongitude());
+        String addr = MyActivityUtil.getAddress(getApplicationContext(), point);
+        String head = String.format("%.5f",point.latitude) + "," + String.format("%.5f",point.longitude);
+        drawMarker(point,head,addr);
+        mMarker.showInfoWindow();
 
-        MyActivity ma = new MyActivity(loc.getLatitude(), loc.getLongitude(), loc.getAltitude(), LocTimeStr(loc));
-        drawMarker(ma);
         if(_showtrack) {
             drawTrack(mMyLocationService.getMyAcitivityList(), Color.CYAN,15);
             if(mPolyline!=null) mPolyline.setVisible(true);
         }
+
+        preloc = curloc;
+        curloc = point;
     }
 
     @Override

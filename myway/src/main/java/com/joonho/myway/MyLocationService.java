@@ -49,6 +49,11 @@ public class MyLocationService extends Service {
         return mList.get(mList.size()-2);
     }
 
+    public void addLocation(Location location) {
+        if(mList==null) mList = new ArrayList<>();
+        mList.add(new MyActivity(location.getLatitude(), location.getLongitude(), location.getAltitude(),LocTimeStr(location)));
+    }
+
     IBinder mBinder = new MyBinder();
     class MyBinder extends Binder {
         MyLocationService getService() {
@@ -73,6 +78,8 @@ public class MyLocationService extends Service {
             Log.e(TAG, "LocationListener " + provider);
             mLastLocation = new Location(provider);
         }
+
+
 
         @Override
         public void onLocationChanged(Location location) {

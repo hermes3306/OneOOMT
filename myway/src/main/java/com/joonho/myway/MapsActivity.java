@@ -163,8 +163,8 @@ public class MapsActivity extends AppCompatActivity
 
         if(cd !=null) {
             if (cd.getDistance() > 1000f)
-                head += String.format("%.1f", cd.getDistance() / 1000) + "km";
-            else head += String.format("%.0f", cd.getDistance()) + "m";
+                head += String.format(" %.1f", cd.getDistance() / 1000) + "km";
+            else head += String.format(" %.0f", cd.getDistance()) + "m";
         }
         drawMarker(point,head,addr);
         mMarker.showInfoWindow();

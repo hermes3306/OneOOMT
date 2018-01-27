@@ -1,5 +1,7 @@
 package com.joonho.myway.util;
 
+import android.os.Environment;
+
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 
 import java.io.File;
@@ -11,6 +13,11 @@ import java.util.Date;
 
 public class Config {
     public static String        _default_ext                    = ".ser2";
+    public static File          mediaStorageDir                 =
+            new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS),
+                    "OneOOMT");
+    public static String        _uploadURL                      =
+            "http://180.69.217.73:8080/OneOOMT/upload2";
 
     public static Date          _last_save_point                = null;
     public static String        _last_save_fname                = null;
@@ -18,6 +25,7 @@ public class Config {
 
     public static boolean       _delete_file_with_same_start    = true;
     public static boolean       _trash_after_dododo             = false;
+    public static int           _dododo_day                     = 2;
 
     public static int           _save_interval                  = 1;
     public static final int     _SAVE_INTERVAL_MININUTE         = 0;

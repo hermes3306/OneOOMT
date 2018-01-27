@@ -41,6 +41,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.joonho.myway.test.PermissionUtils;
+import com.joonho.myway.util.AsyncService;
 import com.joonho.myway.util.CalBearing;
 import com.joonho.myway.util.CalDistance;
 import com.joonho.myway.util.Config;
@@ -476,6 +477,10 @@ public class MapsActivity extends AppCompatActivity
                 intent.putExtra("file", Config.getAbsolutePath(fname));
                 intent.putExtra("pos", 0);
                 startActivity(intent);
+                break;
+            case R.id.bt_cloud:
+                AsyncService as = new AsyncService();
+                as.UploadAll(MapsActivity.this);
                 break;
         }
     }

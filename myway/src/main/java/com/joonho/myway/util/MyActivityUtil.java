@@ -43,7 +43,7 @@ public class MyActivityUtil {
     private static boolean _default_reverse_order = true;
 
     static {
-        mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "OneOOMT");
+        mediaStorageDir = Config.mediaStorageDir;
         String backupdir = StringUtil.DateToString(new Date(), "yyyyMMdd");
         backupDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "OneOOMT" + backupdir);
     }
@@ -372,7 +372,7 @@ public class MyActivityUtil {
             dododo_str = StringUtil.DateToString(day, "yyyyMMdd");
             Log.e(TAG, ">>>>>>>>>>>>>>>>>> " + dododo_str + " >>>>>>>>   END \n\n\n");
             cnt++;
-        } while(cnt < 2); // 2days check
+        } while(cnt < Config._dododo_day); // 2days check
     }
 
     public static File[] getFilesStartsWithEndWith(final String prefix, final String postfix, boolean reverseorder) {

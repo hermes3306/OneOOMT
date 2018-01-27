@@ -485,6 +485,10 @@ public class MapsActivity extends AppCompatActivity
             case R.id.bt_cloudlist:
                 bt_cloud_list();
                 break;
+            case R.id.bt_run:
+                Intent i = new Intent(MapsActivity.this,RunActivity.class);
+                startActivity(i);
+                break;
         }
     }
 

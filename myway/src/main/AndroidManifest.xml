@@ -32,6 +32,8 @@
         <service android:name=".MyLocationService" />
         <activity android:name=".FileActivity" />
         <activity android:name=".CloudFileActivity" />
+        <activity android:name=".RunActivity" />
+
         <activity
             android:name=".test.MapsActivity"
             android:label="@string/title_activity_maps" />

@@ -263,7 +263,7 @@ public class RunActivity extends AppCompatActivity implements View.OnClickListen
     @Override
     public void onBackPressed() {
         Log.e(TAG,"------- onBackPressed() called");
-        //super.onBackPressed();
+        super.onBackPressed();
     }
 
     @Override

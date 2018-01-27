@@ -30,7 +30,6 @@
         </activity>
 
         <service android:name=".MyLocationService" />
-
         <activity android:name=".FileActivity" />
         <activity android:name=".CloudFileActivity" />
         <activity

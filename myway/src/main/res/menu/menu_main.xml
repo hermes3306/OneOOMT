@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/cloud_group" android:title="Cloud">
+        <menu>
+            <item
+                android:id="@+id/files_cloud"
+                android:title="Activities on Cloud" />
+            <item
+                android:id="@+id/sync_mobile2cloud"
+                android:title="Sync from Mobile to Cloud" />
+            <item
+                android:id="@+id/clear_useless_cloud_activity"
+                android:title="Clear useless activities (Cloud)" />
+            <item
+                android:id="@+id/webupload"
+                android:title="upload current activity" />
+            <item
+                android:id="@+id/uploadall2"
+                android:title="upload all activities into ..." />
+            <item
+                android:id="@+id/uploadall"
+                android:title="upload all activities" />
+        </menu>
+    </item>
+
+    <item android:id="@+id/mysql_group" android:title="Database">
+        <menu>
+            <item
+                android:id="@+id/dbupdate"
+                android:title="db update current activity" />
+            <item
+                android:id="@+id/dbupdateall"
+                android:title="db update all activitues" />
+        </menu>
+    </item>
+
+    <item android:id="@+id/activity_group" android:title="Activities">
+    <menu>
+        <item
+            android:id="@+id/dododo"
+            android:title="DoDoDo..." />
+        <item
+            android:id="@+id/files_a"
+            android:title="Activities on Mobile" />
+        <item
+            android:id="@+id/sync_cloud2mobile"
+            android:title="Sync from Cloud to  Mobile" />
+        <item
+            android:id="@+id/files_d"
+            android:title="files dialog" />
+        <item
+            android:id="@+id/clear_useless_mobile_activity"
+            android:title="Clear useless activities (Mobile)" />
+        <item
+            android:id="@+id/map"
+            android:title="current map" />
+    </menu>
+    </item>
+
+    <item android:id="@+id/setting_group" android:title="Setting...">
+    <menu >
+        <item
+            android:id="@+id/lowbattery"
+            android:title="Low Battery mode" />
+        <item
+            android:id="@+id/directdbupdate"
+            android:title="Direct DB update" />
+        <item
+            android:id="@+id/notify"
+            android:title="Toggle Notification..." />
+        <item
+            android:id="@+id/weather"
+            android:title="weather" />
+        <item
+            android:id="@+id/memory"
+            android:title="memory ..." />
+    </menu>
+    </item>
+
+    <item
+        android:id="@+id/web"
+        android:title="upload any file" />
+
+</menu>

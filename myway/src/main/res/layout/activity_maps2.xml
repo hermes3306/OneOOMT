@@ -73,7 +73,7 @@
             android:layout_height="wrap_content"
             android:background="@android:color/transparent"
             android:onClick="onClick"
-            app:srcCompat="@drawable/run64" />
+            app:srcCompat="@drawable/run48" />
     </LinearLayout>
 
     <TableLayout

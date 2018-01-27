@@ -479,10 +479,53 @@ public class MapsActivity extends AppCompatActivity
                 startActivity(intent);
                 break;
             case R.id.bt_cloud:
-                AsyncService as = new AsyncService();
-                as.UploadAll(MapsActivity.this);
+                bt_cloud();
+                break;
+            case R.id.bt_cloudlist:
+                bt_cloud_list();
                 break;
         }
+    }
+
+    public void bt_cloud() {
+        AsyncService as = new AsyncService();
+        as.UploadAll(MapsActivity.this);
+    }
+
+    public void bt_cloud_list() {
+        String urls[] = new String[1];
+        urls[0] =  Config._listURL;
+        AsyncService as = new AsyncService();
+        final String filesOnCloud[] = as.getFilesOnCloud(MapsActivity.this,urls);
+
+        if(filesOnCloud == null ) return;
+        if(filesOnCloud.length==0) return;
+
+        int msize = filesOnCloud.length;
+        final CharSequence items[] = new CharSequence[msize];
+        for(int i=0;i<msize;i++) {
+            long sz = as.lastfilesizeOnCloud[i];
+            String _sz=null;
+            if(sz > 1024*1024) _sz = "" + sz / (1024 * 1024) + "MB";
+            else if(sz > 1024) _sz = "" + sz / (1024) + "KB";
+            else _sz = "" + sz + "B";
+            items[i] = filesOnCloud[i] +  "(" + _sz + ")" ;
+        }
+
+        AlertDialog.Builder alertDialog3 = new AlertDialog.Builder(this);
+        alertDialog3.setTitle("Select an activity on the cloud("+filesOnCloud.length+")");
+        alertDialog3.setItems(items, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int index) {
+                Intent intent = new Intent(MapsActivity.this, CloudFileActivity.class);
+                intent.putExtra("files", filesOnCloud);
+                intent.putExtra("pos", index);
+                startActivity(intent);
+            }
+        });
+        alertDialog3.setNegativeButton("Back",null);
+        AlertDialog alert3 = alertDialog3.create();
+        alert3.show();
     }
 
     /* Map functions */

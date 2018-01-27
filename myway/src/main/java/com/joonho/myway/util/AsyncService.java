@@ -7,6 +7,9 @@ import android.os.Environment;
 import android.util.Log;
 import android.widget.Toast;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -23,6 +26,9 @@ import java.net.URL;
 
 public class AsyncService {
     private String TAG = "AsyncService";
+    private String filesOnCloud[];
+    public Long lastfilesizeOnCloud[];
+
     public void UploadAll(final Context context) {
         final String _serverUrl = Config._uploadURL;
         // Pop Up a Dialog
@@ -126,6 +132,63 @@ public class AsyncService {
                 Toast.makeText(context, "Uploading success", Toast.LENGTH_LONG).show();
             }
         }.execute();
+    }
+
+
+    public String[] getFilesOnCloud(final Context context, String url[]) {
+        new AsyncTask<String,Void,Boolean>() {
+            ProgressDialog asyncDialog = new ProgressDialog(context);
+
+            @Override
+            protected Boolean doInBackground(String... url) {
+                JSONObject jObj = JSONUtil.getJSONFromUrl(url[0]);
+                try {
+                    JSONArray arr = (JSONArray)jObj.get("files");
+                    filesOnCloud = new String[arr.length()];
+                    lastfilesizeOnCloud = new Long[arr.length()];
+
+                    for(int i=0;i<arr.length();i++) {
+                        JSONObject j = (JSONObject)arr.get(i);
+                        filesOnCloud[i] = (String)j.get("name");
+                        lastfilesizeOnCloud[i] = Long.parseLong((String)j.get("size"));
+                    }
+                }catch(Exception e) {
+                    Log.e(TAG,e.toString());
+                }
+                return true;
+            }
+
+            @Override
+            protected void onPreExecute() {
+                filesOnCloud = null;
+                asyncDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                asyncDialog.setMessage("Downloading...");
+                asyncDialog.show();
+                super.onPreExecute();
+            }
+
+            @Override
+            protected void onPostExecute(Boolean result) {
+                asyncDialog.dismiss();
+                super.onPostExecute(result);
+                Toast.makeText(context, "list download " + result + "!!", Toast.LENGTH_SHORT).show();
+            }
+
+        }.execute(url);
+
+        while(filesOnCloud==null) {
+            try {
+                Log.e(TAG, "waiting for get filesOnCloud....");
+                Thread.sleep(100); //0.1초 기다림
+            }catch(Exception e) {
+                Log.e(TAG, e.toString());
+            }
+        }
+
+        for(int i=0;i<filesOnCloud.length;i++) {
+            Log.e(TAG, "File:" + filesOnCloud[i]);
+        }
+        return filesOnCloud;
     }
 
 

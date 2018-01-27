@@ -18,6 +18,8 @@ public class Config {
                     "OneOOMT");
     public static String        _uploadURL                      =
             "http://180.69.217.73:8080/OneOOMT/upload2";
+    public static String        _listURL                        =
+            "http://180.69.217.73:81/OneOOMT/filelist2.php";
 
     public static Date          _last_save_point                = null;
     public static String        _last_save_fname                = null;

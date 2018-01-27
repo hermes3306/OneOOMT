@@ -23,11 +23,11 @@ public class Config {
 
     public static Date          _last_save_point                = null;
     public static String        _last_save_fname                = null;
-    public static String        _filename_fmt                   ="yyyyMMdd(E)HHmmss";
+    public static String        _filename_fmt                   ="yyyyMMdd_HHmmss";
 
     public static boolean       _delete_file_with_same_start    = true;
     public static boolean       _trash_after_dododo             = false;
-    public static int           _dododo_day                     = 2;
+    public static int           _dododo_day                     = 20;
 
     public static int           _save_interval                  = 1;
     public static final int     _SAVE_INTERVAL_MININUTE         = 0;

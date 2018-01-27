@@ -390,7 +390,7 @@ public class MyActivityUtil {
 
 
     public static void dododo(String day) {  // fmt: 20180101
-        File files[] = getFilesStartsWithEndWith(day, ".ser2", false);
+        File files[] = getFilesStartsWithEndWith(day, Config._default_ext, false);
         ArrayList<String> fnamelist = dododo(files);
         for(int i=0;i<files.length;i++) {
             if(fnamelist.contains(files[i].getName() )) continue;

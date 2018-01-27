@@ -47,6 +47,7 @@ import com.joonho.myway.util.CalDistance;
 import com.joonho.myway.util.Config;
 import com.joonho.myway.util.MyActivityUtil;
 import com.joonho.myway.util.StringUtil;
+import com.joonho.myway.CloudFileActivity;
 
 import java.io.File;
 import java.util.ArrayList;

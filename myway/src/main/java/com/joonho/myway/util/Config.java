@@ -27,7 +27,7 @@ public class Config {
 
     public static boolean       _delete_file_with_same_start    = true;
     public static boolean       _trash_after_dododo             = false;
-    public static int           _dododo_day                     = 20;
+    public static int           _dododo_day                     = 2;
 
     public static int           _save_interval                  = 1;
     public static final int     _SAVE_INTERVAL_MININUTE         = 0;
@@ -48,8 +48,8 @@ public class Config {
     public static final long    _12HOURS                        = _HOUR * 12;
     public static final long    _DAY                            = _HOUR * 24;
 
-    public static final int     _location_interval                = 1000; // 10 sec
-    public static final long    _timer_period                     = 1000; // 10 sec
+    public static final int     _location_interval                = 1000; // 1 sec
+    public static final long    _timer_period                     = 1000; // 1 sec
     public static final long    _timer_delay                      = 1000; // 1 sec
     public static boolean       _driving_mode                     = false;
     public static float         _myzoom                           = 15.0f;

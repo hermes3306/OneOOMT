@@ -67,8 +67,8 @@ public class MapsActivity extends AppCompatActivity
 
     public static String    TAG                     = "MainActivity";
     private boolean         __svc_started           = false;
-    private Intent __svc_Intent            = null;
-    MyLocationService       mMyLocationService;
+    private Intent __svc_Intent                     = null;
+    MyLocationService       mMyLocationService      = null;
 
 
     private GoogleMap mMap;
@@ -86,6 +86,8 @@ public class MapsActivity extends AppCompatActivity
 
     ServiceConnection conn = new ServiceConnection() {
         public void onServiceConnected(ComponentName name, IBinder service) {
+            if(__svc_started && mMyLocationService != null) return;
+
             MyLocationService.MyBinder mb = (MyLocationService.MyBinder) service;
             mMyLocationService = mb.getService();
             __svc_started = true;
@@ -93,6 +95,7 @@ public class MapsActivity extends AppCompatActivity
 
         public void onServiceDisconnected(ComponentName name) {
             __svc_started = false;
+            mMyLocationService = null;
         }
     };
 
@@ -160,8 +163,8 @@ public class MapsActivity extends AppCompatActivity
         CalDistance cd=null;
         if(curloc!=null) cd = new CalDistance(curloc.latitude, curloc.longitude, point.latitude, point.longitude);
 
-        String addr = MyActivityUtil.getAddress(getApplicationContext(), point);
-        String head = String.format("%.5f",point.latitude) + "," + String.format("%.5f",point.longitude);
+        String addr = MyActivityUtil.getAddress(MapsActivity.this, point);
+        String head = String.format("%.3f",point.latitude) + "," + String.format("%.3f",point.longitude);
 
         if(cd !=null) {
             if (cd.getDistance() > 1000f)
@@ -169,9 +172,8 @@ public class MapsActivity extends AppCompatActivity
             else head += String.format(" %.0f", cd.getDistance()) + "m";
         }
         drawMarker(point,head,addr);
-        mMarker.showInfoWindow();
+        if(mMarker != null) mMarker.showInfoWindow();
     }
-
 
     /**
      * Enables the My Location layer if the fine location permission has been granted.
@@ -193,14 +195,22 @@ public class MapsActivity extends AppCompatActivity
             setStatus("No GPS");
             return;
         }
+
+        if(mMyLocationService==null) {
+            setStatus("No MyLocationService");
+            return;
+        }
+
         mMyLocationService.addLocation(loc);
 
         //CalDistance cd = new CalDistance(curloc.latitude, curloc.longitude, point.latitude, point.longitude);
         LatLng point = new LatLng(loc.getLatitude(), loc.getLongitude());
         String addr = MyActivityUtil.getAddress(getApplicationContext(), point);
-        String head = String.format("%.5f",point.latitude) + "," + String.format("%.5f",point.longitude);
+        String head = String.format("%.3f",point.latitude) + "," + String.format("%.3f",point.longitude);
+        if(loc.getAccuracy()!=0) head+= ", " + String.format("%.0f",loc.getAltitude()) +"m(A)";
+
         drawMarker(point,head,addr);
-        mMarker.showInfoWindow();
+        if(mMarker!=null) mMarker.showInfoWindow();
 
         if(_showtrack) {
             drawTrack(mMyLocationService.getMyAcitivityList(), Color.CYAN,15);
@@ -264,14 +274,14 @@ public class MapsActivity extends AppCompatActivity
         super.onStart();
         if(__svc_started) {
             Toast.makeText(MapsActivity.this, "SERVICE ALREADY STARTED", Toast.LENGTH_SHORT).show();
-            return;
+            if(mMyLocationService != null) return;
         }
 
-        Toast.makeText(MapsActivity.this,"SERVICE STARTED", Toast.LENGTH_SHORT).show();
-
-        Intent myI = new Intent(this, MyLocationService.class);
+        Intent myI = new Intent(MapsActivity.this, MyLocationService.class);
         bindService(myI, conn, Context.BIND_AUTO_CREATE);
         __svc_started = true;
+        doMyTimeTask();
+        Toast.makeText(MapsActivity.this,"SERVICE STARTED", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -282,7 +292,7 @@ public class MapsActivity extends AppCompatActivity
 
     @Override
     protected void onDestroy() {
-        //super.onDestroy();
+        super.onDestroy();
     }
 
     @Override
@@ -307,7 +317,6 @@ public class MapsActivity extends AppCompatActivity
         if (id == R.id.action_settings) {
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -354,14 +363,16 @@ public class MapsActivity extends AppCompatActivity
                         mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
                     }
                     preloc = curloc;
-                    setStatus("new("+ma.latitude + "," +  ma.longitude+")");
+                    setStatus(String.format("%.5f,%.5f", ma.latitude,ma.longitude));
                 }
             });
         } /* end of run() */
     } /* end of MyTimerTask */
 
     public void setStatus(String str) {
-        tv_status.setText(StringUtil.DateToString(new Date(), "hh:mm:ss") + "-" + str);
+        String htmlstr = "<font color='blue'>" + StringUtil.DateToString(new Date(), "hh:mm:ss") + "</font>";
+        htmlstr +=  "-" +"<font color='red'>"  + str + "</font>";
+        tv_status.setText(Html.fromHtml(htmlstr));
     }
 
     public String LocTimeStr(Location loc) {
@@ -533,7 +544,7 @@ public class MapsActivity extends AppCompatActivity
         alert3.show();
     }
 
-    /* Map functions */
+
     public void drawMarker(LatLng l, String head, String body) {
         if(mMarker==null) {
             MarkerOptions opt = new MarkerOptions()

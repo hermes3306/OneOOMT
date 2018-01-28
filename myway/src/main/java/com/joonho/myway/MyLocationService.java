@@ -50,6 +50,7 @@ public class MyLocationService extends Service {
     }
 
     public void addLocation(Location location) {
+        if(location==null) return;
         if(mList==null) mList = new ArrayList<>();
         mList.add(new MyActivity(location.getLatitude(), location.getLongitude(), location.getAltitude(),LocTimeStr(location)));
     }
@@ -79,10 +80,9 @@ public class MyLocationService extends Service {
             mLastLocation = new Location(provider);
         }
 
-
-
         @Override
         public void onLocationChanged(Location location) {
+            if(location==null) return;
             Log.e(TAG, "onLocationChanged: " + location);
             if(!isBetterLocation(location, mLastLocation)) {
                 Toast.makeText(getApplicationContext(), "!isBetterLocation: " + location, Toast.LENGTH_LONG).show();
@@ -92,7 +92,7 @@ public class MyLocationService extends Service {
             mLastLocation.set(location);
 
             if(mList==null) {
-                mList = new ArrayList<MyActivity>();
+                mList = new ArrayList<>();
             }
 
             mList.add(new MyActivity(location.getLatitude(), location.getLongitude(), location.getAltitude(),LocTimeStr(location)));

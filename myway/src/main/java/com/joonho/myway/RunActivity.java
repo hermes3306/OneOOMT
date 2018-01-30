@@ -2,9 +2,11 @@ package com.joonho.myway;
 
 import android.Manifest;
 import android.app.ProgressDialog;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Address;
@@ -16,6 +18,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.IBinder;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
@@ -111,6 +114,25 @@ public class RunActivity extends AppCompatActivity implements View.OnClickListen
 
     private MyActivity start_loc;
     private ArrayList<MyActivity> mList = null;
+
+    private boolean         __svc_started           = false;
+    private Intent __svc_Intent                     = null;
+    MyLocationService       mMyLocationService      = null;
+
+    ServiceConnection conn = new ServiceConnection() {
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            if(__svc_started && mMyLocationService != null) return;
+
+            MyLocationService.MyBinder mb = (MyLocationService.MyBinder) service;
+            mMyLocationService = mb.getService();
+            __svc_started = true;
+        }
+
+        public void onServiceDisconnected(ComponentName name) {
+            __svc_started = false;
+            mMyLocationService = null;
+        }
+    };
 
     public void initSharedPreferences(ArrayList<MyActivity> _malist,
                            double _total_distance,
@@ -271,6 +293,18 @@ public class RunActivity extends AppCompatActivity implements View.OnClickListen
         Log.e(TAG,"------- onStart() called");
         super.onStart();
         loadSharedPreferences();
+
+        if(__svc_started) {
+            Toast.makeText(RunActivity.this, "SERVICE ALREADY STARTED", Toast.LENGTH_SHORT).show();
+            if(mMyLocationService != null) return;
+        }
+
+        Intent myI = new Intent(RunActivity.this, MyLocationService.class);
+        bindService(myI, conn, Context.BIND_AUTO_CREATE);
+        __svc_started = true;
+        doMyTimeTask();
+        Toast.makeText(RunActivity.this,"SERVICE STARTED", Toast.LENGTH_SHORT).show();
+
     }
 
     @Override
@@ -353,6 +387,10 @@ public class RunActivity extends AppCompatActivity implements View.OnClickListen
     }
 
     public Location getLocation() {
+        return null;
+    }
+
+    public Location getLocation_direct() {
         // 먼저 GPS를 통해서 위치 찾기
         String locationProvider =  LocationManager.GPS_PROVIDER;
         try {
@@ -415,9 +453,8 @@ public class RunActivity extends AppCompatActivity implements View.OnClickListen
         //Toast.makeText(Main2Activity.this, "isStarted = " + isStarted, Toast.LENGTH_LONG).show();
     }
 
-    public String LocTimeStr(Location loc) {
-        String added_on = StringUtil.DateToString(new Date(loc.getTime()), "yyyy년MM월dd일_HH시mm분ss초" );
-        return added_on;
+    public String LocTimeStr(MyActivity loc) {
+        return loc.added_on;
     }
 
     public long Str2LocTime(String str) {
@@ -442,19 +479,17 @@ public class RunActivity extends AppCompatActivity implements View.OnClickListen
                 start_time = new Date().getTime();
                 mList = new ArrayList<MyActivity>();
 
-                Location sl = getLocation();
+                MyActivity sl = mMyLocationService.getLastLocation();
+
                 if(sl != null) {
-                    start_loc = new MyActivity(sl.getLatitude(), sl.getLongitude(), sl.getAltitude(), LocTimeStr(sl));
+                    start_loc = new MyActivity(sl.latitude, sl.longitude, sl.altitude, LocTimeStr(sl));
                     mList.add(start_loc);
                     getMyWeather();
 
-                    String caddr = getCurAddress(getApplicationContext(),sl);
+                    String caddr = MyActivityUtil.getAddress(RunActivity.this, sl);
                     tv_address.setText(caddr);
-                    String lla = String.format("위도:%3.3f, 경도:%3.3f, 고도:%3.1f", sl.getLatitude(), sl.getLongitude(), sl.getAltitude());
+                    String lla = String.format("위도:%3.3f, 경도:%3.3f, 고도:%3.1f", sl.latitude, sl.longitude, sl.altitude);
                     tv_lat_lng_altitude.setText(lla);
-                    String provider = sl.getProvider();
-                    //String msg = String.format("위치가 %s로부터 추가되어 경로의수는 %d입니다", provider, mList.size());
-                    //tv_message.setText(msg);
                 }
             }
     }
@@ -638,49 +673,48 @@ public class RunActivity extends AppCompatActivity implements View.OnClickListen
                         }
                     }
 
-                    Location cur_loc = getLocation();
+                    //Location cur_loc = getLocation();
+                    MyActivity cur_loc = mMyLocationService.getLastLocation();
                     if (cur_loc == null) return;
 
                     /* real address */
-                    String cur_addr = getCurAddress(RunActivity.this, cur_loc);
+                    String cur_addr = MyActivityUtil.getAddress(RunActivity.this, cur_loc);
                     tv_address.setText(cur_addr);
 
                     /* lat, lon, alt*/
-                    if(maxAltitude < cur_loc.getAltitude()) maxAltitude = cur_loc.getAltitude();
-                    String lla = String.format("%dth: LAT %3.1f LON %3.1f ALT %3.1f", mList.size(), cur_loc.getLatitude(), cur_loc.getLongitude(), cur_loc.getAltitude());
+                    if(maxAltitude < cur_loc.altitude) maxAltitude = cur_loc.altitude;
+                    String lla = String.format("%dth: LAT %3.1f LON %3.1f ALT %3.1f", mList.size(), cur_loc.latitude, cur_loc.longitude, cur_loc.altitude);
                     if(mode3) tv_lat_lng_altitude.setText(lla);
-                    else tv_lat_lng_altitude.setText(String.format("%dth: ALT %3.1f/%3.1fM",mList.size(),cur_loc.getAltitude(),maxAltitude));
+                    else tv_lat_lng_altitude.setText(String.format("%dth: ALT %3.1f/%3.1fM",mList.size(),cur_loc.altitude,maxAltitude));
 
                     /* distance calcuration */
                     if (mList == null) {
                         mList = new ArrayList<MyActivity>();
-                        mList.add(new MyActivity(cur_loc.getLatitude(), cur_loc.getLongitude(), cur_loc.getAltitude(),LocTimeStr(cur_loc)));
+                        mList.add(new MyActivity(cur_loc.latitude, cur_loc.longitude, cur_loc.altitude,LocTimeStr(cur_loc)));
                         total_distance = 0;
                         return;
                     }
                     if(mList.size()==0) {
-                        mList.add(new MyActivity(cur_loc.getLatitude(), cur_loc.getLongitude(), cur_loc.getAltitude(),LocTimeStr(cur_loc)));
+                        mList.add(new MyActivity(cur_loc.latitude, cur_loc.longitude, cur_loc.altitude,LocTimeStr(cur_loc)));
                         total_distance = 0;
                         return;
                     }
 
                     /* calculate from last_location to cur_location */
                     MyActivity last_loc = mList.get(mList.size()-1);
-                    CalDistance cd = new CalDistance(last_loc.latitude, last_loc.longitude, cur_loc.getLatitude(), cur_loc.getLongitude());
+                    CalDistance cd = new CalDistance(last_loc.latitude, last_loc.longitude, cur_loc.latitude, cur_loc.longitude);
                     if (Double.isNaN(cd.getDistance())) return;
 
                     /* display distance or speed (current or total */
                     cur_dist = cd.getDistance();
                     total_distance = total_distance + cur_dist;
                     if(cur_dist > 0.001f) {
-                        mList.add(new MyActivity(cur_loc.getLatitude(), cur_loc.getLongitude(), cur_loc.getAltitude(), LocTimeStr(cur_loc)));
-
-
+                        mList.add(new MyActivity(cur_loc.latitude, cur_loc.longitude, cur_loc.altitude, LocTimeStr(cur_loc)));
                         if(direct_db_update) {
                             String urlstr = "http://180.69.217.73:81/OneOOMT/insert.php?";
-                            urlstr += "latitude=" + cur_loc.getLatitude();
-                            urlstr += "&longitude=" + cur_loc.getLongitude();
-                            urlstr += "&altitude=" + cur_loc.getAltitude();
+                            urlstr += "latitude=" + cur_loc.latitude;
+                            urlstr += "&longitude=" + cur_loc.longitude;
+                            urlstr += "&altitude=" + cur_loc.altitude;
                             urlstr += "&added_on=" + LocTimeStr(cur_loc);
                             try {
                                 new HttpRequest().execute(new URL(urlstr));

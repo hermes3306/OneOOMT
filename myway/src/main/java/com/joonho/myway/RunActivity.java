@@ -121,8 +121,6 @@ public class RunActivity extends AppCompatActivity implements View.OnClickListen
 
     ServiceConnection conn = new ServiceConnection() {
         public void onServiceConnected(ComponentName name, IBinder service) {
-            if(__svc_started && mMyLocationService != null) return;
-
             MyLocationService.MyBinder mb = (MyLocationService.MyBinder) service;
             mMyLocationService = mb.getService();
             __svc_started = true;
@@ -130,7 +128,6 @@ public class RunActivity extends AppCompatActivity implements View.OnClickListen
 
         public void onServiceDisconnected(ComponentName name) {
             __svc_started = false;
-            mMyLocationService = null;
         }
     };
 
@@ -294,14 +291,9 @@ public class RunActivity extends AppCompatActivity implements View.OnClickListen
         super.onStart();
         loadSharedPreferences();
 
-        if(__svc_started) {
-            Toast.makeText(RunActivity.this, "SERVICE ALREADY STARTED", Toast.LENGTH_SHORT).show();
-            if(mMyLocationService != null) return;
-        }
-
-        Intent myI = new Intent(RunActivity.this, MyLocationService.class);
+        Intent myI = new Intent(this, MyLocationService.class);
         bindService(myI, conn, Context.BIND_AUTO_CREATE);
-        __svc_started = true;
+
         doMyTimeTask();
         Toast.makeText(RunActivity.this,"SERVICE STARTED", Toast.LENGTH_SHORT).show();
 
@@ -310,8 +302,12 @@ public class RunActivity extends AppCompatActivity implements View.OnClickListen
     @Override
     protected void onStop() {
         Log.e(TAG,"------- onStop() called");
-        saveSharedPreferences();
         super.onStop();
+        saveSharedPreferences();
+        if(__svc_started) {
+            unbindService(conn);
+            __svc_started = false;
+        }
     }
 
     public String getCurAddress(Context ctx, Location loc) {
@@ -479,8 +475,10 @@ public class RunActivity extends AppCompatActivity implements View.OnClickListen
                 start_time = new Date().getTime();
                 mList = new ArrayList<MyActivity>();
 
-                MyActivity sl = mMyLocationService.getLastLocation();
-
+                MyActivity sl = null;
+                if(__svc_started) {
+                    sl = mMyLocationService.getLastLocation();
+                }
                 if(sl != null) {
                     start_loc = new MyActivity(sl.latitude, sl.longitude, sl.altitude, LocTimeStr(sl));
                     mList.add(start_loc);
@@ -674,7 +672,11 @@ public class RunActivity extends AppCompatActivity implements View.OnClickListen
                     }
 
                     //Location cur_loc = getLocation();
-                    MyActivity cur_loc = mMyLocationService.getLastLocation();
+                    MyActivity cur_loc = null;
+                    if(__svc_started) {
+                        cur_loc = mMyLocationService.getLastLocation();
+                    }
+
                     if (cur_loc == null) return;
 
                     /* real address */

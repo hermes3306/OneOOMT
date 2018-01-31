@@ -86,8 +86,6 @@ public class MapsActivity extends AppCompatActivity
 
     ServiceConnection conn = new ServiceConnection() {
         public void onServiceConnected(ComponentName name, IBinder service) {
-            if(__svc_started && mMyLocationService != null) return;
-
             MyLocationService.MyBinder mb = (MyLocationService.MyBinder) service;
             mMyLocationService = mb.getService();
             __svc_started = true;
@@ -95,7 +93,6 @@ public class MapsActivity extends AppCompatActivity
 
         public void onServiceDisconnected(ComponentName name) {
             __svc_started = false;
-            mMyLocationService = null;
         }
     };
 
@@ -272,14 +269,8 @@ public class MapsActivity extends AppCompatActivity
     @Override
     protected void onStart() {
         super.onStart();
-        if(__svc_started) {
-            Toast.makeText(MapsActivity.this, "SERVICE ALREADY STARTED", Toast.LENGTH_SHORT).show();
-            if(mMyLocationService != null) return;
-        }
+        Intent myI = new Intent(this, MyLocationService.class);
 
-        Intent myI = new Intent(MapsActivity.this, MyLocationService.class);
-        bindService(myI, conn, Context.BIND_AUTO_CREATE);
-        __svc_started = true;
         doMyTimeTask();
         Toast.makeText(MapsActivity.this,"SERVICE STARTED", Toast.LENGTH_SHORT).show();
     }
@@ -288,6 +279,10 @@ public class MapsActivity extends AppCompatActivity
     protected void onStop() {
         //Toast.makeText(MainActivity.this,"onStop()", Toast.LENGTH_SHORT).show();
         super.onStop();
+        if(__svc_started) {
+            unbindService(conn);
+            __svc_started = false;
+        }
     }
 
     @Override
@@ -335,7 +330,11 @@ public class MapsActivity extends AppCompatActivity
             long start = System.currentTimeMillis();
             MapsActivity.this.runOnUiThread(new Runnable() {
                 public void run() {
-                    MyActivity ma = mMyLocationService.getLastLocation();
+                    MyActivity ma = null;
+                    if(__svc_started) {
+                        ma = mMyLocationService.getLastLocation();
+                    }
+
                     if(ma==null) {
                         setStatus("No GPS");
                         return;
@@ -385,7 +384,9 @@ public class MapsActivity extends AppCompatActivity
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.bt_current:
-                Location loc = mMyLocationService.getLocation();
+                Location loc = null;
+                if(__svc_started) loc = mMyLocationService.getLocation();
+
                 if(loc!=null) curloc = new LatLng(loc.getLatitude(), loc.getLongitude());
                 else {
                     setStatus("No GPS");
@@ -395,17 +396,21 @@ public class MapsActivity extends AppCompatActivity
                 drawMarker(ma);
 
                 if(_showtrack) {
-                    drawTrack(mMyLocationService.getMyAcitivityList(), Color.CYAN,15);
-                    mPolyline.setVisible(true);
+                    if(__svc_started)  {
+                        drawTrack(mMyLocationService.getMyAcitivityList(), Color.CYAN,15);
+                        mPolyline.setVisible(true);
+                    }
                 }
                 break;
 
             case R.id.bt_track:
                 if(_showtrack) {
-                    drawTrack(mMyLocationService.getMyAcitivityList(),Color.CYAN,15);
-                    if(mPolyline!=null) mPolyline.setVisible(true);
-                    else setStatus("No Track");
-                    _showtrack=false;
+                    if(__svc_started) {
+                        drawTrack(mMyLocationService.getMyAcitivityList(),Color.CYAN,15);
+                        if(mPolyline!=null) mPolyline.setVisible(true);
+                        else setStatus("No Track");
+                        _showtrack=false;
+                    }
                 }else {
                     if(mPolyline!=null) mPolyline.setVisible(false);
                     else setStatus("No Track");
@@ -417,15 +422,22 @@ public class MapsActivity extends AppCompatActivity
                 break;
 
             case R.id.bt_walking:
-                Location walkloc = mMyLocationService.getLocation();
-                if(walkloc==null) {
-                    setStatus("No GPS");
-                    return;
+                Location walkloc = null;
+                if(__svc_started) {
+                    walkloc = mMyLocationService.getLocation();
+                    if(walkloc==null) {
+                        setStatus("No GPS");
+                        return;
+                    }
                 }
+
                 LatLng   ll  = new LatLng(walkloc.getLatitude(),walkloc.getLongitude());
                 double mbearing = 0;
-                MyActivity ma2 = mMyLocationService.getLastLocation();
-                MyActivity ma1 = mMyLocationService.getLastLastLocation();
+                MyActivity ma1=null, ma2=null;
+                if(__svc_started) {
+                    ma2 = mMyLocationService.getLastLocation();
+                    ma1 = mMyLocationService.getLastLastLocation();
+                }
                 if(ma1 !=null && ma2 != null) {
                     CalBearing cb = new CalBearing(ma1.latitude, ma1.longitude, ma2.latitude, ma2.longitude);
                     mbearing = cb.getBearing();
@@ -435,8 +447,10 @@ public class MapsActivity extends AppCompatActivity
                         .bearing((float)mbearing).zoom(Config._myzoom).build();
                 mMap.moveCamera(CameraUpdateFactory.newCameraPosition(currentPlace));
                 if(_showtrack) {
-                    drawTrack(mMyLocationService.getMyAcitivityList(),Color.CYAN,15);
-                    mPolyline.setVisible(true);
+                    if(__svc_started) {
+                        drawTrack(mMyLocationService.getMyAcitivityList(), Color.CYAN, 15);
+                        mPolyline.setVisible(true);
+                    }
                 }
                 break;
 
@@ -482,13 +496,15 @@ public class MapsActivity extends AppCompatActivity
                 MyActivityUtil.dododo();
                 break;
             case R.id.bt_camera:
-                ArrayList<MyActivity> mlist = mMyLocationService.getMyAcitivityList();
-                String fname = Config.get_filename();
-                MyActivityUtil.serializeActivityIntoFile(mlist, fname);
-                Intent intent = new Intent(MapsActivity.this, FileActivity.class);
-                intent.putExtra("file", Config.getAbsolutePath(fname));
-                intent.putExtra("pos", 0);
-                startActivity(intent);
+                if(__svc_started) {
+                    ArrayList<MyActivity> mlist = mMyLocationService.getMyAcitivityList();
+                    String fname = Config.get_filename();
+                    MyActivityUtil.serializeActivityIntoFile(mlist, fname);
+                    Intent intent = new Intent(MapsActivity.this, FileActivity.class);
+                    intent.putExtra("file", Config.getAbsolutePath(fname));
+                    intent.putExtra("pos", 0);
+                    startActivity(intent);
+                }
                 break;
             case R.id.bt_cloud:
                 bt_cloud();

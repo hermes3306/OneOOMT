@@ -62,7 +62,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class RunActivity extends AppCompatActivity implements View.OnClickListener {
-    private String TAG = "Main2Activity";
+    private String TAG = "RunActivity";
     private File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "OneOOMT");
     String backupdir = StringUtil.DateToString(new Date(), "yyyyMMdd");
 

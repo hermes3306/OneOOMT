@@ -425,10 +425,11 @@ public class MapsActivity extends AppCompatActivity
                 Location walkloc = null;
                 if(__svc_started) {
                     walkloc = mMyLocationService.getLocation();
-                    if(walkloc==null) {
-                        setStatus("No GPS");
-                        return;
-                    }
+                }
+
+                if(walkloc==null) {
+                    setStatus("No GPS");
+                    return;
                 }
 
                 LatLng   ll  = new LatLng(walkloc.getLatitude(),walkloc.getLongitude());

@@ -270,6 +270,7 @@ public class MapsActivity extends AppCompatActivity
     protected void onStart() {
         super.onStart();
         Intent myI = new Intent(this, MyLocationService.class);
+        bindService(myI, conn, Context.BIND_AUTO_CREATE);
 
         doMyTimeTask();
         Toast.makeText(MapsActivity.this,"SERVICE STARTED", Toast.LENGTH_SHORT).show();

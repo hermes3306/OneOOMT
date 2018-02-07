@@ -49,13 +49,6 @@
       <sourceFolder url="file://$MODULE_DIR$/../../../myway/src/debug/java" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/../../../myway/src/debug/rs" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/../../../myway/src/debug/shaders" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/../../../myway/src/testDebug/res" type="java-test-resource" />
-      <sourceFolder url="file://$MODULE_DIR$/../../../myway/src/testDebug/resources" type="java-test-resource" />
-      <sourceFolder url="file://$MODULE_DIR$/../../../myway/src/testDebug/assets" type="java-test-resource" />
-      <sourceFolder url="file://$MODULE_DIR$/../../../myway/src/testDebug/aidl" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/../../../myway/src/testDebug/java" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/../../../myway/src/testDebug/rs" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/../../../myway/src/testDebug/shaders" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/../../../myway/src/androidTestDebug/res" type="java-test-resource" />
       <sourceFolder url="file://$MODULE_DIR$/../../../myway/src/androidTestDebug/resources" type="java-test-resource" />
       <sourceFolder url="file://$MODULE_DIR$/../../../myway/src/androidTestDebug/assets" type="java-test-resource" />
@@ -63,6 +56,13 @@
       <sourceFolder url="file://$MODULE_DIR$/../../../myway/src/androidTestDebug/java" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/../../../myway/src/androidTestDebug/rs" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/../../../myway/src/androidTestDebug/shaders" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../myway/src/testDebug/res" type="java-test-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../myway/src/testDebug/resources" type="java-test-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../myway/src/testDebug/assets" type="java-test-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../myway/src/testDebug/aidl" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../myway/src/testDebug/java" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../myway/src/testDebug/rs" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../myway/src/testDebug/shaders" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/../../../myway/src/main/res" type="java-resource" />
       <sourceFolder url="file://$MODULE_DIR$/../../../myway/src/main/resources" type="java-resource" />
       <sourceFolder url="file://$MODULE_DIR$/../../../myway/src/main/assets" type="java-resource" />

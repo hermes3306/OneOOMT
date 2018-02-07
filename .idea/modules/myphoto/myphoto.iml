@@ -49,13 +49,6 @@
       <sourceFolder url="file://$MODULE_DIR$/../../../myphoto/src/debug/java" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/../../../myphoto/src/debug/rs" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/../../../myphoto/src/debug/shaders" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/../../../myphoto/src/androidTestDebug/res" type="java-test-resource" />
-      <sourceFolder url="file://$MODULE_DIR$/../../../myphoto/src/androidTestDebug/resources" type="java-test-resource" />
-      <sourceFolder url="file://$MODULE_DIR$/../../../myphoto/src/androidTestDebug/assets" type="java-test-resource" />
-      <sourceFolder url="file://$MODULE_DIR$/../../../myphoto/src/androidTestDebug/aidl" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/../../../myphoto/src/androidTestDebug/java" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/../../../myphoto/src/androidTestDebug/rs" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/../../../myphoto/src/androidTestDebug/shaders" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/../../../myphoto/src/testDebug/res" type="java-test-resource" />
       <sourceFolder url="file://$MODULE_DIR$/../../../myphoto/src/testDebug/resources" type="java-test-resource" />
       <sourceFolder url="file://$MODULE_DIR$/../../../myphoto/src/testDebug/assets" type="java-test-resource" />
@@ -63,6 +56,13 @@
       <sourceFolder url="file://$MODULE_DIR$/../../../myphoto/src/testDebug/java" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/../../../myphoto/src/testDebug/rs" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/../../../myphoto/src/testDebug/shaders" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../myphoto/src/androidTestDebug/res" type="java-test-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../myphoto/src/androidTestDebug/resources" type="java-test-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../myphoto/src/androidTestDebug/assets" type="java-test-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../myphoto/src/androidTestDebug/aidl" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../myphoto/src/androidTestDebug/java" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../myphoto/src/androidTestDebug/rs" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../myphoto/src/androidTestDebug/shaders" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/../../../myphoto/src/main/res" type="java-resource" />
       <sourceFolder url="file://$MODULE_DIR$/../../../myphoto/src/main/resources" type="java-resource" />
       <sourceFolder url="file://$MODULE_DIR$/../../../myphoto/src/main/assets" type="java-resource" />
@@ -70,13 +70,6 @@
       <sourceFolder url="file://$MODULE_DIR$/../../../myphoto/src/main/java" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/../../../myphoto/src/main/rs" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/../../../myphoto/src/main/shaders" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/../../../myphoto/src/test/res" type="java-test-resource" />
-      <sourceFolder url="file://$MODULE_DIR$/../../../myphoto/src/test/resources" type="java-test-resource" />
-      <sourceFolder url="file://$MODULE_DIR$/../../../myphoto/src/test/assets" type="java-test-resource" />
-      <sourceFolder url="file://$MODULE_DIR$/../../../myphoto/src/test/aidl" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/../../../myphoto/src/test/java" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/../../../myphoto/src/test/rs" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/../../../myphoto/src/test/shaders" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/../../../myphoto/src/androidTest/res" type="java-test-resource" />
       <sourceFolder url="file://$MODULE_DIR$/../../../myphoto/src/androidTest/resources" type="java-test-resource" />
       <sourceFolder url="file://$MODULE_DIR$/../../../myphoto/src/androidTest/assets" type="java-test-resource" />
@@ -84,6 +77,13 @@
       <sourceFolder url="file://$MODULE_DIR$/../../../myphoto/src/androidTest/java" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/../../../myphoto/src/androidTest/rs" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/../../../myphoto/src/androidTest/shaders" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../myphoto/src/test/res" type="java-test-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../myphoto/src/test/resources" type="java-test-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../myphoto/src/test/assets" type="java-test-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../myphoto/src/test/aidl" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../myphoto/src/test/java" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../myphoto/src/test/rs" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../myphoto/src/test/shaders" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/../../../myphoto/build/intermediates/blame" />
       <excludeFolder url="file://$MODULE_DIR$/../../../myphoto/build/intermediates/check-manifest" />
       <excludeFolder url="file://$MODULE_DIR$/../../../myphoto/build/intermediates/incremental" />
@@ -95,6 +95,7 @@
       <excludeFolder url="file://$MODULE_DIR$/../../../myphoto/build/intermediates/symbols" />
       <excludeFolder url="file://$MODULE_DIR$/../../../myphoto/build/intermediates/tmp" />
       <excludeFolder url="file://$MODULE_DIR$/../../../myphoto/build/outputs" />
+      <excludeFolder url="file://$MODULE_DIR$/../../../myphoto/build/tmp" />
     </content>
     <orderEntry type="jdk" jdkName="Android API 26 Platform (1)" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />

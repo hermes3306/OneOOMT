@@ -32,9 +32,13 @@ public class MyLocationService extends Service {
     private static final int    TWO_MINUTES             = 1000 * 60 * 2;
 
     /* Global variables */
-    private ArrayList<MyActivity> mList = null;
+    private static ArrayList<MyActivity> mList = null;
     public ArrayList<MyActivity> getMyAcitivityList() {
         return mList;
+    }
+    public int getSize() {
+        if(mList==null) return -1;
+        return mList.size();
     }
 
     public MyActivity getLastLocation() {

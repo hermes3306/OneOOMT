@@ -271,6 +271,7 @@ public class MapsActivity extends AppCompatActivity
         super.onStart();
         Intent myI = new Intent(this, MyLocationService.class);
         bindService(myI, conn, Context.BIND_AUTO_CREATE);
+        __svc_started = true;
         doMyTimeTask();
         int size = MyLocationService.getSize();
         String str = " - total: ";

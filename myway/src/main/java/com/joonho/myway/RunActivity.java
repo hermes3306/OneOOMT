@@ -296,7 +296,7 @@ public class RunActivity extends AppCompatActivity implements View.OnClickListen
         if(size == -1) str += " -1(null)";
         else str += " " + size + "locations";
         str = "SERVICE STARTED" + str;
-        Toast.makeText(MapsActivity.this,str, Toast.LENGTH_SHORT).show();
+        Toast.makeText(RunActivity.this,str, Toast.LENGTH_SHORT).show();
     }
 
 

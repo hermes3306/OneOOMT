@@ -48,8 +48,8 @@ public class Config {
     public static final long    _12HOURS                        = _HOUR * 12;
     public static final long    _DAY                            = _HOUR * 24;
 
-    public static final int     _location_interval                = 5000; // 1 sec
-    public static final long    _timer_period                     = 5000; // 1 sec
+    public static final int     _location_interval                = 1000; // 1 sec
+    public static final long    _timer_period                     = 1000; // 1 sec
     public static final long    _timer_delay                      = 1000; // 1 sec
     public static boolean       _driving_mode                     = false;
     public static float         _myzoom                           = 15.0f;

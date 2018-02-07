@@ -276,7 +276,7 @@ public class MapsActivity extends AppCompatActivity
         int size = MyLocationService.getSize();
         String str = " - total: ";
         if(size == -1) str += " -1(null)";
-        else str += " " + size + "locations";
+        else str += " " + size + " locations";
         str = "SERVICE STARTED" + str;
         Toast.makeText(MapsActivity.this,str, Toast.LENGTH_SHORT).show();
     }

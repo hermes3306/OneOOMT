@@ -152,7 +152,7 @@ public class MapsActivity extends AppCompatActivity
     @Override
     public void onMapClick(LatLng point) {
         if(point==null) return;
-        setStatus(point.toString());
+        //setStatus(point.toString());
         mMap.animateCamera(CameraUpdateFactory.newLatLng(point));
         CalDistance cd=null;
         if(curloc!=null) cd = new CalDistance(curloc.latitude, curloc.longitude, point.latitude, point.longitude);
@@ -210,7 +210,6 @@ public class MapsActivity extends AppCompatActivity
             drawTrack(mMyLocationService.getMyAcitivityList(), Color.CYAN,15);
             if(mPolyline!=null) mPolyline.setVisible(true);
         }
-
         preloc = curloc;
         curloc = point;
     }
@@ -333,7 +332,10 @@ public class MapsActivity extends AppCompatActivity
                     if(ma==null) {
                         setStatus("No GPS");
                         return;
+                    } else {
+                        setStatus(String.format("%.5f,%.5f", ma.latitude,ma.longitude));
                     }
+
                     LatLng curloc = new LatLng(ma.latitude,ma.longitude);
                     if(curloc.equals(preloc)) return;
 
@@ -357,15 +359,14 @@ public class MapsActivity extends AppCompatActivity
                         mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
                     }
                     preloc = curloc;
-                    setStatus(String.format("%.5f,%.5f", ma.latitude,ma.longitude));
                 }
             });
         } /* end of run() */
     } /* end of MyTimerTask */
 
     public void setStatus(String str) {
-        String htmlstr = "<font color='blue'>" + StringUtil.DateToString(new Date(), "hh:mm:ss") + "</font>";
-        htmlstr +=  "-" +"<font color='red'>"  + str + "</font>";
+        String htmlstr = "<font color='gray'>" + StringUtil.DateToString(new Date(), "hh:mm:ss") + "</font>";
+        htmlstr +=  "-" +"<font color='gray'>"  + str + "</font>";
         tv_status.setText(Html.fromHtml(htmlstr));
     }
 

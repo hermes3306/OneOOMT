@@ -115,7 +115,6 @@ public class RunActivity extends AppCompatActivity implements View.OnClickListen
     private MyActivity start_loc;
     private ArrayList<MyActivity> mList = null;
 
-    private boolean         __svc_started           = false;
     private Intent __svc_Intent                     = null;
     MyLocationService       mMyLocationService      = null;
 
@@ -123,11 +122,9 @@ public class RunActivity extends AppCompatActivity implements View.OnClickListen
         public void onServiceConnected(ComponentName name, IBinder service) {
             MyLocationService.MyBinder mb = (MyLocationService.MyBinder) service;
             mMyLocationService = mb.getService();
-            __svc_started = true;
         }
 
         public void onServiceDisconnected(ComponentName name) {
-            __svc_started = false;
         }
     };
 
@@ -290,12 +287,11 @@ public class RunActivity extends AppCompatActivity implements View.OnClickListen
         super.onStart();
         Intent myI = new Intent(this, MyLocationService.class);
         bindService(myI, conn, Context.BIND_AUTO_CREATE);
-        __svc_started = true;
         doMyTimeTask();
         int size = MyLocationService.getSize();
         String str = " - total: ";
         if(size == -1) str += " -1(null)";
-        else str += " " + size + "locations";
+        else str += " " + size + " locations";
         str = "SERVICE STARTED" + str;
         Toast.makeText(RunActivity.this,str, Toast.LENGTH_SHORT).show();
     }
@@ -305,10 +301,7 @@ public class RunActivity extends AppCompatActivity implements View.OnClickListen
     protected void onStop() {
         Log.e(TAG,"------- onStop() called");
         super.onStop();
-        if(__svc_started) {
-            unbindService(conn);
-            __svc_started = false;
-        }
+        unbindService(conn);
     }
 
     public String getCurAddress(Context ctx, Location loc) {
@@ -383,67 +376,6 @@ public class RunActivity extends AppCompatActivity implements View.OnClickListen
         //locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
     }
 
-    public Location getLocation() {
-        return null;
-    }
-
-    public Location getLocation_direct() {
-        // 먼저 GPS를 통해서 위치 찾기
-        String locationProvider =  LocationManager.GPS_PROVIDER;
-        try {
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                Log.e(TAG, "no Permission"); // but never occur!
-                return null;
-            }
-
-            Location lastKnownLocation = locationManager.getLastKnownLocation(locationProvider);
-            if (lastKnownLocation != null) {
-                //Log.e(TAG, "New Location Found from -  " + locationProvider);
-                return lastKnownLocation;
-            }
-        }catch(Exception e) {
-            e.printStackTrace();
-            Log.e(TAG, e.toString());
-        }
-
-        // GPS로 못찾을 경우 NETWORK 위치 찾기
-        locationProvider = LocationManager.NETWORK_PROVIDER;
-        try {
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                Log.e(TAG, "no Permission"); // but never occur!
-                return null;
-            }
-
-            Location lastKnownLocation = locationManager.getLastKnownLocation(locationProvider);
-            if (lastKnownLocation != null) {
-                //Log.e(TAG, "New Location Found from -  " + locationProvider);
-                return lastKnownLocation;
-            }
-        }catch(Exception e) {
-            e.printStackTrace();
-            Log.e(TAG, e.toString());
-        }
-
-        // GPS/NETWORK 모두 못 찾을 경우 다른 APP의 네트웤을 통해서 위치 찾기
-        locationProvider = LocationManager.PASSIVE_PROVIDER;
-        try {
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                Log.e(TAG, "no Permission"); // but never occur!
-                return null;
-            }
-
-            Location lastKnownLocation = locationManager.getLastKnownLocation(locationProvider);
-            if (lastKnownLocation != null) {
-                //Log.e(TAG, "New Location Found from -  " + locationProvider);
-                return lastKnownLocation;
-            }
-        }catch(Exception e) {
-            e.printStackTrace();
-            Log.e(TAG, e.toString());
-        }
-        return null;
-    }
-
     public void doTimerPause() {
         isStarted = !isStarted;
         Log.e(TAG, "isStarted: " + isStarted);
@@ -477,9 +409,9 @@ public class RunActivity extends AppCompatActivity implements View.OnClickListen
                 mList = new ArrayList<MyActivity>();
 
                 MyActivity sl = null;
-                if(__svc_started) {
-                    sl = mMyLocationService.getLastLocation();
-                }
+                if(mMyLocationService==null) return;
+                sl = mMyLocationService.getLastLocation();
+
                 if(sl != null) {
                     start_loc = new MyActivity(sl.latitude, sl.longitude, sl.altitude, LocTimeStr(sl));
                     mList.add(start_loc);
@@ -505,12 +437,6 @@ public class RunActivity extends AppCompatActivity implements View.OnClickListen
         alertDialog.setNeutralButton("MAP", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-//                String fname = ActivityUtil.serializeWithCurrentTime(mList);
-//                Intent intent = new Intent(Main2Activity.this, ActFileActivity.class);
-//                intent.putExtra("file", new File(mediaStorageDir,fname).getAbsolutePath());
-//                intent.putExtra("pos", 0);
-//                startActivity(intent);
-
                 String fname = StringUtil.DateToString(new Date(), Config._filename_fmt);
                 MyActivityUtil.serializeActivityIntoFile(mList, fname);
                 Intent intent = new Intent(RunActivity.this, FileActivity.class);
@@ -518,7 +444,6 @@ public class RunActivity extends AppCompatActivity implements View.OnClickListen
                 startActivity(intent);
             }
         });
-
 
         alertDialog.setPositiveButton("SAVE", new DialogInterface.OnClickListener() {
             @Override
@@ -674,9 +599,7 @@ public class RunActivity extends AppCompatActivity implements View.OnClickListen
 
                     //Location cur_loc = getLocation();
                     MyActivity cur_loc = null;
-                    if(__svc_started) {
-                        cur_loc = mMyLocationService.getLastLocation();
-                    }
+                    cur_loc = mMyLocationService.getLastLocation();
 
                     if (cur_loc == null) return;
 

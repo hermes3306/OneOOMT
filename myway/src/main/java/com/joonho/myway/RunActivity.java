@@ -287,23 +287,23 @@ public class RunActivity extends AppCompatActivity implements View.OnClickListen
 
     @Override
     protected void onStart() {
-        Log.e(TAG,"------- onStart() called");
         super.onStart();
-        loadSharedPreferences();
-
         Intent myI = new Intent(this, MyLocationService.class);
         bindService(myI, conn, Context.BIND_AUTO_CREATE);
-
         doMyTimeTask();
-        Toast.makeText(RunActivity.this,"SERVICE STARTED", Toast.LENGTH_SHORT).show();
-
+        int size = MyLocationService.getSize();
+        String str = " - total: ";
+        if(size == -1) str += " -1(null)";
+        else str += " " + size + "locations";
+        str = "SERVICE STARTED" + str;
+        Toast.makeText(MapsActivity.this,str, Toast.LENGTH_SHORT).show();
     }
+
 
     @Override
     protected void onStop() {
         Log.e(TAG,"------- onStop() called");
         super.onStop();
-        saveSharedPreferences();
         if(__svc_started) {
             unbindService(conn);
             __svc_started = false;

@@ -33,10 +33,10 @@ public class MyLocationService extends Service {
 
     /* Global variables */
     private static ArrayList<MyActivity> mList = null;
-    public ArrayList<MyActivity> getMyAcitivityList() {
+    public static ArrayList<MyActivity> getMyAcitivityList() {
         return mList;
     }
-    public int getSize() {
+    public static int getSize() {
         if(mList==null) return -1;
         return mList.size();
     }

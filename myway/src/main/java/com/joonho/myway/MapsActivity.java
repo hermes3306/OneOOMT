@@ -271,9 +271,13 @@ public class MapsActivity extends AppCompatActivity
         super.onStart();
         Intent myI = new Intent(this, MyLocationService.class);
         bindService(myI, conn, Context.BIND_AUTO_CREATE);
-
         doMyTimeTask();
-        Toast.makeText(MapsActivity.this,"SERVICE STARTED", Toast.LENGTH_SHORT).show();
+        int size = MyLocationService.getSize();
+        String str = " - total: ";
+        if(size == -1) str += " -1(null)";
+        else str += " " + size + "locations";
+        str = "SERVICE STARTED" + str;
+        Toast.makeText(MapsActivity.this,str, Toast.LENGTH_SHORT).show();
     }
 
     @Override

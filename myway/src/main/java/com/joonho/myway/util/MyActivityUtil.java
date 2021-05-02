@@ -303,6 +303,7 @@ public class MyActivityUtil {
         String addinfoDong = null;
         if(addresses == null || addresses.size() ==0) {
             Log.e(TAG, "No Addresses found !!");
+            return "";
         }else {
             addinfoDong = addresses.get(0).getThoroughfare() +
                     (addresses.get(0).getPremises()==null?"":" " + addresses.get(0).getPremises());

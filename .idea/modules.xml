@@ -3,10 +3,10 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/OneOOMT.iml" filepath="$PROJECT_DIR$/OneOOMT.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/myphoto/myphoto.iml" filepath="$PROJECT_DIR$/.idea/modules/myphoto/myphoto.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/myway/myway.iml" filepath="$PROJECT_DIR$/.idea/modules/myway/myway.iml" />
-      <module fileurl="file://$PROJECT_DIR$/runme/runme.iml" filepath="$PROJECT_DIR$/runme/runme.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/OneOOMT.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/OneOOMT.app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/myphoto/OneOOMT.myphoto.iml" filepath="$PROJECT_DIR$/.idea/modules/myphoto/OneOOMT.myphoto.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/myway/OneOOMT.myway.iml" filepath="$PROJECT_DIR$/.idea/modules/myway/OneOOMT.myway.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/runme/OneOOMT.runme.iml" filepath="$PROJECT_DIR$/.idea/modules/runme/OneOOMT.runme.iml" />
     </modules>
   </component>
 </project>

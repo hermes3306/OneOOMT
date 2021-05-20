@@ -72,11 +72,13 @@ public class AsyncService {
                         DataOutputStream request = new DataOutputStream(
                                 httpUrlConnection.getOutputStream());
 
-                        request.writeBytes(this.twoHyphens + this.boundary + this.crlf);
-                        request.writeBytes("Content-Disposition: form-data; name=\"" +
-                                this.attachmentName + "\";filename=\"" +
-                                this.attachmentFileName + "\"" + this.crlf);
+                        request.writeBytes("--" + boundary + this.crlf);
+                        request.writeBytes("Content-Disposition: form-data; name=\"file\"; filename=\"" + file.getName() + "\"" + this.crlf);
+                        request.writeBytes("Content-Type: " + httpUrlConnection.guessContentTypeFromName(file.getName()) + this.crlf);
+                        request.writeBytes("Content-Transfer-Encoding: binary" + this.crlf);
                         request.writeBytes(this.crlf);
+                        request.flush();
+
 
                         OutputStream out = httpUrlConnection.getOutputStream();
                         FileInputStream fis = new FileInputStream(file);

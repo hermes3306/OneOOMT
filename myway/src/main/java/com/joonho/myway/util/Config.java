@@ -16,10 +16,11 @@ public class Config {
     public static File          mediaStorageDir                 =
             new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS),
                     "OneOOMT");
+
     public static String        _uploadURL                      =
-            "http://180.69.217.73:8080/OneOOMT/upload2";
+            "http://ezehub.club/moment/php/upload_file4100mt.php";
     public static String        _listURL                        =
-            "http://180.69.217.73:81/OneOOMT/filelist2.php";
+            "http://ezehub.club/moment/php/list_file.php";
 
     public static Date          _last_save_point                = null;
     public static String        _last_save_fname                = null;

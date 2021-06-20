@@ -94,7 +94,7 @@ public class ViewCameraPicActivity extends AppCompatActivity {
                 File f = new File(storageDir, fp.getName());
 
                 // ******* Uri *************
-                final Uri uri = FileProvider.getUriForFile(ViewCameraPicActivity.this, "com.joonho.oneoomt.fileprovider", f);
+                final Uri uri = FileProvider.getUriForFile(ViewCameraPicActivity.this, "com.joonho.oneoomt.fileprovider2", f);
 
 
                 //final Intent intent = new Intent(Intent.ACTION_SEND);

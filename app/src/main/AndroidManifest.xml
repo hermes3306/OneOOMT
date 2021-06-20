@@ -68,7 +68,7 @@
 
         <provider
             android:name="android.support.v4.content.FileProvider"
-            android:authorities="com.joonho.oneoomt.fileprovider"
+            android:authorities="com.joonho.oneoomt.fileprovider2"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
@@ -80,6 +80,13 @@
         <activity
             android:name=".RunningActivity"
             android:label="@string/title_activity_running">
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+
         </activity>
         <activity android:name=".AdminActivity" />
         <activity
@@ -93,10 +100,7 @@
             android:name=".MyMainActivity"
             android:label="@string/title_activity_my_main"
             android:theme="@style/AppTheme.NoActionBar">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+
         </activity>
     </application>
 

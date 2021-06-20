@@ -187,7 +187,7 @@ public class MapsActivity extends AppCompatActivity /*FragmentActivity*/ impleme
             // Continue only if the File was successfully created
             if (photoFile != null) {
                 Uri photoURI = FileProvider.getUriForFile(this,
-                        "com.joonho.oneoomt.fileprovider",
+                        "com.joonho.oneoomt.fileprovider2",
                         photoFile);
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
                 getApplicationContext().grantUriPermission(
